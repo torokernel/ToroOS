@@ -21,20 +21,20 @@ Unit Block_Dev;
 interface
 
 
-{$I ../Include/Toro/procesos.inc}
-{$I ../Include/Head/scheduler.h}
-{$I ../Include/Head/procesos.h}
-{$I ../Include/Toro/buffer.inc}
-{$I ../Include/Head/ll_rw_block.h}
-{$I ../Include/Head/asm.h}
-{$I ../Include/Head/devices.h}
+{$I ../include/toro/procesos.inc}
+{$I ../include/head/scheduler.h}
+{$I ../include/head/procesos.h}
+{$I ../include/toro/buffer.inc}
+{$I ../include/head/ll_rw_block.h}
+{$I ../include/head/asm.h}
+{$I ../include/head/devices.h}
 
 
 
 implementation
 
 
-{$I ../Include/Head/lock.h}
+{$I ../include/head/lock.h}
 
 
 

@@ -25,17 +25,17 @@ Unit Inodes;
 interface
 
 
-{$I ../Include/Toro/procesos.inc}
-{$I ../Include/Head/procesos.h}
-{$I ../Include/Head/scheduler.h}
-{$I ../Include/Head/asm.h}
-{$I ../Include/Toro/buffer.inc}
-{$I ../Include/Head/buffer.h}
-{$I ../Include/Head/super.h}
-{$I ../Include/Head/printk_.h}
-{$I ../Include/Head/malloc.h}
-{$I ../Include/Head/dcache.h}
-{$I ../Include/Head/devices.h}
+{$I ../include/toro/procesos.inc}
+{$I ../include/head/procesos.h}
+{$I ../include/head/scheduler.h}
+{$I ../include/head/asm.h}
+{$I ../include/toro/buffer.inc}
+{$I ../include/head/buffer.h}
+{$I ../include/head/super.h}
+{$I ../include/head/printk_.h}
+{$I ../include/head/malloc.h}
+{$I ../include/head/dcache.h}
+{$I ../include/head/devices.h}
 
 {$define Use_Tail }
 {$define nodo_struct := p_inode_t}
@@ -57,8 +57,8 @@ var Max_Inodes : dword ;
 
 implementation
 
-{$I ../Include/Head/list.h}
-{$I ../Include/Head/lock.h}
+{$I ../include/head/list.h}
+{$I ../include/head/lock.h}
 
 { * funcion que quita de la cola simple un inodo sucio * }
 

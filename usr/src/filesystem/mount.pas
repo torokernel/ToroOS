@@ -22,22 +22,22 @@ interface
 
 {$define debug}
 
-{$I ../Include/Toro/procesos.inc}
-{$I ../Include/Head/asm.h}
-{$I ../Include/Head/inodes.h}
-{$I ../Include/Toro/buffer.inc}
-{$I ../Include/Head/buffer.h}
-{$I ../Include/Head/scheduler.h}
-{$I ../Include/Head/open.h}
-{$I ../Include/Head/printk_.h}
-{$I ../Include/Head/dcache.h}
-{$I ../Include/Head/super.h}
-{$I ../Include/Head/namei.h}
-{$I ../Include/Head/version.h}
+{$I ../include/toro/procesos.inc}
+{$I ../include/head/asm.h}
+{$I ../include/head/inodes.h}
+{$I ../include/toro/buffer.inc}
+{$I ../include/head/buffer.h}
+{$I ../include/head/scheduler.h}
+{$I ../include/head/open.h}
+{$I ../include/head/printk_.h}
+{$I ../include/head/dcache.h}
+{$I ../include/head/super.h}
+{$I ../include/head/namei.h}
+{$I ../include/head/version.h}
 
 implementation
 
-{$I ../Include/Head/string.h}
+{$I ../include/head/string.h}
 
 { * Sys_Mount :                                                      *
   *                                                                  *

@@ -21,23 +21,23 @@ interface
 
 
 
-{$I ../../Include/Toro/procesos.inc}
-{$I ../../Include/Toro/buffer.inc}
-{$I ../../Include/Toro/mount.inc}
-{$I ../../Include/Head/buffer.h}
-{$I ../../Include/Head/asm.h}
-{$I ../../Include/Head/inodes.h}
-{$I ../../Include/Head/dcache.h}
-{$I ../../Include/Head/open.h}
-{$I ../../Include/Head/procesos.h}
-{$I ../../Include/Head/scheduler.h}
-{$I ../../Include/Head/read_write.h}
-{$I ../../Include/Head/devices.h}
-{$I ../../Include/Head/printk_.h}
-{$I ../../Include/Head/malloc.h}
-{$I ../../Include/Toro/fat12fs/fat12.inc}
-{$I ../../Include/Head/fat12fs/misc.h}
-{$I ../../Include/Head/super.h}
+{$I ../../include/toro/procesos.inc}
+{$I ../../include/toro/buffer.inc}
+{$I ../../include/toro/mount.inc}
+{$I ../../include/head/buffer.h}
+{$I ../../include/head/asm.h}
+{$I ../../include/head/inodes.h}
+{$I ../../include/head/dcache.h}
+{$I ../../include/head/open.h}
+{$I ../../include/head/procesos.h}
+{$I ../../include/head/scheduler.h}
+{$I ../../include/head/read_write.h}
+{$I ../../include/head/devices.h}
+{$I ../../include/head/printk_.h}
+{$I ../../include/head/malloc.h}
+{$I ../../include/toro/fat12fs/fat12.inc}
+{$I ../../include/head/fat12fs/misc.h}
+{$I ../../include/head/super.h}
 
 {$define Use_Tail }
 {$define nodo_struct := pfat_inode_cache}
@@ -53,9 +53,9 @@ var    fat_inode_op : inode_operations;
 
 implementation
 
-{$I ../../Include/Head/string.h}
-{$I ../../Include/Head/list.h}
-{$I ../../Include/Head/lock.h}
+{$I ../../include/head/string.h}
+{$I ../../include/head/list.h}
+{$I ../../include/head/lock.h}
 
 { * procedimientos para quitar y poner los inodos en la tabla hash * }
 

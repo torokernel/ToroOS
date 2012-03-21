@@ -18,11 +18,11 @@ Unit Devices;
 interface
 
 
-{$I ../Include/Head/asm.h}
-{$I ../Include/Toro/procesos.inc}
-{$I ../Include/Head/procesos.h}
-{$I ../Include/Head/scheduler.h}
-{$I ../Include/Head/printk_.h}
+{$I ../include/head/asm.h}
+{$I ../include/toro/procesos.inc}
+{$I ../include/head/procesos.h}
+{$I ../include/head/scheduler.h}
+{$I ../include/head/printk_.h}
 
 {$define Use_Tail }
 {$define nodo_struct := p_file_system_type }
@@ -41,8 +41,8 @@ var Blk_Dev:array[1..Nr_Blk] of device ;
 
 implementation
 
-{$I ../Include/Head/string.h}
-{$I ../Include/Head/list.h}
+{$I ../include/head/string.h}
+{$I ../include/head/list.h}
 
 
 { * Register_Filesystem :                                               *

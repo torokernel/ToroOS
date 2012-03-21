@@ -29,30 +29,30 @@ interface
 
 {DEFINE DEBUG}
 
-{$I ../Include/Toro/procesos.inc}
-{$I ../Include/Head/asm.h}
-{$I ../Include/Head/open.h}
-{$I ../Include/Head/inodes.h}
-{$I ../Include/Head/super.h}
-{$I ../Include/Head/dcache.h}
-{$I ../Include/Toro/coff.inc}
-{$I ../Include/Toro/buffer.inc}
-{$I ../Include/Head/buffer.h}
-{$I ../Include/Head/mm.h}
-{$I ../Include/Head/scheduler.h}
-{$I ../Include/Head/printk_.h}
-{$I ../Include/Head/itimer.h}
-{$I ../Include/Head/paging.h}
-{$I ../Include/Head/vmalloc.h}
-{$I ../Include/Head/procesos.h}
-{$I ../Include/Head/namei.h}
+{$I ../include/toro/procesos.inc}
+{$I ../include/head/asm.h}
+{$I ../include/head/open.h}
+{$I ../include/head/inodes.h}
+{$I ../include/head/super.h}
+{$I ../include/head/dcache.h}
+{$I ../include/toro/coff.inc}
+{$I ../include/toro/buffer.inc}
+{$I ../include/head/buffer.h}
+{$I ../include/head/mm.h}
+{$I ../include/head/scheduler.h}
+{$I ../include/head/printk_.h}
+{$I ../include/head/itimer.h}
+{$I ../include/head/paging.h}
+{$I ../include/head/vmalloc.h}
+{$I ../include/head/procesos.h}
+{$I ../include/head/namei.h}
 
 const MAX_ARG_PAGES = 10 ;
 
 
 implementation
 
-{$I ../Include/Head/lock.h}
+{$I ../include/head/lock.h}
 
 { * get_args_size : simple funcion que devuelve el tama¤o de los argumentos *
 }

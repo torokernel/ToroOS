@@ -30,19 +30,19 @@ interface
 {DEFINE DEBUG}
 
 
-{$I ../Include/Toro/procesos.inc}
-{$I ../Include/Head/asm.h}
-{$I ../Include/Head/inodes.h}
-{$I ../Include/Toro/buffer.inc}
-{$I ../Include/Head/buffer.h}
-{$I ../Include/Head/scheduler.h}
-{$I ../Include/Head/blk_dev.h}
-{$I ../Include/Head/printk_.h}
-{$I ../Include/Head/procesos.h}
+{$I ../include/toro/procesos.inc}
+{$I ../include/head/asm.h}
+{$I ../include/head/inodes.h}
+{$I ../include/toro/buffer.inc}
+{$I ../include/head/buffer.h}
+{$I ../include/head/scheduler.h}
+{$I ../include/head/blk_dev.h}
+{$I ../include/head/printk_.h}
+{$I ../include/head/procesos.h}
 
 implementation
 
-{$I ../Include/Head/lock.h}
+{$I ../include/head/lock.h}
 
 { * Sys_Seek :                                                             *
   *                                                                        *

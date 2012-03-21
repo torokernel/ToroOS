@@ -21,31 +21,31 @@ interface
 
 
 
-{$I ../../Include/Toro/procesos.inc}
-{$I ../../Include/Toro/buffer.inc}
-{$I ../../Include/Toro/mount.inc}
-{$I ../../Include/Head/buffer.h}
-{$I ../../Include/Head/asm.h}
-{$I ../../Include/Head/inodes.h}
-{$I ../../Include/Head/dcache.h}
-{$I ../../Include/Head/open.h}
-{$I ../../Include/Head/procesos.h}
-{$I ../../Include/Head/itimer.h}
+{$I ../../include/toro/procesos.inc}
+{$I ../../include/toro/buffer.inc}
+{$I ../../include/toro/mount.inc}
+{$I ../../include/head/buffer.h}
+{$I ../../include/head/asm.h}
+{$I ../../include/head/inodes.h}
+{$I ../../include/head/dcache.h}
+{$I ../../include/head/open.h}
+{$I ../../include/head/procesos.h}
+{$I ../../include/head/itimer.h}
 
-{$I ../../Include/Head/scheduler.h}
-{$I ../../Include/Head/read_write.h}
-{$I ../../Include/Head/devices.h}
-{$I ../../Include/Head/printk_.h}
-{$I ../../Include/Head/malloc.h}
-{$I ../../Include/Toro/fat12fs/fat12.inc}
-{$I ../../Include/Head/fat12fs/inodes.h}
-{$I ../../Include/Head/fat12fs/super.h}
-{$I ../../Include/Head/fat12fs/misc.h}
+{$I ../../include/head/scheduler.h}
+{$I ../../include/head/read_write.h}
+{$I ../../include/head/devices.h}
+{$I ../../include/head/printk_.h}
+{$I ../../include/head/malloc.h}
+{$I ../../include/toro/fat12fs/fat12.inc}
+{$I ../../include/head/fat12fs/inodes.h}
+{$I ../../include/head/fat12fs/super.h}
+{$I ../../include/head/fat12fs/misc.h}
 
 implementation
 
-{$I ../../Include/Head/string.h}
-{$I ../../Include/Head/lock.h}
+{$I ../../include/head/string.h}
+{$I ../../include/head/lock.h}
 
 
 
@@ -482,7 +482,7 @@ else
  until (cnt = 0 )  ;
 
 
- {si se supero el tama¤o de archivo se deve actualizar su tama¤o}
+ {si se supero el tamano de archivo se deve actualizar su tamano}
  if fichero^.f_pos > fichero^.inodo^.size then
   begin
    fichero^.inodo^.size := fichero^.f_pos ;
@@ -502,8 +502,8 @@ end;
   *                                                                          *
   * ino : puntero a un inodo                                                 *
   *                                                                          *
-  * trunca el tama¤o de un archivo a 0 , ciudado que los clusters no son     *
-  * liberados sino que solo es cambiado el tama¤o de la entrada a 0          *
+  * trunca el tamano de un archivo a 0 , ciudado que los clusters no son     *
+  * liberados sino que solo es cambiado el tamano de la entrada a 0          *
   *                                                                          *
   ****************************************************************************
 }
@@ -512,7 +512,7 @@ var tmp : pfat_inode_cache ;
 begin
 tmp := find_in_cache (ino^.ino,ino^.sb);
 
-{es truncado su tama¤o a 0}
+{es truncado su tamano a 0}
 tmp^.dir_entry^.size := 0 ;
 ino^.size := 0 ;
 

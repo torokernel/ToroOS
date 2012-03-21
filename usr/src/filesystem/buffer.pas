@@ -38,21 +38,21 @@ Unit Buffer;
 interface
 
 
-{$I ../Include/Head/asm.h}
-{$I ../Include/Toro/procesos.inc}
-{$I ../Include/Toro/buffer.inc}
-{$I ../Include/Head/devices.h}
-{$I ../Include/Head/procesos.h}
-{$I ../Include/Head/scheduler.h}
-{$I ../Include/Head/printk_.h}
-{$I ../Include/Head/malloc.h}
-{$I ../Include/Head/paging.h}
-{$I ../Include/Head/mm.h}
-{$I ../Include/Head/ll_rw_block.h}
-{$I ../Include/Head/dcache.h}
-{$I ../Include/Head/inodes.h}
-{$I ../Include/Head/super.h}
-{$I ../Include/Head/itimer.h}
+{$I ../include/head/asm.h}
+{$I ../include/toro/procesos.inc}
+{$I ../include/toro/buffer.inc}
+{$I ../include/head/devices.h}
+{$I ../include/head/procesos.h}
+{$I ../include/head/scheduler.h}
+{$I ../include/head/printk_.h}
+{$I ../include/head/malloc.h}
+{$I ../include/head/paging.h}
+{$I ../include/head/mm.h}
+{$I ../include/head/ll_rw_block.h}
+{$I ../include/head/dcache.h}
+{$I ../include/head/inodes.h}
+{$I ../include/head/super.h}
+{$I ../include/head/itimer.h}
 
 
 {$define Use_Tail }
@@ -79,8 +79,8 @@ procedure Sys_Sync ;
 implementation
 
 
-{$I ../Include/Head/list.h}
-{$I ../Include/Head/lock.h}
+{$I ../include/head/list.h}
+{$I ../include/head/lock.h}
 
 
 { * Lru_Find :                                                          *

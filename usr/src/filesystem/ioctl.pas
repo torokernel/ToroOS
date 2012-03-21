@@ -18,10 +18,10 @@ Unit ioctl;
 interface
 
 
-{$I ../Include/Toro/procesos.inc}
-{$I ../Include/Head/scheduler.h}
-{$I ../Include/Head/printk_.h}
-{$I ../Include/Head/asm.h}
+{$I ../include/toro/procesos.inc}
+{$I ../include/head/scheduler.h}
+{$I ../include/head/printk_.h}
+{$I ../include/head/asm.h}
 
 
 implementation

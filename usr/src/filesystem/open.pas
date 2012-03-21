@@ -37,29 +37,29 @@ interface
 {define debug}
 
 
-{$I ../Include/Toro/procesos.inc}
-{$I ../Include/Head/procesos.h}
-{$I ../Include/Head/asm.h}
-{$I ../Include/Head/inodes.h}
-{$I ../Include/Toro/buffer.inc}
-{$I ../Include/Head/buffer.h}
-{$I ../Include/Toro/utime.inc}
-{$I ../Include/Head/scheduler.h}
-{$I ../Include/Head/read_write.h}
-{$I ../Include/Head/devices.h}
-{$I ../Include/Head/blk_dev.h}
-{$I ../Include/Head/printk_.h}
-{$I ../Include/Head/relog.h}
-{$I ../Include/Head/namei.h}
-{$I ../Include/Head/dcache.h}
+{$I ../include/toro/procesos.inc}
+{$I ../include/head/procesos.h}
+{$I ../include/head/asm.h}
+{$I ../include/head/inodes.h}
+{$I ../include/toro/buffer.inc}
+{$I ../include/head/buffer.h}
+{$I ../include/toro/utime.inc}
+{$I ../include/head/scheduler.h}
+{$I ../include/head/read_write.h}
+{$I ../include/head/devices.h}
+{$I ../include/head/blk_dev.h}
+{$I ../include/head/printk_.h}
+{$I ../include/head/relog.h}
+{$I ../include/head/namei.h}
+{$I ../include/head/dcache.h}
 
 
 function sys_open (path : pchar ; mode , flags : dword) : dword ; cdecl;
 
 implementation
 
-{$I ../Include/Head/string.h}
-{$I ../Include/Head/lock.h}
+{$I ../include/head/string.h}
+{$I ../include/head/lock.h}
 
 
 
