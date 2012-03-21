@@ -6,7 +6,7 @@ Unit read_write;
   * DO_SEEK , importantisimas para el sistema de archivos , ya que ma *
   * nipulan los ficheros                                              *
   *                                                                   *
-  * Copyright (c) 2003-2005 Matias Vara <matiasvara@yahoo.com>        *
+  * Copyright (c) 2003-2005 Matias Vara <matiasevara@gmail.com>        *
   * All Rights Reserved                                               *
   *                                                                   *
   * Versiones :                                                       *

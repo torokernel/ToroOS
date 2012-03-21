@@ -5,7 +5,7 @@
   * tarea inicial INIT , luego se entra en un bucle al que nunca se   *
   * devera llegar                                                     *
   *                                                                   *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>        *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>        *
   * All Rights Reserved                                               *
   *                                                                   *
   * Versiones :                                                       *
@@ -31,30 +31,30 @@
 {$I-}
 {$M 2048,4096}
 
-{$I ../Include/Head/asm.h}
-{$I ../Include/Toro/procesos.inc }
-{$I ../Include/Toro/buffer.inc}
-{$I ../Include/Head/gdt.h}
-{$I ../Include/Head/malloc.h}
-{$I ../Include/Head/vmalloc.h}
-{$I ../Include/Head/mm.h}
-{$I ../Include/Head/paging.h}
-{$I ../Include/Head/mapmem.h}
-{$I ../Include/Head/init_.h}
-{$I ../Include/Head/cpu.h}
-{$I ../Include/Head/idt.h}
-{$I ../Include/Head/relog.h}
-{$I ../Include/Head/ll_rw_block.h}
-{$I ../Include/Head/scheduler.h}
-{$I ../Include/Head/procesos.h}
-{$I ../Include/Head/syscall.h}
-{$I ../Include/Head/devices.h}
-{$I ../Include/Head/irq.h}
-{$I ../Include/Head/printk_.h}
-{$I ../Include/Head/dma.h}
-{$I ../Include/Head/fat12fs/super.h}
-{$I ../Include/Toro/drivers/tty.inc}
-{$I ../Include/Toro/drivers/keyb.inc}
+{$I ../include/head/asm.h}
+{$I ../include/toro/procesos.inc }
+{$I ../include/toro/buffer.inc}
+{$I ../include/head/gdt.h}
+{$I ../include/head/malloc.h}
+{$I ../include/head/vmalloc.h}
+{$I ../include/head/mm.h}
+{$I ../include/head/paging.h}
+{$I ../include/head/mapmem.h}
+{$I ../include/head/init_.h}
+{$I ../include/head/cpu.h}
+{$I ../include/head/idt.h}
+{$I ../include/head/relog.h}
+{$I ../include/head/ll_rw_block.h}
+{$I ../include/head/scheduler.h}
+{$I ../include/head/procesos.h}
+{$I ../include/head/syscall.h}
+{$I ../include/head/devices.h}
+{$I ../include/head/irq.h}
+{$I ../include/head/printk_.h}
+{$I ../include/head/dma.h}
+{$I ../include/head/fat12fs/super.h}
+{$I ../include/toro/drivers/tty.inc}
+{$I ../include/toro/drivers/keyb.inc}
 
 {Procedimiento que inicializan los drivers , por ahora se inician con el}
 {kernel}

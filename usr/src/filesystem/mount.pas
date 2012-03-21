@@ -8,7 +8,7 @@ Unit mount;
   * ROOT , y los puntos de montage son eliminados una ves reseteada la  *
   * maquina puesto que solo existen en memoria                          *
   *                                                                     *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>          *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>          *
   * All Rights Reserved                                                 *
   *                                                                     *
   * Versiones :                                                         *

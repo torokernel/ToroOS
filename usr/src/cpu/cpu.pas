@@ -7,7 +7,7 @@ Unit Cpu;
   * estructura struc_cpu , con la informacion del coprocesador,             *
   * registros MMX , SSE y SSE2                                              *
   *                                                                         *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>              *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>              *
   * All Rights Reserved                                                     *
   *                                                                         *
   * Versiones :                                                             *

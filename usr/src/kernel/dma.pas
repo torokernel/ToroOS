@@ -7,7 +7,7 @@ Unit Dma;
   * trabaja sobre el buffer de dma , en el futuro utilizara     *
   * paginas dma solicitadas al modulo de memoria                *
   *                                                             *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>  *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>  *
   * All Rights Reserved                                         *
   *                                                             *
   * Versiones :                                                 *
@@ -21,13 +21,13 @@ Unit Dma;
 
 Interface
 
-{$I ../Include/Toro/procesos.inc}
-{$I ../Include/Head/procesos.h}
-{$I ../Include/Head/scheduler.h}
-{$I ../Include/Head/asm.h}
-{$I ../Include/Toro/drivers/dma.inc}
-{$I ../Include/Head/paging.h}
-{$I ../Include/Head/printk_.h}
+{$I ../include/toro/procesos.inc}
+{$I ../include/head/procesos.h}
+{$I ../include/head/scheduler.h}
+{$I ../include/head/asm.h}
+{$I ../include/toro/drivers/dma.inc}
+{$I ../include/head/paging.h}
+{$I ../include/head/printk_.h}
 
 
 var dma_flags : word ;
@@ -36,8 +36,8 @@ var dma_flags : word ;
 Implementation
 
 
-{$I ../Include/Head/lock.h}
-{$I ../Include/Head/ioport.h}
+{$I ../include/head/lock.h}
+{$I ../include/head/ioport.h}
 
 
 

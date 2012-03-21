@@ -6,7 +6,7 @@ Unit kdev;
   * acceso a variables del kernel  , en un futuro puede tener mas       *
   * implementaciones  , por ahora solo da acceso a un par de variables  *
   *                                                                     *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>          *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>          *
   * All Rights Reserved                                                 *
   *                                                                     *
   *                                                                     *
@@ -19,20 +19,20 @@ Unit kdev;
 
 interface
 
-{$I ../Include/Toro/kdev.inc}
-{$I ../Include/Head/printk_.h}
-{$I ../Include/Toro/procesos.inc}
-{$I ../Include/Toro/buffer.inc}
-{$I ../Include/Head/procesos.h}
-{$I ../Include/Head/devices.h}
-{$I ../Include/Head/mm.h}
-{$I ../Include/Head/malloc.h}
-{$I ../Include/Head/cpu.h}
-{$I ../Include/Head/gdt.h}
-{$I ../Include/Head/inodes.h}
-{$I ../Include/Head/dcache.h}
-{$I ../Include/Head/paging.h}
-{$I ../Include/Head/buffer.h}
+{$I ../include/toro/kdev.inc}
+{$I ../include/head/printk_.h}
+{$I ../include/toro/procesos.inc}
+{$I ../include/toro/buffer.inc}
+{$I ../include/head/procesos.h}
+{$I ../include/head/devices.h}
+{$I ../include/head/mm.h}
+{$I ../include/head/malloc.h}
+{$I ../include/head/cpu.h}
+{$I ../include/head/gdt.h}
+{$I ../include/head/inodes.h}
+{$I ../include/head/dcache.h}
+{$I ../include/head/paging.h}
+{$I ../include/head/buffer.h}
 
 
 

@@ -6,7 +6,7 @@ Unit Floppy;
    * es un circuito muy primitivo y dificil de manejar no tanto por la com *
    * plejidad sino los detalles que hay que tener                          *
    *                                                                       *
-   * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>            *
+   * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>            *
    * All Rights Reserved                                                   *
    *                                                                       *
    * Versiones :                                                           *

@@ -7,7 +7,7 @@ Unit Idt;
    * car TASK Y INT GATE en la IDT  . Todas las int. HARD son cubiertas *
    * ,excepto la IRQ 0 que es tratada por el Planificador  ,            *                   *
    *                                                                    *
-   * Copyright (c) 2003-2005 Matias Vara <matiasvara@yahoo.com>         *
+   * Copyright (c) 2003-2005 Matias Vara <matiasevara@gmail.com>         *
    * All Rights Reserved                                                *
    *                                                                    *
    * Versiones :                                                        *
@@ -19,13 +19,13 @@ Unit Idt;
 
 interface
 
-{$I ../Include/Toro/procesos.inc}
-{$I ../Include/Head/asm.h}
-{$I ../Include/Head/irq.h}
-{$I ../Include/Head/gdt.h}
-{$I ../Include/Head/mm.h}
-{$I ../Include/Head/printk_.h}
-{$I ../Include/Head/scheduler.h}
+{$I ../include/toro/procesos.inc}
+{$I ../include/head/asm.h}
+{$I ../include/head/irq.h}
+{$I ../include/head/gdt.h}
+{$I ../include/head/mm.h}
+{$I ../include/head/printk_.h}
+{$I ../include/head/scheduler.h}
 
 
 procedure Excep_Init;external name 'EXCEP_INIT';

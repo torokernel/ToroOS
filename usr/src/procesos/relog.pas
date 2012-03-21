@@ -6,7 +6,7 @@ Unit Relog;
   * irq 0 , en el que esta instalado el scheduler , maneja               *
   * todas las salidas de este                                            *
   *                                                                      *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>           *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>           *
   * All Rights Reserved                                                  *
   *                                                                      *
   * Versiones :                                                          *
@@ -23,14 +23,14 @@ interface
 
 {DEFINE DEBUG}
 
-{$I ../Include/Toro/page.inc}
-{$I ../Include/Toro/relog.inc}
-{$I ../Include/Head/asm.h}
-{$I ../Include/Head/printk_.h}
+{$I ../include/toro/page.inc}
+{$I ../include/toro/relog.inc}
+{$I ../include/head/asm.h}
+{$I ../include/head/printk_.h}
 
 implementation
 
-{$I ../Include/Head/ioport.h}
+{$I ../include/head/ioport.h}
 
 
 procedure poner_contador(Freq:word;Salida:byte);

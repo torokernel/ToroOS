@@ -5,7 +5,7 @@ Unit printk_;
   * Unidad encarga de la llamada printk() , que es utilizada por el     *
   * kernel para desplegar caracteres en pantalla  .                     *
   *                                                                     *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>          *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>          *
   * All Rights Reserved                                                 *
   *                                                                     *
   * Versiones :                                                         *
@@ -18,10 +18,10 @@ Unit printk_;
 
 interface
 
-{$I ../Include/Toro/printk.inc}
-{$I ../Include/Toro/procesos.inc}
-{$I ../Include/Head/procesos.h}
-{$I ../Include/Head/asm.h}
+{$I ../include/toro/printk.inc}
+{$I ../include/toro/procesos.inc}
+{$I ../include/head/procesos.h}
+{$I ../include/head/asm.h}
 
 {$DEFINE Use_Hash}
 
@@ -37,7 +37,7 @@ var x,y:byte;
 implementation
 
 
-{$I ../Include/Head/list.h}
+{$I ../include/head/list.h}
 
 
 

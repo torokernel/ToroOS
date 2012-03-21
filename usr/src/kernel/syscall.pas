@@ -7,7 +7,7 @@ Unit Syscall;
   * 6 parametros  , el array Syscall_Table mantiene la lista de punteros    *
   * de las syscall del sistema                                              *
   *                                                                         *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>              *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>              *
   * All Rights Reserved                                                     *
   *                                                                         *
   * Versiones :                                                             *
@@ -17,21 +17,21 @@ Unit Syscall;
 }
 interface
 
-{$I ../Include/Toro/procesos.inc}
-{$I ../Include/Head/asm.h}
-{$I ../Include/Head/idt.h}
-{$I ../Include/Head/open.h}
-{$I ../Include/Head/read_write.h}
-{$I ../Include/Head/mount.h}
-{$I ../Include/Head/itimer.h}
-{$I ../Include/Head/procesos.h}
-{$I ../Include/Head/prc_sys.h}
-{$I ../Include/Head/exec.h}
-{$I ../Include/Head/scheduler.h}
-{$I ../Include/Head/relog.h}
-{$I ../Include/Toro/buffer.inc}
-{$I ../Include/Head/buffer.h}
-{$I ../Include/Head/vmalloc.h}
+{$I ../include/toro/procesos.inc}
+{$I ../include/head/asm.h}
+{$I ../include/head/idt.h}
+{$I ../include/head/open.h}
+{$I ../include/head/read_write.h}
+{$I ../include/head/mount.h}
+{$I ../include/head/itimer.h}
+{$I ../include/head/procesos.h}
+{$I ../include/head/prc_sys.h}
+{$I ../include/head/exec.h}
+{$I ../include/head/scheduler.h}
+{$I ../include/head/relog.h}
+{$I ../include/toro/buffer.inc}
+{$I ../include/head/buffer.h}
+{$I ../include/head/vmalloc.h}
 
 
 function sys_ioctl (Fichero , req : dword ; argp : pointer) : dword

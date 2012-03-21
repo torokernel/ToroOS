@@ -5,7 +5,7 @@ Unit Procesos;
   * Esta unidad se encarga de la creacion y eliminacion de procesos      *
   * aqui no estan implementadas las llamadas al sistema ,                *
   *                                                                      *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>           *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>           *
   * All Rights Reserved                                                  *
   *                                                                      *
   * Versiones :                                                          *
@@ -25,19 +25,19 @@ interface
 {DEFINE DEBUG}
 {DEFINE STAT}
 
-{$I ../Include/Toro/procesos.inc}
-{$I ../Include/Toro/signal.inc}
-{$I ../Include/Head/asm.h}
-{$I ../Include/Head/gdt.h}
-{$I ../Include/Head/signal.h}
-{$I ../Include/Head/scheduler.h}
-{$I ../Include/Head/open.h}
-{$I ../Include/Head/printk_.h}
-{$I ../Include/Head/paging.h}
-{$I ../Include/Head/vmalloc.h}
-{$I ../Include/Head/inodes.h}
-{$I ../Include/Head/itimer.h}
-{$I ../Include/Head/dcache.h}
+{$I ../include/toro/procesos.inc}
+{$I ../include/toro/signal.inc}
+{$I ../include/head/asm.h}
+{$I ../include/head/gdt.h}
+{$I ../include/head/signal.h}
+{$I ../include/head/scheduler.h}
+{$I ../include/head/open.h}
+{$I ../include/head/printk_.h}
+{$I ../include/head/paging.h}
+{$I ../include/head/vmalloc.h}
+{$I ../include/head/inodes.h}
+{$I ../include/head/itimer.h}
+{$I ../include/head/dcache.h}
 
 {$DEFINE Use_Hash}
 {$DEFINE Use_Tail}
@@ -66,8 +66,8 @@ procedure proceso_reanudar(Tarea:p_tarea_struc;var Cola : p_tarea_struc );
 implementation
 
 
-{$I ../Include/Head/list.h}
-{$I ../Include/Head/lock.h}
+{$I ../include/head/list.h}
+{$I ../include/head/lock.h}
 
 
 function nuevo_pid:dword;

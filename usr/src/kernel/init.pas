@@ -7,7 +7,7 @@ Unit Init;
   * r gara de leer archivos de configuracion , abrir la shell del sis*
   * tema , etc . Es la primer tarea en el contexto de usuario.       *
   *                                                                  *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>       *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>       *
   * All Rights Reserved                                              *
   *                                                                  *
   * Versiones                                                        *
@@ -20,8 +20,8 @@ Unit Init;
 
 interface
 
-{$I ../Include/Toro/procesos.inc}
-{$I ../Include/Toro/utime.inc}
+{$I ../include/toro/procesos.inc}
+{$I ../include/toro/utime.inc}
 
 { aqui es definida la ubicacion de la shell!!! }
 {$define SHELL_PATH := '/bin/sh' }

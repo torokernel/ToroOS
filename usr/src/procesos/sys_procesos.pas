@@ -5,7 +5,7 @@ Unit Sys_Procesos;
   * Implementacion de las llamadas al sistema de los procesos  *
   * algunas no estan provadas hasta el momento                 *
   *                                                            *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com> *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com> *
   * All Rights Reserved                                        *
   *                                                            *
   * Versiones   :                                              *
@@ -19,20 +19,20 @@ interface
 {DEFINE DEBUG}
 
 
-{$I ../Include/Head/asm.h}
-{$I ../Include/Toro/procesos.inc}
-{$I ../Include/Toro/signal.inc}
-{$I ../Include/Head/procesos.h}
-{$I ../Include/Head/signal.h}
-{$I ../Include/Head/scheduler.h}
-{$I ../Include/Head/read_write.h}
-{$I ../Include/Head/printk_.h}
+{$I ../include/head/asm.h}
+{$I ../include/toro/procesos.inc}
+{$I ../include/toro/signal.inc}
+{$I ../include/head/procesos.h}
+{$I ../include/head/signal.h}
+{$I ../include/head/scheduler.h}
+{$I ../include/head/read_write.h}
+{$I ../include/head/printk_.h}
 
 {$DEFINE Use_Hash}
 
 implementation
 
-{$I ../Include/Head/list.h}
+{$I ../include/head/list.h}
 
 
 { * Sys_Getpid :

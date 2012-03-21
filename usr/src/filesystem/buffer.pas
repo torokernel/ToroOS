@@ -6,7 +6,7 @@ Unit Buffer;
   * son anidados en dos colas las cola Lru y la cola Hash , por      *
   * ahora solo maneja el cache de bloques de dispositivos de bloque  *
   *                                                                  *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>       *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>       *
   * All Rights Reserved                                              *
   *                                                                  *
   *                                                                  *

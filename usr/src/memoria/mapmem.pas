@@ -7,7 +7,7 @@ Unit Mapmem;
   * pasar que la pagina se encuentre mas alla de HIGH_MEMORY   ,      *
   * asi solo a traves del KERNEL_PDT se podra acceder a estas paginas *
   *                                                                   *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>        *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>        *
   * All Rights Reserved                                               *
   *                                                                   *
   * Versiones :                                                       *
@@ -22,11 +22,11 @@ interface
 {DEFINE DEBUG}
 
 
-{$I ../Include/Toro/procesos.inc}
-{$I ../Include/Head/asm.h}
-{$I ../Include/Head/mm.h}
-{$I ../Include/Head/printk_.h}
-{$I ../Include/Head/paging.h}
+{$I ../include/toro/procesos.inc}
+{$I ../include/head/asm.h}
+{$I ../include/head/mm.h}
+{$I ../include/head/printk_.h}
+{$I ../include/head/paging.h}
 
 
 

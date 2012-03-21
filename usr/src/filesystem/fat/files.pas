@@ -5,7 +5,7 @@ unit files;
   * Unidad que se encarga de lectura y escritura de archivos sobre      *
   * discos con fat12                                                    *
   *                                                                     *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>          *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>          *
   * All Rights Reserved                                                 *
   *                                                                     *
   * Versiones :                                                         *

@@ -6,7 +6,7 @@ Unit Excepciones;
   * excepciones y de acuerdo a la excepcion destruye la tarea y muestra *
   * un volcado de la tarea en pantalla                                  *
   *                                                                     *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>          *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>          *
   * All Rights Reserved                                                 *
   *                                                                     *
   * Versiones :                                                         *
@@ -23,16 +23,16 @@ Unit Excepciones;
 interface
 
 
-{$I ../Include/Toro/procesos.inc}
-{$I ../Include/Head/asm.h}
-{$I ../Include/Head/gdt.h}
-{$I ../Include/Head/mm.h}
-{$I ../Include/Head/scheduler.h}
-{$I ../Include/Head/idt.h}
-{$I ../Include/Head/procesos.h}
-{$I ../Include/Head/printk_.h}
-{$I ../Include/Toro/signal.inc}
-{$I ../Include/Head/signal.h}
+{$I ../include/toro/procesos.inc}
+{$I ../include/head/asm.h}
+{$I ../include/head/gdt.h}
+{$I ../include/head/mm.h}
+{$I ../include/head/scheduler.h}
+{$I ../include/head/idt.h}
+{$I ../include/head/procesos.h}
+{$I ../include/head/printk_.h}
+{$I ../include/toro/signal.inc}
+{$I ../include/head/signal.h}
 
 implementation
 

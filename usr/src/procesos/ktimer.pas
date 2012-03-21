@@ -5,7 +5,7 @@ Unit Ktimer ;
   * Aqui se encuentran implementados los timers del nucleo que ordenan *
   * la ejecuion de funcionesn en un cierto lapso de tiempo             *
   *                                                                    *                                                               *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>         *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>         *
   * All Rights Reserved                                                *
   *                                                                    *
   *                                                                    *
@@ -22,17 +22,17 @@ Unit Ktimer ;
 interface
 
 
-{$I ../Include/Toro/procesos.inc}
-{$I ../Include/Toro/signal.inc}
-{$I ../Include/Head/gdt.h}
-{$I ../Include/Head/mm.h}
-{$I ../Include/Head/asm.h}
-{$I ../Include/Head/procesos.h  }
-{$I ../Include/Head/relog.h}
-{$I ../Include/Head/scheduler.h}
-{$I ../Include/Head/signal.h}
-{$I ../Include/Head/printk_.h}
-{$I ../Include/Head/itimer.h}
+{$I ../include/toro/procesos.inc}
+{$I ../include/toro/signal.inc}
+{$I ../include/head/gdt.h}
+{$I ../include/head/mm.h}
+{$I ../include/head/asm.h}
+{$I ../include/head/procesos.h  }
+{$I ../include/head/relog.h}
+{$I ../include/head/scheduler.h}
+{$I ../include/head/signal.h}
+{$I ../include/head/printk_.h}
+{$I ../include/head/itimer.h}
 
 
 { Simbolos utilizados para la cola ligada de timers }
@@ -53,7 +53,7 @@ const tq_ktimers: p_timer_kernel = nil;
 
 implementation
 
-{$I ../Include/Head/list.h}
+{$I ../include/head/list.h}
 
 { * Add_timer :                                                         *
   *                                                                     *

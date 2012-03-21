@@ -5,7 +5,7 @@ Unit Exec;
   * Esta Unidad se encarga de realizar la llamada al sistema        *
   * SYS_EXEC , utiliza archivos COFF.                               *                                                   *
   *                                                                 *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>      *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>      *
   * All Rights Reserved                                             *
   *                                                                 *
   * Versiones  :                                                    *

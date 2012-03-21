@@ -6,7 +6,7 @@ Unit Scheduler;
   * segun la implementacion de 2 algotimos FIFO Y ROUND ROBIN , se    *
   * de captar las IRQ del relog e incrementar el contador             *
   *                                                                   *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>        *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>        *
   * All Rights Reserved                                               *
   *                                                                   *
   * Versiones :                                                       *
@@ -28,16 +28,16 @@ interface
 
 {DEFINE DEBUG}
 
-{$I ../Include/Toro/procesos.inc}
-{$I ../Include/Head/irq.h}
-{$I ../Include/Head/gdt.h}
-{$I ../Include/Head/idt.h}
-{$I ../Include/Head/asm.h}
-{$I ../Include/Head/procesos.h}
-{$I ../Include/Head/itimer.h}
-{$I ../Include/Head/ktimer.h}
-{$I ../Include/Head/signal.h}
-{$I ../Include/Head/printk_.h}
+{$I ../include/toro/procesos.inc}
+{$I ../include/head/irq.h}
+{$I ../include/head/gdt.h}
+{$I ../include/head/idt.h}
+{$I ../include/head/asm.h}
+{$I ../include/head/procesos.h}
+{$I ../include/head/itimer.h}
+{$I ../include/head/ktimer.h}
+{$I ../include/head/signal.h}
+{$I ../include/head/printk_.h}
 
 {$DEFINE Use_Tail}
 {$DEFINE Use_Hash}
@@ -58,8 +58,8 @@ procedure Scheduling ;
 
 implementation
 
-{$I ../Include/Head/ioport.h}
-{$I ../Include/Head/list.h}
+{$I ../include/head/ioport.h}
+{$I ../include/head/list.h}
 
 
 procedure load_task(tarea : p_tarea_struc);inline;

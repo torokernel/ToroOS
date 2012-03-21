@@ -6,7 +6,7 @@ Unit ll_rw_block;
   * por parte del kernel debido a que el kernel no trabaja con descrip  *
   * tores de archivos                                                   *
   *                                                                     *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>          *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>          *
   * All Rights Reserved                                                 *
   *                                                                     *
   * Versiones :                                                         *

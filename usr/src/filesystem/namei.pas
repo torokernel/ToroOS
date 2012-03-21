@@ -6,7 +6,7 @@ Unit namei ;
   * Unidad encargada de la conversion de ruta a inodos a traves *
   * del cache del sistema                                       *
   *                                                             *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>  *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>  *
   * All Rights Reserved                                         *
   *                                                             *
   * Versiones :                                                 *

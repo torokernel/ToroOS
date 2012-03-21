@@ -6,7 +6,7 @@ Unit multiboot;
   * multiboot y es certificada por ahora solo verifica el numero magico *
   * en el futuro controlara el tama¤o del kernel                        *
   *                                                                     *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>          *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>          *
   * All Rights Reserved                                                 *
   *                                                                     *
   * Versiones :                                                         *

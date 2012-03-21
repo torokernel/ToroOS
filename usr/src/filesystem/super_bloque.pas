@@ -5,7 +5,7 @@ Unit Super_Bloque;
   * Esta unidad se dedica al mantenimiento de los superbloques y al montado *
   * de los sistema de archivo                                               *
   *                                                                         *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>              *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>              *
   * All Rights Reserved                                                     *
   *                                                                         *
   * Versiones :                                                             *

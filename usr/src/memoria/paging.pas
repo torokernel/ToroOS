@@ -7,7 +7,7 @@ Unit Paging;
   * info sobre el estado de la pagina  y la cola de libres , que liga a  *
   * las paginas libre                                                    *
   *                                                                      *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>           *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>           *
   * All Rights Reserved                                                  *
   *                                                                      *
   * Versiones :                                                          *
@@ -21,12 +21,12 @@ Unit Paging;
 interface
 {DEFINE DEBUG}
 
-{$I ../Include/Toro/procesos.inc}
-{$I ../Include/Head/procesos.h}
-{$I ../Include/Head/scheduler.h}
-{$I ../Include/Head/asm.h}
-{$I ../Include/Head/mm.h}
-{$I ../Include/Head/printk_.h}
+{$I ../include/toro/procesos.inc}
+{$I ../include/head/procesos.h}
+{$I ../include/head/scheduler.h}
+{$I ../include/head/asm.h}
+{$I ../include/head/mm.h}
+{$I ../include/head/printk_.h}
 
 
 
@@ -50,7 +50,7 @@ var mem_map:P_page;
 implementation
 
 
-{$I ../Include/Head/list.h}
+{$I ../include/head/list.h}
 
 { * Clear_Page :                                        *
   *                                                     *

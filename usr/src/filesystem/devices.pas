@@ -5,7 +5,7 @@ Unit Devices;
   * Unidad que se encarga del acceso a los dispositivos hard atraves    *
   * del Fs  . Es una implementacion parecida al VFS de Linux            *
   *                                                                     *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>          *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>          *
   * All Rights Reserved                                                 *
   *                                                                     *
   * Versiones :                                                         *

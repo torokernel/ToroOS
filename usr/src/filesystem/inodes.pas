@@ -5,7 +5,7 @@ Unit Inodes;
   * Esta unidad en encarga del cache de inodos a traves de las llama  *
   * das al sistema get_inode y put_inode .                            *
   *                                                                   *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>        *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>        *
   * All Rights Reserved                                               *
   *                                                                   *
   * Versiones  :                                                      *

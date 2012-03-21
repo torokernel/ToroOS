@@ -5,7 +5,7 @@ Unit Pci;
   * Esta Unidad detecta los dispositivos dentro del bus PCI  y los       *
   * coloca en el array pci_devices , el codigo fue extraido de Delhineos *
   *                                                                      *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>           *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>           *
   * All Rights Reserved                                                  *
   *                                                                      *
   * Versiones :                                                          *

@@ -6,7 +6,7 @@ Unit open;
   * , desde aqui se realizan las llamadas al sistema para la creacion *
   * de archivos , directorios y archivos especiales y su apertura  .  *
   *                                                                   *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>        *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>        *
   * All Rights Reserved                                               *
   *                                                                   *
   * Versiones :                                                       *

@@ -6,7 +6,7 @@ Unit asmb;
   * del sistema , en su mayoria escritas en assembler  para que sean   *
   * mas rapidas                                                        *
   *                                                                    *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>         *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>         *
   * All Rights Reserved                                                *
   *                                                                    *
   * Versiones :                                                        *

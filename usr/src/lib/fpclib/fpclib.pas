@@ -36,7 +36,7 @@ unit fpclib;
 
 INTERFACE
 
- {$I ../../Include/Head/asm.h}
+ {$I ../../include/head/asm.h}
 
 IMPLEMENTATION
 

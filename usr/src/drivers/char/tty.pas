@@ -11,7 +11,7 @@ Unit tty;
   * con la llamada ioctl() .Hay gran cantidad de carateres especiales   *
   * estos son  apartir del caracter 250 en adelante                     *
   *                                                                     *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>          *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>          *
   * All Rights Reserved                                                 *
   *                                                                     *
   * Versiones  :                                                        *

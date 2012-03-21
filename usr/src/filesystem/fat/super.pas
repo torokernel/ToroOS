@@ -6,7 +6,7 @@ unit super;
   * entre el vfs y fat . Por ahora solo registra fat12  y se limita     *
   * montar una sola unidad                                              *
   *                                                                     *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>          *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>          *
   * All Rights Reserved                                                 *
   *                                                                     *
   * Versiones :                                                         *

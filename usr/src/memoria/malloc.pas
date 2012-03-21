@@ -9,7 +9,7 @@ Unit Malloc;
   * no asignados , la cola de descriptores en uso y la cola de desc. a  *
   * huecos libres                                                       *
   *                                                                     *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>          *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>          *
   * All Rights Reserved                                                 *
   *                                                                     *
   * Versiones:                                                          *
@@ -26,11 +26,11 @@ interface
 
 
 
-{$I ../Include/Toro/procesos.inc}
-{$I ../Include/Head/asm.h}
-{$I ../Include/Head/mm.h}
-{$I ../Include/Head/printk_.h}
-{$I ../Include/Head/paging.h}
+{$I ../include/toro/procesos.inc}
+{$I ../include/head/asm.h}
+{$I ../include/head/mm.h}
+{$I ../include/head/printk_.h}
+{$I ../include/head/paging.h}
 
 
 

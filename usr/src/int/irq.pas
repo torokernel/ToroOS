@@ -7,7 +7,7 @@ Unit Irq;
   * Irq por parte de los procesos  y de manejar la tabla de asignacion  *
   * de Irq                                                              *
   *                                                                     *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>          *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>          *
   * All Rights Reserved                                                 *
   *                                                                     *
   * Versiones :                                                         *
@@ -28,14 +28,14 @@ Unit Irq;
 interface
 
 
-{$I ../Include/Head/asm.h}
-{$I ../Include/Toro/irq.inc}
-{$I ../Include/Toro/procesos.inc}
-{$I ../Include/Head/procesos.h}
-{$I ../Include/Head/scheduler.h}
-{$I ../Include/Head/idt.h}
-{$I ../Include/Head/printk_.h}
-{$I ../Include/Head/itimer.h}
+{$I ../include/head/asm.h}
+{$I ../include/toro/irq.inc}
+{$I ../include/toro/procesos.inc}
+{$I ../include/head/procesos.h}
+{$I ../include/head/scheduler.h}
+{$I ../include/head/idt.h}
+{$I ../include/head/printk_.h}
+{$I ../include/head/itimer.h}
 
 {Cola de tareas interrumpidas por e/s}
 const Tq_WaitIrq : p_tarea_struc = nil ;
@@ -45,7 +45,7 @@ var Irq_Wait : array [ 0..15] of p_tarea_struc ;
 
 implementation
 
-{$I ../Include/Head/ioport.h}
+{$I ../include/head/ioport.h}
 
 procedure habilitar_irq(Irq:byte);[public , alias :'HABILITAR_IRQ'];
 var puerto:word;
