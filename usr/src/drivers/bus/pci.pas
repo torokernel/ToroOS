@@ -18,10 +18,10 @@ Unit Pci;
 
 interface
 
-{$I ../../Include/Head/asm.h}
-{$I ../../Include/Head/printk_.h}
-{$I ../../Include/Toro/drivers/pci.inc}
-{$I ../../Include/Toro/page.inc}
+{$I ../../include/head/asm.h}
+{$I ../../include/head/printk_.h}
+{$I ../../Include/toro/drivers/pci.inc}
+{$I ../../include/toro/page.inc}
 
 procedure check_pci_devices;
 function  pci_device_count (bus : dword) : dword;
@@ -39,7 +39,7 @@ var
 implementation
 
 
-{$I ../../Include/Head/ioport.h}
+{$I ../../include/head/ioport.h}
 
 
 { * Pci_Init :                                                         *
