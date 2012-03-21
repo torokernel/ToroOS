@@ -29,20 +29,20 @@ Unit Floppy;
 
 interface
 
-{$I ../../Include/Toro/procesos.inc}
-{$I ../../Include/Head/procesos.h}
-{$I ../../Include/Head/paging.h}
-{$I ../../Include/Head/ktimer.h}
-{$I ../../Include/Head/scheduler.h}
-{$I ../../Include/Head/asm.h}
-{$I ../../Include/Head/printk_.h}
-{$I ../../Include/Toro/floppy.inc}
-{$I ../../Include/Head/irq.h}
-{$I ../../Include/Head/idt.h}
-{$I ../../Include/Head/dma.h}
-{$I ../../Include/Toro/drivers/dma.inc}
-{$I ../../Include/Head/mm.h}
-{$I ../../Include/Head/devices.h}
+{$I ../../include/toro/procesos.inc}
+{$I ../../include/head/procesos.h}
+{$I ../../include/head/paging.h}
+{$I ../../include/head/ktimer.h}
+{$I ../../include/head/scheduler.h}
+{$I ../../include/head/asm.h}
+{$I ../../include/head/printk_.h}
+{$I ../../include/toro/floppy.inc}
+{$I ../../include/head/irq.h}
+{$I ../../include/head/idt.h}
+{$I ../../include/head/dma.h}
+{$I ../../include/toro/drivers/dma.inc}
+{$I ../../include/head/mm.h}
+{$I ../../include/head/devices.h}
 
 
 { macros para entender mas los procedimientos }
@@ -78,8 +78,8 @@ var
 implementation
 
 
-{$I ../../Include/Head/lock.h}
-{$I ../../Include/Head/ioport.h}
+{$I ../../include/head/lock.h}
+{$I ../../include/head/ioport.h}
 
 
 procedure fd_log_to_chs(Log:dword);
