@@ -19,24 +19,24 @@ Unit ll_rw_block;
 interface
 
 
-{$I ../../Include/Head/asm.h}
-{$I ../../Include/Toro/procesos.inc}
-{$I ../../Include/Toro/buffer.inc}
-{$I ../../Include/Head/buffer.h}
-{$I ../../Include/Head/devices.h}
-{$I ../../Include/Head/procesos.h}
-{$I ../../Include/Head/scheduler.h}
-{$I ../../Include/Head/printk_.h}
-{$I ../../Include/Head/malloc.h}
-{$I ../../Include/Head/paging.h}
-{$I ../../Include/Head/mm.h}
+{$I ../../include/head/asm.h}
+{$I ../../include/toro/procesos.inc}
+{$I ../../include/toro/buffer.inc}
+{$I ../../include/head/buffer.h}
+{$I ../../include/head/devices.h}
+{$I ../../include/head/procesos.h}
+{$I ../../include/head/scheduler.h}
+{$I ../../include/head/printk_.h}
+{$I ../../include/head/malloc.h}
+{$I ../../include/head/paging.h}
+{$I ../../include/head/mm.h}
 
 
 const block_size = 512 ;
 
 implementation
 
-{$I ../../Include/Head/lock.h}
+{$I ../../include/head/lock.h}
 
 
 { * Buffer_Read :                                                       *
