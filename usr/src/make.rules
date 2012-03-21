@@ -6,7 +6,7 @@
 
 
 
-DIR_WORK = ../../../../fpc-1.9.2/bin
+DIR_WORK = ../../../../../fpc-1.9.2/bin
 
 #atencion!!! este ld no es el que se encuentra dentro de FPC sino el que viene con las
 #distribuciones de Linux con soporte para elf32-i386 targets
@@ -27,7 +27,7 @@ FPCLIB =toro-src/Lib/fpclib/fpclib.o
 
 RM =rm
 
-FPC_FLAGS =-Un -s -Sh -Sg -Cn -Sc -S2 -OG -Sm -Un -a -vwnh -Rintel
+FPC_FLAGS =-s -Sh -Sg -Cn -Sc -S2 -OG -Sm -Un -a -vwnh -Rintel
 
 CP =cp
 
