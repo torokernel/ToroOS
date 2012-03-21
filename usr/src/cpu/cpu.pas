@@ -19,9 +19,9 @@ Unit Cpu;
 INTERFACE
 
 
-{$I ../Include/Head/asm.h}
-{$I ../Include/Head/printk_.h}
-{$I ../Include/Toro/cpu.inc}
+{$I ../include/head/asm.h}
+{$I ../include/head/printk_.h}
+{$I ../include/toro/cpu.inc}
 
 var  p_cpu : struc_cpu ;
 
