@@ -32,8 +32,8 @@ kernel/printk.o
 kernel/kernel.o
 kernel/kdev.o
 kernel/dma.o
-Lib/fpclib/fpclib.o
-Lib/fpclib/strings.o
+lib/fpclib/fpclib.o
+lib/fpclib/strings.o
 memoria/mm.o
 memoria/malloc.o
 memoria/mapmem.o
