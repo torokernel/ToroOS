@@ -1,0 +1,1 @@
+procedure SYSCALL_INIT;external;

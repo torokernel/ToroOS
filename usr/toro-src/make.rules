@@ -1,0 +1,39 @@
+#Este archivo es utilizado por Make y contiene los
+#directorios donde se encuentran los programas y otras cosas
+#
+#
+
+
+
+
+DIR_WORK = c:/pp/bin/go32v2
+
+#atencion!!! este ld no es el que se encuentra dentro de FPC sino el que viene con las
+#distribuciones de Linux con soporte para elf32-i386 targets
+
+LD =c:/ld.exe
+
+FPC = $(DIR_WORK)/ppc386.exe
+
+AS =$(DIR_WORK)/as.exe
+
+NASM=$(DIR_WORK)/nasm.exe
+
+GREP=$(DIR_WORK)/grep.exe
+
+MAKE=make
+
+FPCLIB =toro-src/Lib/fpclib/fpclib.o
+
+RM =del
+
+FPC_FLAGS =-Un -s -Sh -Sg -Cn -Sc -S2 -OG -Sm -Un -a -vwnh -Rintel
+
+CP =copy
+
+KERNEL_DIR =../../boot/
+
+RENAME = rename
+
+MV = mv
+

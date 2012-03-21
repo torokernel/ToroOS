@@ -1,0 +1,9 @@
+procedure Habilitar_IRQ(Irq:byte);external;
+procedure DHabilitar_IRQ(Irq:byte);external;
+procedure FDI;external;
+procedure Habilitar_TodasIrq;external;
+procedure Dhabilitar_TodasIrq;external;
+procedure Iniciar_Relog;external;
+procedure Wait_Short_Irq(Irq:byte;Handler:pointer);external;
+procedure Wait_Long_Irq(Irq:byte);external;
+procedure Irq_Init;external;

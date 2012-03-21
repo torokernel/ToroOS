@@ -1,0 +1,26 @@
+OUTPUT_FORMAT("elf32-i386");
+
+ENTRY(_inicio)
+PHDRS {
+   text PT_LOAD;
+   data PT_LOAD;
+   bss  PT_LOAD;
+}
+
+SECTIONS {
+   . = SIZEOF_HEADERS + 0x100000;
+
+   .text : { *(.text) 
+           } :text
+
+   .data : { *(.data) 
+           } :data
+
+   .bss  : { *(.bss) 
+           } :bss
+
+   .comment : { *(.comment)
+              }
+}
+
+
