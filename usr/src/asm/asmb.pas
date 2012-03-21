@@ -19,7 +19,7 @@ Unit asmb;
 interface
 
 
-{$I ../Include/Head/printk_.h}
+{$I ../include/head/printk_.h}
 
 
 const Kernel_Data_Sel =$10;
@@ -29,7 +29,7 @@ const Kernel_Data_Sel =$10;
 implementation
 
 
-{$I ../Include/Head/ioport.h}
+{$I ../include/head/ioport.h}
 
 {* Memcopy :                                                                 *
  *                                                                           *
