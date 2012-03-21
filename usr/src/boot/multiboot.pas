@@ -21,9 +21,9 @@ Unit multiboot;
 interface
 
 
-{$I ../Include/Toro/multiboot.inc}
-{$I ../Include/Head/printk_.h}
-{$I ../Include/Head/asm.h}
+{$I ../include/toro/multiboot.inc}
+{$I ../include/head/printk_.h}
+{$I ../include/head/asm.h}
 
 implementation
 
