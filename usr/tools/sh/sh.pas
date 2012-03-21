@@ -162,7 +162,7 @@ rela_path := stralloc (255);
 dir := '/' ;
 
 writeln('Toro shell ',version,'.',subversion,' by Matias Vara');
-writeln('matiasvara@yahoo.com');
+writeln('matiasevara@gmail.com');
 
 write('$', dir);
 

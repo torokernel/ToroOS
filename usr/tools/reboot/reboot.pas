@@ -4,7 +4,7 @@
   * Simple ejecutable que realiza el booteo de la maquina              *
   *                                                                    *
   *                                                                    *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>         *
+  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>         *
   * All Rights Reserved                                                *
   *                                                                    *
   **********************************************************************

@@ -3,7 +3,7 @@
   *                                                                    *
   * Lista un directorio                                                *
   *                                                                    *
-  * Copyright (c) 2003-2007 Matias Vara <matiasvara@yahoo.com>         *
+  * Copyright (c) 2003-2007 Matias Vara <matiasevara@gmail.com>         *
   * All Rights Reserved                                                *
   *                                                                    *
   * Versiones :                                                        *
