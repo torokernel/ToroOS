@@ -47,7 +47,7 @@
    <p>ToroOS is an Operative System for x86 arch written in Pascal and Assembler. 
       Supports multitasking, VFS, paging and so on.
       At the momment it just boots from 3 1/2 diskette but It's simple configure a VM (like Bochs or QEMU) in order to test it.</p>
-     <p>Go to <a href="http://github.com/MatiasVara/ToroOS/wiki">Wiki!</a> for further details!
+     <p>Go to <a href="http://github.com/MatiasVara/ToroOS/wiki">Wiki!</a> for details!
     </p>   
       <h2>License</h2>
       <p>GNU/Linux General Public License</p>
@@ -68,7 +68,18 @@
     <p>You can also clone the project with <a href="http://git-scm.com">Git</a>
       by running:
       <pre>$ git clone git://github.com/MatiasVara/ToroOS</pre>
-      Also, you can download the <a href="http://github.com/downloads/MatiasVara/ToroOS/toro-1.1.3.img">ToroOS image</a> for 3 1/2 diskette
+      Also, you can download the <a href="http://github.com/downloads/MatiasVara/ToroOS/toro-1.1.3.img">ToroOS image</a> for 3 1/2 diskette or  for a VM.
+      In order to run ToroOS on Bochs just configuring .bochsrc file as:
+      <pre>
+      romimage: file=./bios/BIOS-bochs-latest
+      vgaromimage: file=./bios/VGABIOS-lgpl-latest
+      megs: 256
+      floppya: 1_44=toro-1.1.3.img, status=inserted
+      boot: floppy</pre>
+      And then, run :
+      <pre>$ bochs </pre>
+      It needs a previus Bochs installation. 
+      Further information can be read from <a href="http://torokerneleng.blogspot.fr/2010/11/old-toro.html">this post</a>      
     </p>
 
     <div class="footer">
