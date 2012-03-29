@@ -60,6 +60,7 @@ var   I_Root:p_inode_t;
 
 implementation
 
+{$I ../include/head/string.h}
 {$I ../include/head/list.h}
 {$I ../include/head/lock.h}
 
@@ -208,7 +209,14 @@ begin
 
 id := 0 ;
 
-for tmp := 1 to High (fsid) do if fsid[tmp].name = name then id := fsid[tmp].id ;
+for tmp := 1 to High (fsid) do 
+ begin
+	if chararraycmp(@fsid[tmp].name[1],@name[1],dword(name[0])) then
+        begin 
+       	 id := fsid[tmp].id ;
+         break;
+	end;
+ end;         
 
 if id = 0 then exit(nil);
 

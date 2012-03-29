@@ -1,5 +1,5 @@
-function dma_set_channel (iChan:dword;uSize:Word;bMode:Byte;buffer:pointer):dword;external;
-procedure dma_init;external;
+function dma_set_channel (iChan:dword;uSize:Word;bMode:Byte;buffer:pointer):dword;external name 'DMA_SET_CHANNEL';
+procedure dma_init;external name 'DMA_INIT';
 
 {$define dma_lock := lock }
 {$define dma_unlock := unlock }

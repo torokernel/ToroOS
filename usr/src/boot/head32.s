@@ -4,7 +4,7 @@ BITS 32
     GLOBAL _inicio  
 
     EXTERN MULTIBOOT_INIT
-    EXTERN _main
+    EXTERN PASCALMAIN
 
     ;
     ; Posible multiboot header flags
@@ -48,7 +48,7 @@ KERNEL_STACKSIZE		equ	0x4000
     push ebx 
     call MULTIBOOT_INIT 
 
-    jmp _main
+    jmp PASCALMAIN
 
 
      GLOBAL FARJUMP

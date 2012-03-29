@@ -1,17 +1,17 @@
 
 
-procedure Memcopy(origen , destino :pointer;tamano:dword);external;
-procedure Debug(Valor:dword);external;
-function  Bit_Test(Val:pointer;pos:dword):boolean;external;
-procedure Bit_Set(ptr_dw:pointer;pos:dword);external;
-procedure Bit_Reset(Cadena:pointer;pos:dword);external;
+procedure Memcopy(origen , destino :pointer;tamano:dword);external name 'MEMCOPY';
+procedure Debug(Valor:dword);external name 'DEBUG';
+function  Bit_Test(Val:pointer;pos:dword):boolean;external name 'BIT_TEST';
+procedure Bit_Set(ptr_dw:pointer;pos:dword);external name 'BIT_SET';
+procedure Bit_Reset(Cadena:pointer;pos:dword);external name 'BIT_RESET';
 
-procedure Panic(Error:string);external;
+procedure Panic(Error:pchar);external name 'PANIC';
 
-function  Mapa_Get(Mapa:pointer;Limite:dword):word;external;
-procedure Limpiar_Array(p_array:pointer;fin:word);external;
-procedure Reboot;external;
-function get_datetime  : dword ;external;
+function  Mapa_Get(Mapa:pointer;Limite:dword):word;external name 'MAPA_GET';
+procedure Limpiar_Array(p_array:pointer;fin:word);external name 'LIMPIAR_ARRAY';
+procedure Reboot;external name 'REBOOT';
+function get_datetime  : dword ;external name 'GET_DATETIME';
 
 {$DEFINE cerrar := asm cli ; end;}
 {$DEFINE abrir := asm sti ; end ;}

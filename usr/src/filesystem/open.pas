@@ -293,12 +293,15 @@ set_errno := -ENODEV;
 if (Mayor < Nr_blk ) then
  begin
    if Blk_Dev [Mayor].fops = nil then goto _exit ;
-   dt.name := Blk_Dev[mayor].name ;
+   // TODO: replace string for pchar
+   pchar_copy (@dt.name[1],@Blk_Dev[mayor].name[1], dword(Blk_Dev[mayor].name[0]));
+   //dt.name := Blk_Dev[mayor].name ;
  end
   else if (Mayor > Nr_blk) and (Mayor < Nr_Chr) then
    begin
     if chr_Dev [mayor].fops = nil then goto _exit;
-    dt.name := chr_dev[mayor].name;
+    pchar_copy (@dt.name[1],@chr_dev[mayor].name[1], dword(chr_dev[mayor].name[0]));
+    //dt.name := chr_dev[mayor].name;
    end
     else goto _exit ;
 
@@ -409,7 +412,7 @@ if (tmp = nil) then
 
  end;
 
-{si existe bandera de truncar tu tama¤o a 0 !!!}
+{si existe bandera de truncar tu tamao a 0 !!!}
 if (flags and O_TRUNC) = O_TRUNC then tmp^.op^.truncate (tmp);
 
 set_errno := -EACCES ;
@@ -485,7 +488,7 @@ begin
 
 clear_errno;
 
-{se valida el tama¤o de la ruta}
+{se valida el tamao de la ruta}
 if validate_path (path) then else exit(-1);
 
 {es traido el nombre}
@@ -513,8 +516,8 @@ if tmp^.op^.rename (tmp^.i_dentry , @dt) = -1 then
   else
    begin
     {se actualiza el nombre en el cache!!}
-    tmp^.i_dentry^.name := dt.name ;
-
+    pchar_copy(@dt.name[1], @tmp^.i_dentry^.name[1], dword(dt.name[0]));
+    //tmp^.i_dentry^.name := dt.name ;
     put_dentry (tmp^.i_dentry);
     exit(0);
    end;

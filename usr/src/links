@@ -33,6 +33,7 @@ kernel/kernel.o
 kernel/kdev.o
 kernel/dma.o
 lib/fpclib/fpclib.o
+lib/fpclib/system.o
 lib/fpclib/strings.o
 memoria/mm.o
 memoria/malloc.o

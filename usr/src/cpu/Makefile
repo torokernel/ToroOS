@@ -15,7 +15,6 @@ cpu.o : cpu.pas
 	$(FPC) $(FPC_FLAGS) cpu.pas
 	$(AS) -o cpu.o cpu.s
 	$(RM) *.s
-	$(RM) *.bat
 	$(RM) *.ppu
 
 

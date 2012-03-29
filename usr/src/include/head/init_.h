@@ -1,4 +1,4 @@
-procedure Init_ ; external;
+procedure Init_ ; external name 'INIT_';
 
 
 {$DEFINE Init_Task :=

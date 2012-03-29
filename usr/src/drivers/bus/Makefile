@@ -13,7 +13,6 @@ pci.o : pci.pas
 	$(FPC) $(FPC_FLAGS) pci.pas
 	$(AS) -o pci.o pci.s
 	$(RM) *.s
-	$(RM) *.bat
 	$(RM) *.ppu
 
 

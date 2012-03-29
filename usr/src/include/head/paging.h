@@ -1,14 +1,14 @@
-function get_free_page:pointer;external;
-procedure free_page(Add_f:pointer);external;
-function get_phys_add(add_l,Pdt:pointer):pointer;external;
-function get_page_index(Add_l:pointer):Indice;external;
-function unload_page_table(add_l,add_dir:pointer):dword;external;
-function dup_page_table(add_tp:pointer):dword;external;
-function get_free_kpage:pointer;external;
-procedure paging_init;external;
-function free_reserve_page (add_f : pointer ) : dword;external;
-function reserve_page (add_f:pointer):dword;external;
-function get_dma_page : pointer ;external;
+function get_free_page:pointer;external name 'GET_FREE_PAGE';
+procedure free_page(Add_f:pointer);external name 'FREE_PAGE';
+function get_phys_add(add_l,Pdt:pointer):pointer;external name 'GET_PHYS_ADD';
+function get_page_index(Add_l:pointer):Indice;external name 'GET_PAGE_INDEX';
+function unload_page_table(add_l,add_dir:pointer):dword;external name 'UNLOAD_PAGE_TABLE';
+function dup_page_table(add_tp:pointer):dword;external name 'DUP_PAGE_TABLE';
+function get_free_kpage:pointer;external name 'GET_FREE_KPAGE';
+procedure paging_init;external name 'PAGING_INIT';
+function free_reserve_page (add_f : pointer ) : dword;external name 'FREE_RESERVE_PAGE';
+function reserve_page (add_f:pointer):dword;external name 'RESERVE_PAGE';
+function get_dma_page : pointer ;external name 'GET_DMA_PAGE';
 
 
 {$DEFINE mem_lock := lock (@mem_wait) ; }

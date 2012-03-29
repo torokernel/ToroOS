@@ -1,8 +1,8 @@
-function gdt_dame:word;external;
-procedure gdt_init;external;
-procedure gdt_quitar(Selector:word);external;
-function gdt_set_tss(tss:pointer):word;external;
-procedure init_tss(tss:p_tss_struc);external;
+function gdt_dame:word;external name 'GDT_DAME';
+procedure gdt_init;external name 'GDT_INIT';
+procedure gdt_quitar(Selector:word);external name 'GDT_QUITAR'; 
+function gdt_set_tss(tss:pointer):word;external name 'GDT_SET_TSS';
+procedure init_tss(tss:p_tss_struc);external name 'INIT_TSS';
 
 
 {$DEFINE gdt_lock := lock (@gdt_wait) }

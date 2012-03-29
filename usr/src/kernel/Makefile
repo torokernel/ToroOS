@@ -11,7 +11,6 @@ init.o : init.pas
 	$(FPC) $(FPC_FLAGS)  init.pas
 	$(AS) -o init.o init.s
 	$(RM) *.s
-	$(RM) *.bat
 	$(RM) *.ppu
 
 
@@ -19,7 +18,6 @@ syscall.o : syscall.pas
 	$(FPC) $(FPC_FLAGS) syscall.pas
 	$(AS) -o syscall.o syscall.s
 	$(RM) *.s
-	$(RM) *.bat
 	$(RM) *.ppu
 
 
@@ -27,7 +25,6 @@ printk.o : printk.pas
 	$(FPC) $(FPC_FLAGS) printk.pas
 	$(AS) -o printk.o printk.s
 	$(RM) *.s
-	$(RM) *.bat
 	$(RM) *.ppu
 
 
@@ -35,14 +32,12 @@ dma.o : dma.pas
 	$(FPC) $(FPC_FLAGS) dma.pas
 	$(AS) -o dma.o dma.s
 	$(RM) *.s
-	$(RM) *.bat
 	$(RM) *.ppu
 
 kdev.o : kdev.pas
 	$(FPC) $(FPC_FLAGS) kdev.pas
 	$(AS) -o kdev.o kdev.s
 	$(RM) *.s
-	$(RM) *.bat
 	$(RM) *.ppu
 
 	
@@ -59,7 +54,6 @@ kernel.o : kernel.pas
 	$(RM) kernel.tmq
 	$(RM) kernel.kkk
 	$(RM) *.s
-	$(RM) *.bat
 
 
 	

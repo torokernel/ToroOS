@@ -17,7 +17,6 @@ multiboot.o : multiboot.pas
 	$(FPC) $(FPC_FLAGS) multiboot.pas
 	$(AS) -o multiboot.o multiboot.s
 	$(RM) multiboot.s
-	$(RM) *.bat
 	$(RM) *.ppu
 
 

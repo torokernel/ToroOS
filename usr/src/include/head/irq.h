@@ -1,9 +1,9 @@
-procedure Habilitar_IRQ(Irq:byte);external;
-procedure DHabilitar_IRQ(Irq:byte);external;
-procedure FDI;external;
-procedure Habilitar_TodasIrq;external;
-procedure Dhabilitar_TodasIrq;external;
-procedure Iniciar_Relog;external;
-procedure Wait_Short_Irq(Irq:byte;Handler:pointer);external;
-procedure Wait_Long_Irq(Irq:byte);external;
-procedure Irq_Init;external;
+procedure Habilitar_IRQ(Irq:byte);external name 'HABILITAR_IRQ';
+procedure DHabilitar_IRQ(Irq:byte);external name 'DHABILITAR_IRQ';
+procedure FDI;external name 'FDI';
+procedure Habilitar_TodasIrq;external name 'HABILITAR_TODASIRQ';
+procedure Dhabilitar_TodasIrq;external name 'DHABILITAR_TODASIRQ';
+procedure Iniciar_Relog;external name 'INICIAR_RELOG';
+procedure Wait_Short_Irq(Irq:byte;Handler:pointer);external name 'WAIT_SHORT_IRQ';
+procedure Wait_Long_Irq(Irq:byte);external name 'WAIT_LONG_IRQ';
+procedure Irq_Init;external name 'IRQ_INIT';

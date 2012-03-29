@@ -42,14 +42,14 @@ IMPLEMENTATION
 
 
 procedure Move(const source;var dest;count:longint);[public , alias : '_SYSTEM$$_MOVE$$$$$$$$$LONGINT'];
-type
-  bytearray    = array [0..maxlongint] of byte;
+//type
+//  bytearray    = array [0..maxlongint] of byte;
 var
   i,size : longint;
 begin
-  Dec(count);
-  for i:=0 to count do
-         bytearray(dest)[i]:=bytearray(source)[i];
+//  Dec(count);
+//  for i:=0 to count do
+//         bytearray(dest)[i]:=bytearray(source)[i];
 end;
 
 
@@ -66,7 +66,7 @@ begin
   if s1l+s2l>255 then
     s1l:=255-s2l;
   move(pstring(s1)^[1],pstring(s2)^[s2l+1],s1l);
-  pstring(s2)^[0]:=chr(s1l+s2l);
+  //pstring(s2)^[0]:=chr(s1l+s2l);
 end;
 
 procedure Init_System;[public, alias : 'INIT$$SYSTEM'];
@@ -121,9 +121,9 @@ end;
 
 
 Procedure fillchar(var x;count:longint;value:byte);[public];
-type
-  longintarray = array [0..maxlongint] of longint;
-  bytearray    = array [0..maxlongint] of byte;
+//type
+//  longintarray = array [0..maxlongint] of longint;
+ // bytearray    = array [0..maxlongint] of byte;
 var
   i,v : longint;
 begin
@@ -131,10 +131,10 @@ begin
   v := 0;
   v:=(value shl 8) or (value and $FF);
   v:=(v shl 16) or (v and $ffff);
-  for i:=0 to (count div 4) -1 do
-    longintarray(x)[i]:=v;
-  for i:=(count div 4)*4 to count-1 do
-    bytearray(x)[i]:=value;
+ // for i:=0 to (count div 4) -1 do
+ //   longintarray(x)[i]:=v;
+ // for i:=(count div 4)*4 to count-1 do
+ //   bytearray(x)[i]:=value;
 end;
 
 
@@ -168,8 +168,8 @@ begin
   else if l<0 then
     l:=0;
   move(p^,s[1],l);
-  s[0]:=chr(l);
-  strchararray := s;
+//  s[0]:=chr(l);
+//  strchararray := s;
 end;
 
 
@@ -216,13 +216,13 @@ begin
   if p=nil then
     l:=0
   else
-    l:=strlen(p);
+//    l:=strlen(p);
   if l>255 then
     l:=255;
   if l>0 then
     move(p^,s[1],l);
-  s[0]:=chr(l);
-  strpas := s;
+  //s[0]:=chr(l);
+//  strpas := s;
 end;
 
 function strlen(p:pchar):longint;[public , alias :'_SYSTEM$$_STRLEN$PCHAR'];
@@ -288,7 +288,7 @@ end;
 
 
 
-
+{
 
 Function ValUnsignedInt(Const S: ShortString; var Code: ValSInt): ValUInt; [public, alias:'FPC_VAL_UINT_SHORTSTR'];
 var
@@ -321,7 +321,7 @@ begin
    end;
   code := 0;
 end;
-
+}
 
 
 end.

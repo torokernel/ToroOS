@@ -12,7 +12,6 @@ gdt.o : gdt.pas
 	$(FPC) $(FPC_FLAGS) gdt.pas
 	$(AS) -o gdt.o gdt.s
 	$(RM) *.s
-	$(RM) *.bat
 	$(RM) *.ppu
 
 

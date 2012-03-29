@@ -12,5 +12,4 @@ tty.o : tty.pas
 	$(FPC) $(FPC_FLAGS) tty.pas
 	$(AS) -o tty.o tty.s
 	$(RM) *.s
-	$(RM) *.bat
 	$(RM) *.ppu

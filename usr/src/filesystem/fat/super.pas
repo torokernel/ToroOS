@@ -145,7 +145,8 @@ for count := 19 to 32 do
 exit(true);
 end;
 
-
+const
+ FAT12ID : pchar = 'FAT12';
 
 { * Fat12fs_Read_Super :                                                *
   *                                                                     *
@@ -181,7 +182,7 @@ if bh = nil then goto _exit ;
 sb_fat^.pbpb := bh^.data ;
 
 {letras magicas , por ahora solo soporto Fat12}
-if (sb_fat^.pbpb^.bs_filsystype <> 'FAT12   ') then goto _exit ;
+if not(chararraycmp(@sb_fat^.pbpb^.bs_filsystype[1],FAT12ID,5)) then goto _exit ;
 
 sb^.driver_space := sb_fat ;
 
@@ -241,7 +242,7 @@ put_block(bh);
 blk += 1;
 
 {el siguiente offset se encuentra en otro bloque de la fat??}
-if (blk div 512)  = ((blk -1 ) div 512) then  exit ;
+if dword((blk div 512))  = dword(((blk -1 ) div 512)) then  exit ;
 
 tmp += sb^.blocksize;
 

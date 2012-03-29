@@ -23,10 +23,10 @@ INTERFACE
 {$I ../include/head/printk_.h}
 {$I ../include/toro/cpu.inc}
 
-var  p_cpu : struc_cpu ;
-
+var  p_cpu : struc_cpu;
 
 implementation
+
 
 
 { * Cpu_Id :                                                            *

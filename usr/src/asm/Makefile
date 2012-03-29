@@ -11,7 +11,6 @@ asmb.o : asmb.pas
 	$(FPC) $(FPC_FLAGS) asmb.pas
 	$(AS) -o asmb.o asmb.s
 	$(RM) *.s
-	$(RM) *.bat
 	$(RM) *.ppu
 
 

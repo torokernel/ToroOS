@@ -61,9 +61,10 @@ var dentry_root : p_dentry ;
 implementation
 
 
+{$I ../include/head/string.h}
+
 {$I ../include/head/list.h}
 {$I ../include/head/lock.h}
-
 
 procedure Init_dentry (dt : p_dentry);
 begin
@@ -116,7 +117,8 @@ tmp := dt^.down_tree;
 if tmp = nil then exit(nil);
 
 repeat
-if (name = tmp^.name)Then exit(tmp);
+if dword(name[0]) <> dword(tmp^.name[0]) then exit(nil);
+if chararraycmp(@name[1], @tmp^.name[1],dword(tmp^.name[0])) Then exit(tmp);
 tmp := tmp^.next_dentry;
 until (tmp = dt^.down_tree) ;
 
@@ -163,7 +165,7 @@ if Max_dentrys = 0 then
 
  init_dentry (tmp);
 
- memcopy (@name[0],@tmp^.name[0],256);
+ memcopy (@name[0],@tmp^.name[0],dword(name[0]));
  tmp^.len := byte(tmp^.name[0]);
  tmp^.name[0] := char(tmp^.len);
 
@@ -190,6 +192,11 @@ if Max_dentrys = 0 then
   ***********************************************************************
 }
 
+
+const 
+	DIR :  pchar = '.';
+	DIR_PREV  : pchar = '..';
+
 function Alloc_Entry ( ino_p : p_inode_t ; const name : string ) : p_dentry ;[public , alias :'ALLOC_ENTRY'];
 var tmp :p_dentry ;
 label _1 ;
@@ -198,12 +205,12 @@ begin
 Inode_Lock (@ino_p^.wait_on_inode);
 
 {entradas estandart}
-if name = '.' then
+if chararraycmp(@name[1],@DIR[1],1) then
  begin
  tmp := ino_p^.i_dentry ;
  goto _1;
  end
-  else if name = '..' then
+  else if chararraycmp(@name[1],@DIR_PREV[1],2) then
    begin
     tmp := ino_p^.i_dentry^.parent ;
     goto _1 ;

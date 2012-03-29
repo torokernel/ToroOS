@@ -368,19 +368,19 @@ end;
 function fat_name ( const name : string ; destino : pointer ) : dword ; [public , alias :'FAT_NAME'];
 var ret ,cont:dword ;
     p : pchar ;
-    pname : string ;
+  //  pname : string ;
 label _exit , _name_long ;
 begin
 
 p := destino  ;
-pname := name  ;
+//pname := name  ;
 
 
-for ret := 1 to (byte(pname[0])) do
+for ret := 1 to (dword(name[0])) do
  begin
-  if (pname[ret] = '.')  then goto _exit
-   else if pname[ret] = #32 then exit(-1);
-  p[ret-1] := strupper (@pname[ret])^;
+  if (dword(name[ret]) = 46)  then goto _exit
+   else if dword(name[ret]) = 32 then exit(-1);
+  p[ret-1] := strupper (@name[ret])^;
  end;
 
 
@@ -393,11 +393,11 @@ cont := 8 ;
 
 
 {se deven poner los caracteres de extension}
-   while (ret <= byte(pname[0])) and (cont <= 11) do
+   while (ret <= byte(name[0])) and (cont <= 11) do
     begin
-     if pname[ret] = #32 then exit(-1);
+     if dword(name[ret]) = 32 then exit(-1);
 
-     p[cont] := strupper (@pname[ret])^;
+     p[cont] := strupper (@name[ret])^;
      ret += 1;
      cont += 1;
     end;

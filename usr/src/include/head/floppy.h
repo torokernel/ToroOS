@@ -1,1 +1,1 @@
-procedure fd_init;external;
+procedure fd_init;external name 'FD_INIT';

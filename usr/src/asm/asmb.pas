@@ -117,9 +117,9 @@ bts dword [esi] , edx
 end;
 
 
-procedure Panic(error:string);[public, alias :'PANIC'];
+procedure Panic(error:pchar);[public, alias :'PANIC'];
 begin
-printk(@error,[],[]);
+//printk(@error,[],[]);
 debug(-1);
 end;
 
