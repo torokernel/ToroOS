@@ -485,20 +485,39 @@ end;
 
 procedure unicode_to_unix ( longname : pvfatdirectory_entry ; var destino : string) ; [public , alias : 'UNICODE_TO_UNIX'];
 var count : dword ;
+    i: dword;
 begin
+
+i := 1;
 
 { se lee la primera parte del nombre }
 for count := 0 to 4 do
- if longname^.name1[(count*2)+1] = #0 then exit else destino += longname^.name1[(count*2)+1] ;
+ if longname^.name1[(count*2)+1] = #0 then exit 
+ else 
+ begin
+ 	destino[i] := longname^.name1[(count*2)+1] ;
+        i+=1;
+ end;
 
 { se lee la segunda parte del nombre }
 for count := 0 to 5 do
-  if longname^.name2[(count*2)+1] = #0 then exit else destino += longname^.name2[(count*2)+1] ;
+  if longname^.name2[(count*2)+1] = #0 then exit 
+  else 
+  begin
+	destino[i] := longname^.name2[(count*2)+1] ;
+	i+=1;
+  end;
 
 { se lee la tercera parte }
 for count := 0 to 1 do
-  if longname^.name3[(count*2)+1] = #0 then exit else destino += longname^.name3[(count*2)+1] ;
+  if longname^.name3[(count*2)+1] = #0 then exit 
+  else 
+  begin
+  	destino[i] :=  longname^.name3[(count*2)+1] ;
+        i+=1;
+  end;
 
+destino[0] := char(i-1);
 end;
 
 
@@ -525,7 +544,7 @@ _ext :
 
  if fatname[8] = #32 then goto _exit;
 
- tmp[count] := '.' ;
+ tmp[count] := #46 ;
  count += 1;
 
  for ret := 8 to 11 do
@@ -538,7 +557,7 @@ _ext :
 
 _exit :
 
- destino := tmp ;
+ memcopy(@tmp,@destino[1],count); //destino := tmp ;
  destino[0] := chr(count);
 
 end;

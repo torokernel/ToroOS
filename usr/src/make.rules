@@ -6,7 +6,7 @@
 
 
 
-DIR_WORK = /auto/sop-nas2a/u/sop-nas2a/vol/home_aoste/mvaralar/fpc-2.6.0/bin
+DIR_WORK = /home/z0rr0/fpc-2.6.0/bin
 
 #atencion!!! este ld no es el que se encuentra dentro de FPC sino el que viene con las
 #distribuciones de Linux con soporte para elf32-i386 targets
@@ -17,7 +17,7 @@ FPC = $(DIR_WORK)/ppc386
 
 AS =$(DIR_WORK)/as-i386
 
-NASM=/auto/sop-nas2a/u/sop-nas2a/vol/home_aoste/mvaralar/Download/nasm-0.98.39/nasm
+NASM=/home/z0rr0/Downloads/nasm-0.98.39/nasm
 
 GREP=grep
 

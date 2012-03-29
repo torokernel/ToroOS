@@ -20,4 +20,4 @@ toro-kernel :
 	make -C drivers/char
 	make -C drivers/block
 	make -C lib/fpclib
-	$(LD) -s -o ..\..\boot\toro-1.1.3 @links -T linkfile.txt
+	$(LD) -m elf_i386 -s -o ../../boot/toro-1.1.3 @links -T linkfile.txt

@@ -144,7 +144,8 @@ type
   PDate               = ^TDateTime;
   PError              = ^Error;
 
-
+var 
+	 fpc_threadvar: pointer; public name 'THREADVARLIST_SI_PRC';
 implementation 
 
 

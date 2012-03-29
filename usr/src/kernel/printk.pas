@@ -117,11 +117,12 @@ ult_linea := VIDEO_OFF + 160 * 24;
 end;
 
 
-procedure print_string (str : string ) ;inline;
-var ret : dword ;
-begin
-for ret := 1 to byte(str[0]) do putc (str[ret]);
-end;
+//procedure print_string (str : string );
+//var ret, len : dword ;
+//begin
+//len := dword(str[0]);
+//for ret := 1 to len do putc (str[ret]);
+//end;
 
 
 
@@ -137,7 +138,7 @@ end;
   ***********************************************************************
 }
 procedure printk(Cadena:pchar ; Args , Kargs: array of const);[public , alias : 'PRINTK'];
-var arg,argk,cont,val : dword;
+var arg,argk,cont,val,i : dword;
 label volver;
 begin
 
@@ -177,7 +178,9 @@ while (cadena^ <> #0) do
       goto volver;
      end;
   'p':begin
-      print_string (args[arg].vstring^);
+      //for i := 1 to byte(args[arg].vstring^[0]) do 
+	//putc (args[arg].vstring^[i]);
+      //print_string (args[arg].vstring^);
       goto volver;
       end;
   '%':begin
