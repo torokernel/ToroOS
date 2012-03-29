@@ -124,7 +124,7 @@ end;
 
 { * fd_on_motor : prende el motor de la unidad dada * }
 
-procedure fd_on_motor(Unidad:byte);inline;
+procedure fd_on_motor(Unidad:dword);inline;
 begin
 enviar_byte((1 shl (unidad+4)) or ENABLED_INT  or UNIDAD,PORT_MOTOR);
 end;
@@ -132,7 +132,7 @@ end;
 
 { * fd_off_motor : apaga el motor de la unidad dada * }
 
-procedure fd_off_motor(Unidad:byte);
+procedure fd_off_motor(Unidad:dword);
 begin
 enviar_byte( ENABLED_INT  or UNIDAD ,PORT_MOTOR);
 fd_state_motor[unidad] := false ;
