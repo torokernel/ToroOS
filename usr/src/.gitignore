@@ -1,5 +1,7 @@
+make.rules
 *.s
 *.o
 *.ppu
 ../../boot/toro-1.1.3
 ppas*.sh
+
