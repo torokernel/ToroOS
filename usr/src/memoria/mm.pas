@@ -56,8 +56,8 @@ procedure mm_init;[Public , alias : 'MM_INIT'];
 begin
 mm_total_fisica;
 mm_memfree := mm_totalmem - mem_ini;
-printk('/nMemoria fisica total ... /V%d\n',[MM_TotalMem],[]);
-printk('/nMemoria fisica libre ... /V%d\n',[MM_MEMFREE],[]);
+printk('/nMemoria fisica total ... /V%d\n',[MM_TotalMem]);
+printk('/nMemoria fisica libre ... /V%d\n',[MM_MEMFREE]);
 Paging_Init;
 end;
 

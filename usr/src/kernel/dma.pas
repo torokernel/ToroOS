@@ -146,7 +146,7 @@ begin
 
  if buffer > pointer (dma_memory)  then
   begin
-   printk('/Vdma/n : Buffer invalido\n',[],[]);
+   printk('/Vdma/n : Buffer invalido\n',[]);
    exit(-1);
   end;
 
@@ -211,7 +211,7 @@ for ret := 0 to 7 do
    dma_wait[ret].lock_wait := nil;
   end;
 
-printk('/nIniciando dma ... /VOk \n',[],[]);
+printk('/nIniciando dma ... /VOk \n',[]);
 end;
 
 end.

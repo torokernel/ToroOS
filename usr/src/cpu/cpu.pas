@@ -106,10 +106,10 @@ end;
 procedure cpu_init;[public,alias :'CPU_INIT'];
 begin
 Cpu_Id;
-printk('/nProcesador ... ',[],[]);
+printk('/nProcesador ... ',[]);
 
-if p_cpu.marca = amd then printk('/Vamd\n',[],[])
-else  printk('/Vintel\n',[],[]);
+if p_cpu.marca = amd then printk('/Vamd\n',[])
+else  printk('/Vintel\n',[]);
 end;
 
 

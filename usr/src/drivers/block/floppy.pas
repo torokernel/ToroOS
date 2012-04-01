@@ -535,20 +535,20 @@ disk := 0;
 
 If a=4 then
  begin
- printk('/nIniciando fd0 ... /VOk\n',[],[]);
+ printk('/nIniciando fd0 ... /VOk\n',[]);
  disk += 1;
  fls[0] := true;
  end
- else printk('/nIniciando fd0 ... /Rfault\n',[],[]);
+ else printk('/nIniciando fd0 ... /Rfault\n',[]);
 
 
 If b=4 then
  begin
- printk('/nIniciando fd1 ... /VOk\n',[],[]);
+ printk('/nIniciando fd1 ... /VOk\n',[]);
  disk += 1 ;
  fls[1] := true;
  end
- else printk('/nIniciando fd1 ... /Rfault\n',[],[]);
+ else printk('/nIniciando fd1 ... /Rfault\n',[]);
 
  { unica pagina utilizada como buffer }
  pgbuffer := get_dma_page ;

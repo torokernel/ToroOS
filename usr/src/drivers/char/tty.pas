@@ -578,7 +578,6 @@ end;
 end;
 
 end;
-
 end;
 
 
@@ -678,7 +677,7 @@ end;
 }
 procedure tty_init;[public , alias :'TTY_INIT'];
 begin
-printk('/nIniciando tty0 ... /VOk\n',[],[]);
+printk('/nIniciando tty0 ... /VOk\n',[]);
 
 tty_ops.write := @tty_write ;
 tty_ops.read :=  nil ;
@@ -697,7 +696,7 @@ tty_dev.color := $7;
 
 { se pasa al registro del teclado !! }
 
-printk('/nIniciando keyb0 ... /VOk\n',[],[]);
+printk('/nIniciando keyb0 ... /VOk\n',[]);
 
 keyb_ops.seek := nil ;
 keyb_ops.open := @keyb_open;

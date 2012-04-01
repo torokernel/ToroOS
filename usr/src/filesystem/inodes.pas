@@ -151,7 +151,7 @@ tmp := Inodes_Lru^.ino_prev;
 
 {por si esta sucio , esto es un grave error}
 if Inode_Update (tmp) <> 0 then
-    printk('/VVFS/n : Error de escritura del Inodo : %d dev : %d \n',[tmp^.ino,tmp^.mayor,tmp^.menor],[]);
+    printk('/VVFS/n : Error de escritura del Inodo : %d dev : %d \n',[tmp^.ino,tmp^.mayor,tmp^.menor]);
 
 {fue quitado de la cola de sucios}
 remove_ino_dirty (tmp);
@@ -317,7 +317,7 @@ tmp^.count := 1 ;
 
 if Inode_Uptodate (tmp) = -1 then
  begin
-  printk('/VVFS/n : Error de lectura de Inodo : %d Dev %d %d \n',[tmp^.ino,tmp^.mayor,tmp^.menor],[]);
+  printk('/VVFS/n : Error de lectura de Inodo : %d Dev %d %d \n',[tmp^.ino,tmp^.mayor,tmp^.menor]);
   Push_Inode (Inodes_Free,tmp);
  exit(nil);
  end;
@@ -407,7 +407,7 @@ tmp := inodes_dirty ;
 
 while (tmp <> nil) do
  begin
- if Inode_Update (tmp) = -1 then printk('/VVFS/n : Error de escritura de inodo\n',[],[]);
+ if Inode_Update (tmp) = -1 then printk('/VVFS/n : Error de escritura de inodo\n',[]);
  tmp := tmp^.ino_dirty_next ;
 end;
 

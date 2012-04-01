@@ -311,7 +311,7 @@ tmp := alloc_buffer (size);
 
 if tmp = nil then
  begin
- printk('/Vvfs/n : No hay mas buffer-heads libres\n',[],[]);
+ printk('/Vvfs/n : No hay mas buffer-heads libres\n',[]);
  exit(nil);
  end;
 
@@ -326,7 +326,7 @@ Init_Bh (tmp,mayor,menor,bloque);
   else
    begin
      {hubo un error se devuelve el buffer}
-     printk('/Vvfs/n : Error de Lectura : block %d dev %d %d \n',[tmp^.bloque,tmp^.mayor,tmp^.menor],[]);
+     printk('/Vvfs/n : Error de Lectura : block %d dev %d %d \n',[tmp^.bloque,tmp^.mayor,tmp^.menor]);
      free_buffer (tmp);
      Max_Buffers += 1;
      exit(nil);
@@ -415,7 +415,7 @@ tmp := Buffer_Dirty ;
 
 while (tmp <> nil) do
  begin
- if Buffer_Update (tmp) = -1 then printk('/Vvfs/n : Error de escritura : block %d dev %d %d\n',[tmp^.bloque,tmp^.mayor,tmp^.menor],[]);
+ if Buffer_Update (tmp) = -1 then printk('/Vvfs/n : Error de escritura : block %d dev %d %d\n',[tmp^.bloque,tmp^.mayor,tmp^.menor]);
  tmp := tmp^.next_bh_dirty ;
 end;
 
@@ -482,8 +482,8 @@ Max_Buffers := ((Buffer_Use_Mem * MM_MemFree ) div 100) div sizeof(buffer_head);
 Max_dentrys := Max_Buffers ;
 Max_Inodes := Max_dentrys ;
 
-printk('/Vvfs/n ... Buffer - Cache /V%d /nBufferes\n',[Max_Buffers],[]);
-printk('/Vvfs/n ... Inode  - Cache /V%d /nBufferes\n',[Max_Buffers],[]);
+printk('/Vvfs/n ... Buffer - Cache /V%d /nBufferes\n',[Max_Buffers]);
+printk('/Vvfs/n ... Inode  - Cache /V%d /nBufferes\n',[Max_Buffers]);
 
 end;
 

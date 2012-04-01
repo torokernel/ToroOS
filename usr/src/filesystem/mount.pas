@@ -122,7 +122,7 @@ tmp^.i_dentry^.l_count += 1;
 tmp^.i_dentry^.down_mount_tree := spbmount^.pino_root^.i_dentry ;
 
 {$ifdef debug}
- printk('/VVFS/n : Sistema %p montado con exito\n',[sname],[]);
+ //printk('/VVFS/n : Sistema %p montado con exito\n',[sname],[]);
 {$endif}
 
 exit(0);
@@ -130,7 +130,7 @@ exit(0);
 _exit :
 
  {$ifdef debug}
-  printk('/VVFS/n : Sistema %p no pudo ser montado\n',[sname],[]);
+//  printk('/VVFS/n : Sistema %p no pudo ser montado\n',[sname],[]);
  {$endif}
 
  put_dentry (tmp^.i_dentry);
@@ -153,7 +153,7 @@ end;
 
 function sys_unmount(path:pchar):dword;cdecl;[public , alias :'SYS_UNMOUNT'];
 begin
-printk('/Vvfs/n : Unmount funcion no implementada \n',[],[]);
+printk('/Vvfs/n : Unmount funcion no implementada \n',[]);
 exit(-1);
 end;
 
@@ -199,7 +199,7 @@ i_root^.i_dentry^.count += 1;
 Tarea_Actual^.cwd := i_root ;
 
 
-printk('/Vvfs/n ... root montada\n',[],[]);
+printk('/Vvfs/n ... root montada\n',[]);
 
 { bienvenida al usuario }
 toro_msg;
@@ -208,7 +208,7 @@ exit;
 
 _exit :
 
-printk('/Vvfs/n : No se ha podido montar la unidad root\n',[],[]);
+printk('/Vvfs/n : No se ha podido montar la unidad root\n',[]);
 debug($1987);
 
 end;

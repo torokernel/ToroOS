@@ -226,7 +226,7 @@ end;
   *                                                                      *
   * Size : Tamano en que aumentara el segmento de datos                  *
   *                                                                      *
-  * Esta funcion aumenta de acuerdo size el tama¤o del segmento de datos *
+  * Esta funcion aumenta de acuerdo size el tamano del segmento de datos *
   * que es el area vmm text_area . Se mantienen las especificaciones de  *
   * de la llamadas al sistema brk() de Unix , en que el deve haber un    *
   * espacio de 16kb entre STACK_AREA y el fin de text_area               *
@@ -256,7 +256,7 @@ oldpos := Tarea_Actual^.text_area.add_l_fin;
 {Se protege el recurso memoria}
 Mem_Lock;
 
-If vmm_alloc(Tarea_Actual,@Tarea_Actual^.text_area,size)=0 then printk('/nSys_Brk : Ok\n',[],[])
+If vmm_alloc(Tarea_Actual,@Tarea_Actual^.text_area,size)=0 then printk('/nSys_Brk : Ok\n',[])
 else
  begin
  Mem_Unlock;

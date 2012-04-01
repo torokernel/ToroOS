@@ -277,6 +277,7 @@ If Bit_Test(@Irq_Flags,Irq) then exit
 set_int_gate(Irq + 32 , Handler);
 Habilitar_Irq(irq);
 
+
 end;
 
 

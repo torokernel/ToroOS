@@ -90,7 +90,7 @@ kdev_ops.open := nil;
 kdev_ops.ioctl := @kdev_ioctl ;
 
 register_chrdev (kdev_mayor,'kdev',@kdev_ops);
-printk('/nIniciando kdev0 ... /VOk\n',[],[]);
+printk('/nIniciando kdev0 ... /VOk\n',[]);
 end;
 
 end.

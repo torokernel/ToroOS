@@ -66,12 +66,25 @@ begin
   if s1l+s2l>255 then
     s1l:=255-s2l;
   move(pstring(s1)^[1],pstring(s2)^[s2l+1],s1l);
-  //pstring(s2)^[0]:=chr(s1l+s2l);
+  pstring(s2)^[0]:=char(s1l+s2l);
 end;
 
-procedure Init_System;[public, alias : 'INIT$$SYSTEM'];
+procedure Init_System;[public, alias : 'INIT$_SYSTEM'];
 begin
 end;
+
+
+
+procedure Finalize_Objpas;[public, alias : 'FINALIZE$_OBJPAS'];
+begin
+end;
+
+
+procedure Threadvarlist_Objpas;[public, alias : 'THREADVARLIST_OBJPAS'];
+begin
+end;
+
+
 
 {***********************************************************************************
  * int_strcopy
@@ -119,11 +132,13 @@ begin
 end;
 
 
+const 
+ maxlongint = 2048;
 
 Procedure fillchar(var x;count:longint;value:byte);[public];
-//type
-//  longintarray = array [0..maxlongint] of longint;
- // bytearray    = array [0..maxlongint] of byte;
+type
+  longintarray = array [0..maxlongint] of longint;
+  bytearray    = array [0..maxlongint] of byte;
 var
   i,v : longint;
 begin
@@ -131,10 +146,10 @@ begin
   v := 0;
   v:=(value shl 8) or (value and $FF);
   v:=(v shl 16) or (v and $ffff);
- // for i:=0 to (count div 4) -1 do
- //   longintarray(x)[i]:=v;
- // for i:=(count div 4)*4 to count-1 do
- //   bytearray(x)[i]:=value;
+  for i:=0 to (count div 4) -1 do
+    longintarray(x)[i]:=v;
+  for i:=(count div 4)*4 to count-1 do
+    bytearray(x)[i]:=value;
 end;
 
 
@@ -158,7 +173,7 @@ asm
 @Fin:
 end;
 
-
+{
 function strchararray(p:pchar; l : longint):shortstring;[public,alias:'FPC_CHARARRAY_TO_SHORTSTR'];
 var
  s: shortstring;
@@ -168,11 +183,12 @@ begin
   else if l<0 then
     l:=0;
   move(p^,s[1],l);
-//  s[0]:=chr(l);
-//  strchararray := s;
+  s[0]:=char(l);
+  
+  strchararray := s;
 end;
 
-
+}
 
 
 
@@ -208,6 +224,15 @@ begin
 end;
 
 
+function strlen(p:pchar):longint;[public , alias :'_SYSTEM$$_STRLEN$PCHAR'];
+var i : longint;
+begin
+  i:=0;
+  while p[i]<>#0 do inc(i);
+  exit(i);
+end;
+
+{
 function strpas(p:pchar):shortstring;[public,alias:'FPC_PCHAR_TO_SHORTSTR'];
 var
   l : longint;
@@ -216,22 +241,16 @@ begin
   if p=nil then
     l:=0
   else
-//    l:=strlen(p);
+    l:=strlen(p);
   if l>255 then
     l:=255;
   if l>0 then
     move(p^,s[1],l);
-  //s[0]:=chr(l);
-//  strpas := s;
+  s[0]:=char(l);
+  strpas := s;
 end;
 
-function strlen(p:pchar):longint;[public , alias :'_SYSTEM$$_STRLEN$PCHAR'];
-var i : longint;
-begin
-  i:=0;
-  while p[i]<>#0 do inc(i);
-  exit(i);
-end;
+}
 
 
 function strcomp(str1,str2:pchar):boolean;[public , alias :'STRCOMP'];

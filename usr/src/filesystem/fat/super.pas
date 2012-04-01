@@ -124,7 +124,7 @@ sb_fat^.pfat := @fat;
 exit(true);
 
 _exit :
-printk('/Vfat12fs/n : Error al Cargar FAT12\n',[],[]);
+printk('/Vfat12fs/n : Error al Cargar FAT12\n',[]);
 exit(false);
 end;
 
@@ -166,7 +166,7 @@ begin
 
 if mounted then
  begin
-  printk('/Vfatfs/n : Solo se puede montar una unidad \n',[],[]);
+  printk('/Vfatfs/n : Solo se puede montar una unidad \n',[]);
   exit(nil)
  end;
 
@@ -206,7 +206,7 @@ exit(sb);
 
 _exit :
  remove_super_fat (sb_fat);
- printk('/VVFS/n : Error de lectura de Super FAT12\n',[],[]);
+ printk('/VVFS/n : Error de lectura de Super FAT12\n',[]);
  exit(nil);
 end;
 
@@ -293,7 +293,7 @@ fat_file_op.ioctl := nil ;
 
 register_filesystem (@fat_fstype);
 
-printk('/Vvfs/n ... registrando /Vfat\n',[],[]);
+printk('/Vvfs/n ... registrando /Vfat\n',[]);
 end;
 
 

@@ -28,6 +28,7 @@ interface
 procedure print_dec_dword (nb : dword);
 procedure print_pchar(c:pchar);
 procedure print_dword(nb : dword);
+procedure PrintDecimal(Value: dword);
 procedure DumpTask(Pid:dword);
 procedure Limpiar_P;
 
@@ -80,7 +81,7 @@ begin
 y := 24;
 if x > 79 then x:=0;
 
-consola := pointer(pointer(VIDEO_OFF)  + (80*2) * y + (x *2) );
+consola := pointer(VIDEO_OFF + (80*2) * y + (x *2) );
 consola^.form:= color;
 consola^.car := Car;
 
@@ -137,7 +138,7 @@ end;
   *                                                                     *
   ***********************************************************************
 }
-procedure printk(Cadena:pchar ; Args , Kargs: array of const);[public , alias : 'PRINTK'];
+procedure printk(Cadena:pchar ; const Args: array of dword);[public , alias : 'PRINTK'];
 var arg,argk,cont,val,i : dword;
 label volver;
 begin
@@ -160,21 +161,22 @@ while (cadena^ <> #0) do
 
  Case cadena^ of
  'h': begin
-      val := args[arg].vinteger ;
+      val := args[arg] ;
       print_dword(val);
       goto volver;
       end;
  'd': begin
-      val := args[arg].vinteger;
+      val := args[arg];
       print_dec_dword(val);
+      //PrintDecimal(val);
       goto volver;
       end;
  's': begin
-      print_pchar (args[arg].vpchar);
+      print_pchar (pchar(args[arg]));
       goto volver
      end;
   'e':begin
-      putc(Args[arg].vchar);
+      putc(char(Args[arg]));
       goto volver;
      end;
   'p':begin
@@ -268,7 +270,7 @@ end;
 end;
 
 
-{Caracteres de Argumentos al kernel}
+{Caracteres de Argumentos al kernel
 If (cadena^ = '$') and (High(kArgs) <> -1) and (High(kArgs) >= argk) then
   begin
   cadena += 1;
@@ -277,7 +279,7 @@ If (cadena^ = '$') and (High(kArgs) <> -1) and (High(kArgs) >= argk) then
 
   case cadena^ of
   'd':begin
-      DumpTask(kargs[argk].vinteger);
+      DumpTask(kargs[argk]);
       arg += 1
       end;
   else
@@ -290,7 +292,7 @@ If (cadena^ = '$') and (High(kArgs) <> -1) and (High(kArgs) >= argk) then
   cadena += 1;
   continue;
 end;
-
+}
 
 putc(cadena^);
 cadena += 1;
@@ -303,13 +305,14 @@ end;
 procedure print_dec_dword (nb : dword);
 
 var
-   i, compt : byte;
+   compt: dword;
    dec_str  : string[10];
-
+   k,i: dword;
 begin
 
    compt := 0;
    i     := 10;
+   k := 0;
 
    if (nb and $80000000) = $80000000 then
       begin
@@ -331,7 +334,7 @@ begin
 
          while (nb <> 0) do
             begin
-               dec_str[i]:=chr((nb mod 10) + $30);
+               dec_str[i]:=char((nb mod 10) + $30);
                nb    := nb div 10;
                i     := i-1;
                compt := compt + 1;
@@ -339,7 +342,8 @@ begin
 
          if (compt <> 10) then
             begin
-               dec_str[0] := chr(compt);
+               k := compt;
+               dec_str[0] := char(compt);
                for i:=1 to compt do
 	          begin
                dec_str[i] := dec_str[11-compt];
@@ -348,15 +352,61 @@ begin
             end
          else
             begin
-               dec_str[0] := chr(10);
+	       k := 10;
+               dec_str[0] := #10;
             end;
-
-         for i:=1 to ord(dec_str[0]) do
-            begin
+         
+         i:=1;
+	 while k <> 0 do
+         begin
+         //for i:=1 to k do
+         //   begin
                putc(dec_str[i]);
+	       k -=1;
+	       i +=1;
             end;
       end;
 end;
+
+// Print in decimal form
+procedure PrintDecimal(Value: dword);
+var
+  I, Len: Byte;
+  S: string[10];
+begin
+  Len := 0;
+  I := 10;
+  if Value = 0 then
+  begin
+    putc('0');
+  end else
+  begin
+    while Value <> 0 do
+    begin
+      S[I] := Char((Value mod 10) + $30);
+    Value := Value div 10;
+   I := I-1;
+   Len := Len+1;
+  end;
+  if (Len <> 10) then
+  begin
+   S[0] := Char(Len);
+   for I := 1 to Len do
+   begin
+    S[I] := S[11-Len];
+    Len := Len-1;
+   end;
+   end else
+   begin
+    S[0] := Char(10);
+   end;
+   for I := 1 to byte(S[0]) do
+   begin
+    putc(char(S[I]));
+   end;
+  end;
+end;
+
 
 
 
@@ -433,16 +483,16 @@ end;
 
 If tmp = nil then exit ;
 
-printk('\n/nVolcado de Registros de la Tarea : /V%d \n',[tmp^.pid],[]);
+printk('\n/nVolcado de Registros de la Tarea : /V%d \n',[tmp^.pid]);
 
 printk('/neax : /v%h /nebx : /v%h /necx : /v%h /nedx : /v%h \n',
-[tmp^.reg.eax , tmp^.reg.ebx , tmp^.reg.ecx , tmp^.reg.edx],[]);
+[dword(tmp^.reg.eax) , dword(tmp^.reg.ebx) , dword(tmp^.reg.ecx) , dword(tmp^.reg.edx)]);
 
 printk('/nesp : /v%h /nebp : /v%h /nesi : /v%h /nedi : /v%h \n',
-[tmp^.reg.esp,tmp^.reg.ebp,tmp^.reg.esi,tmp^.reg.edx],[]);
+[dword(tmp^.reg.esp),dword(tmp^.reg.ebp),dword(tmp^.reg.esi),dword(tmp^.reg.edx)]);
 
 printk('/nflg : /v%h /neip : /v%h /ncr3 : /v%h /ncr2 : /v%h \n',
-[tmp^.reg.eflags,tmp^.reg.eip,tmp^.reg.cr3,page_fault],[]);
+[dword(tmp^.reg.eflags),dword(tmp^.reg.eip),dword(tmp^.reg.cr3),dword(page_fault)]);
 
 abrir;
 end;

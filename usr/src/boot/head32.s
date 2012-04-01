@@ -40,7 +40,6 @@ KERNEL_STACKSIZE		equ	0x4000
 
    _inicio: 
 
-
     mov esp , KERNEL_STACK+KERNEL_STACKSIZE
     mov ebp , KERNEL_STACK+KERNEL_STACKSIZE
 

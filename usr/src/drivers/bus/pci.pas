@@ -63,7 +63,7 @@ while not (found) or (base < pointer($100000)) do
  If base^.magic = $5F32335F then
   begin
    found:=true;
-   printk('/nIniciando pcibus ... /VOk\n',[],[]);
+   printk('/nIniciando pcibus ... /VOk\n',[]);
    check_pci_devices;
    exit;
   end;
@@ -71,7 +71,7 @@ while not (found) or (base < pointer($100000)) do
 base += 1;
 end;
 
-printk('/nIniciando pcibus ... /Rfault\n',[],[]);
+printk('/nIniciando pcibus ... /Rfault\n',[]);
 end;
 
 

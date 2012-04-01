@@ -108,7 +108,7 @@ end;
 Procedure int_ignore;interrupt;
 begin
 LoadKernelData;
-printk('/Virq/n : Irq igonarada\n',[],[]);
+printk('/Virq/n : Irq igonarada\n',[]);
 end;
 
 
@@ -145,7 +145,7 @@ end;
 {Se inicializan las excepciones}
 Excep_init;
 Irq_Init;
-printk('/nIniciando Irqs ... /VOk\n',[],[]);
+printk('/nIniciando Irqs ... /VOk\n',[]);
 end;
 
 end.

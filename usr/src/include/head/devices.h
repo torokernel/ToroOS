@@ -1,5 +1,5 @@
 
-procedure Devices_Init;external;
+procedure Devices_Init;external name 'DEVICES_INIT';
 procedure Register_Chrdev(nb : byte ; name : pchar ; fops : p_file_ops);external name 'REGISTER_CHRDEV';
 procedure Register_Blkdev (nb : byte ; name : pchar ; fops : p_file_ops);external name 'REGISTER_BLKDEV';
 function Register_Filesystem (fs : p_file_system_type) : dword ;external name 'REGISTER_FILESYSTEM';

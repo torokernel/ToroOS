@@ -73,13 +73,13 @@ var Init_proc , Null : p_tarea_struc;
     r : dword ;
 
 begin
-
 cerrar;
-printk('/nCargando Sistema TORO... \n',[],[]);
+printk('/nCargando Sistema TORO... \n',[]);
 
 {Son cargados todos los modulos del sistema}
 Gdt_Init;
 Mm_Init;
+
 
 Idt_Init;
 Cpu_Init;
@@ -91,11 +91,12 @@ Syscall_Init;
 {Son inicializados los drivers}
 dma_init;
 Fd_Init;
-
 tty_Init;
+while true do;
 kdev_Init;
 
 Buffer_Init;
+
 fatfs_init;
 
 Init_Task;

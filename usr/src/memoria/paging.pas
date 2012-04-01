@@ -584,15 +584,15 @@ mem_map:= pointer (Mem_Ini) ;
 { Se inicializa la lista de paginas libres }
 Init_Lista_Page_Free;
 
-printk('/nCantidad de Paginas : /V%d \n',[nr_page],[]);
-printk('/nPrimer Pagina       : /V%d \n',[start_page],[]);
-printk('/nPaginas en Mem_Map  : /V%d \n',[mem_map_size div Page_Size],[]);
+printk('/nCantidad de Paginas : /V%d \n',[nr_page]);
+printk('/nPrimer Pagina       : /V%d \n',[start_page]);
+printk('/nPaginas en Mem_Map  : /V%d \n',[mem_map_size div Page_Size]);
 
 { Se inicializa a la MMU }
 paging_start;
 
 { Se iniciliza el directorio de Malloc }
-printk('/nIniciando malloc ... ',[],[]);
+printk('/nIniciando malloc ... ',[]);
 size:=16;
 for ret:= 1 to 9 do
  begin
@@ -603,7 +603,7 @@ for ret:= 1 to 9 do
  size_dir[ret].Unassign_list:=nil;
  size:=size * 2;
 end;
-printk('/VOk\n',[],[]);
+printk('/VOk\n',[]);
 
 mem_wait.lock_wait := nil ;
 end;

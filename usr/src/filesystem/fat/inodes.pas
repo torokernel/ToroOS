@@ -301,7 +301,7 @@ if (ino_cache^.dir_entry^.atributos and attr_system = attr_system ) then
        ino^.mode := dt_blk
        else
         begin
-         printk('/VVFS/n : inode desconocido \n',[],[]);
+         printk('/VVFS/n : inode desconocido \n',[]);
          ino^.state := i_dirty ;
          exit;
         end;
@@ -337,7 +337,7 @@ if (ino_cache^.dir_entry^.atributos and attr_system = attr_system ) then
     ino^.mode := dt_dir;
     ino^.size := 0 ;
 
-    {los dir. no poseen tama¤o}
+    {los dir. no poseen tamano}
     ino^.blocks := 0 ;
     end
     else
@@ -418,7 +418,7 @@ end;
 procedure fat_put_inode (ino : p_inode_t) ; [public , alias :'FAT_PUT_INODE'];
 begin
 {$IFDEF debug}
-printk('/Vfat_put_inode/n : No implementado en fat12fs\n',[],[]);
+printk('/Vfat_put_inode/n : No implementado en fat12fs\n',[]);
 {$ENDIF}
 end;
 
@@ -577,7 +577,7 @@ label _vacio , _novacio , _nada ;
 
 begin
 
-printk('/Vfat_rmdir/n : funcion no implementada \n',[],[]);
+printk('/Vfat_rmdir/n : funcion no implementada \n',[]);
 exit(-1);
 
 
@@ -590,7 +590,7 @@ tmpd := find_in_cache (dentry^.ino^.ino , dentry^.ino^.sb) ;
 { se debera eliminar uno por uno cada archivos para que el dir sea libre }
 if (dentry^.ino^.mode = dt_dir ) and (tmpd^.dir_entry^.entradafat <> last_sector) then
  begin
-  printk('/Vfatfs/n : rmdir en directorio no vacio \n',[],[]);
+  printk('/Vfatfs/n : rmdir en directorio no vacio \n',[]);
   exit(-1);
  end;
 
@@ -686,7 +686,7 @@ end;
 
 function fat_rename (dentry , ndentry : p_dentry) : dword ; [public , alias : 'FAT_RENAME'];
 begin
-printk('/Vvfs/n : fat_rename funcion no implementada en fat\n',[],[]);
+printk('/Vvfs/n : fat_rename funcion no implementada en fat\n',[]);
 exit(-1);
 end;
 

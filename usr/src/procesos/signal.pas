@@ -97,8 +97,8 @@ procedure kernel_signal_handler;
 var tarea:pointer ;
 begin
 
-printk('$d',[],[Tarea_Actual^.pid]);
-printk('/nMuerte por Se¤al : %s \n',[@Sig_name[tarea_actual^.terminacion][1]],[]);
+//printk('$d',[],[Tarea_Actual^.pid]);
+printk('/nMuerte por Se¤al : %s \n',[dword(@Sig_name[tarea_actual^.terminacion][1])]);
 
 Proceso_destruir (Tarea_Actual);
 
