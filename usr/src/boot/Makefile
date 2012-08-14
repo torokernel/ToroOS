@@ -11,7 +11,7 @@ include $(TOP_DIR)../make.rules
 all : head32.o multiboot.o
 
 head32.o : head32.s
-	$(NASM) -o head32.o -f elf head32.s
+	$(NASM) -o head32.o  -f elf head32.s
 
 multiboot.o : multiboot.pas
 	$(FPC) $(FPC_FLAGS) multiboot.pas
