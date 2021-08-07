@@ -1,4 +1,4 @@
-Unit printk_;
+Unit printk;
 
 { * Printk :                                                            *
   *                                                                     *
@@ -17,30 +17,31 @@ Unit printk_;
 }
 
 interface
+type
+struc_consola=record
+car:char;
+form:byte;
+end;
 
-{$I ../include/toro/printk.inc}
-{$I ../include/toro/procesos.inc}
-{$I ../include/head/procesos.h}
-{$I ../include/head/asm.h}
 
-{$DEFINE Use_Hash}
+const VIDEO_OFF=$B8000;
+
+   hex_char : array[0..15] of char = ('0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f');
+   color : byte = 7 ;
 
 procedure print_dec_dword (nb : dword);
 procedure print_pchar(c:pchar);
 procedure print_dword(nb : dword);
 procedure PrintDecimal(Value: dword);
-procedure DumpTask(Pid:dword);
+//procedure DumpTask(Pid:dword);
 procedure Limpiar_P;
+
+procedure printkf(Cadena:pchar ; const Args: array of dword);
 
 var x,y:byte;
     consola:^struc_consola;
 
 implementation
-
-
-{$I ../include/head/list.h}
-
-
 
 { * Set_Cursor :                                                        *
   *                                                                     *
@@ -138,7 +139,7 @@ end;
   *                                                                     *
   ***********************************************************************
 }
-procedure printk(Cadena:pchar ; const Args: array of dword);[public , alias : 'PRINTK'];
+procedure printkf(Cadena:pchar ; const Args: array of dword);
 var arg,argk,cont,val,i : dword;
 label volver;
 begin
@@ -466,7 +467,7 @@ end;
   * tes de una tarea                                                     *
   *                                                                      *
   ************************************************************************
-}
+
 
 procedure DumpTask(Pid:dword);
 var tmp : p_tarea_struc;
@@ -496,7 +497,7 @@ printk('/nflg : /v%h /neip : /v%h /ncr3 : /v%h /ncr2 : /v%h \n',
 
 abrir;
 end;
-
+}
 
 
 procedure Limpiar_P;

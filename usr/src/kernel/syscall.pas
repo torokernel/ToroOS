@@ -17,30 +17,14 @@ Unit Syscall;
 }
 interface
 
-{$I ../include/toro/procesos.inc}
-{$I ../include/head/asm.h}
-{$I ../include/head/idt.h}
-{$I ../include/head/open.h}
-{$I ../include/head/read_write.h}
-{$I ../include/head/mount.h}
-{$I ../include/head/itimer.h}
-{$I ../include/head/procesos.h}
-{$I ../include/head/prc_sys.h}
-{$I ../include/head/exec.h}
-{$I ../include/head/scheduler.h}
-{$I ../include/head/relog.h}
-{$I ../include/toro/buffer.inc}
-{$I ../include/head/buffer.h}
-{$I ../include/head/vmalloc.h}
-
-
-function sys_ioctl (Fichero , req : dword ; argp : pointer) : dword
-;cdecl; external name 'SYS_IOCTL';
-
+const
+  NR_SYSCALL = 50;
 
 var syscall_table:array [0..NR_SYSCALL] of pointer;
+procedure Syscall_Init;
 
 implementation
+uses arch, process, memory, filesystem;
 
 { * Kernel_Entry :                                                       *
   *                                                                      *
@@ -96,8 +80,6 @@ asm
       pop   es
       pop   eax
       iret
-
-
    end;
 
 
@@ -109,21 +91,25 @@ asm
   *                                                                      *
   ************************************************************************
 }
-procedure Syscall_Init;[public , alias :'SYSCALL_INIT'];
+procedure Syscall_Init;
+var 
+m: dword;
 begin
 Set_Int_Gate_User(50,@kernel_entry);
+for m := 0 to 34 do
+  syscall_table[m] := nil;
 
 syscall_table[0]:= @Sys_MountRoot; {Solo puede ser llamada una vez}
 Syscall_Table[1]:= @Sys_Exit;
-Syscall_Table[2]:= @Sys_Fork;
+Syscall_Table[2]:= @Sys_Fork;{
 Syscall_Table[3]:= @Sys_Mkdir;
 Syscall_Table[4]:= @Sys_Mknod;
 Syscall_Table[5]:= @Sys_Create;
-Syscall_Table[6]:= @Sys_Open;
+}Syscall_Table[6]:= @Sys_Open;
 SYSCALL_Table[7]:= @Sys_WaitPid;
 Syscall_Table[8]:= @Sys_Read;
 Syscall_Table[9]:= @Sys_Write;
-Syscall_Table[10]:= @Sys_Close;
+{Syscall_Table[10]:= @Sys_Close;
 Syscall_Table[12]:= @Sys_Chmod;
 Syscall_Table[13]:= @Sys_Time;
 Syscall_Table[14]:= @Sys_Rename;
@@ -133,24 +119,25 @@ Syscall_Table[17]:= @Sys_sleep;
 Syscall_Table[18]:= @sys_setitimer;
 Syscall_Table[19]:= @Sys_GetPid;
 Syscall_Table[20]:= @Sys_GetPPid;
-Syscall_Table[21]:= @Sys_Detener;
-Syscall_Table[22] := @Sys_Stat;
+Syscall_Table[21]:= @Sys_Detener;}
+Syscall_Table[22] := @Sys_Stat;{
 Syscall_Table[23] := @Sys_Utime;
 Syscall_Table[24] := @Sys_Stime ;
-Syscall_Table[25]:= @Sys_exec;
-Syscall_Table[26] := @sys_getitimer;
+}Syscall_Table[25]:= @Sys_exec;
+{Syscall_Table[26] := @sys_getitimer;}
 Syscall_Table[27] := @Sys_chdir ;
-Syscall_Table[28] := @Sys_ReadErrno ;
+Syscall_Table[28] := @Sys_ReadErrno ;{
 syscall_Table[29] := @sys_setscheduler ;
 syscall_table[31] := @sys_getscheduler ;
 Syscall_Table[36]:= @Sys_Sync;
-Syscall_Table[45]:= @Sys_Brk;
-Syscall_Table[37]:= @Sys_Kill;
+}Syscall_Table[45]:= @Sys_Brk;
+{Syscall_Table[37]:= @Sys_Kill;
 Syscall_Table[48]:= @Sys_Signal;
+}
 Syscall_Table[30]:= @Sys_Seek;
 syscall_table [33] := @Sys_Ioctl;
-syscall_table[32] := @Reboot ;
-syscall_table[34] := @sys_rmdir;
+{syscall_table[32] := @Reboot ;
+syscall_table[34] := @sys_rmdir;}
 end;
 
 

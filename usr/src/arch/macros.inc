@@ -1,0 +1,10 @@
+{$DEFINE cerrar := asm cli ; end;}
+{$DEFINE abrir := asm sti ; end ;}
+{$DEFINE save_flags := asm pushfd; end;}
+{$DEFINE restore_flags := asm popfd; end;}
+{$DEFINE LoadKernelData := asm mov ax , kernel_data_sel ; mov ds , ax ; mov es , ax ; end;}
+{$DEFINE flush_tlp := asm eax , cr3 ; mov cr3 , eax ; end ;}
+{$DEFINE Save_Cr3 := asm mov eax ,cr3 ; push eax ; end ;}
+{$DEFINE Restore_Cr3 := asm pop eax ; mov cr3 , eax ; end ;}
+{$DEFINE Load_Kernel_Pdt := asm mov eax , kernel_pdt ; mov cr3 , eax ; end ;}
+{$DEFINE Aqui_Paso := printk('AQUI PASO!!!!\n',[],[]);}

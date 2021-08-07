@@ -1,21 +1,10 @@
-#Este archivo es utilizado por Make y contiene los
-#directorios donde se encuentran los programas y otras cosas
-#
-#
-
-
-
-
 DIR_WORK = 
 
-#atencion!!! este ld no es el que se encuentra dentro de FPC sino el que viene con las
-#distribuciones de Linux con soporte para elf32-i386 targets
+LD =/home/debian/multibootfpc/fpc-3.2.0-i386-embedded.cross.x86_64-linux/fpc/bin/i386-unknown-elf-ld 
 
-LD =ld-i386
+FPC =/home/debian/multibootfpc/fpc-3.2.0-i386-embedded.cross.x86_64-linux/fpc/bin/x86_64-linux/ppcross386
 
-FPC = ppc386
-
-AS =as-i386
+AS =/home/debian/multibootfpc/fpc-3.2.0-i386-embedded.cross.x86_64-linux/fpc/bin/i386-unknown-elf-as 
 
 NASM=nasm
 
@@ -27,7 +16,7 @@ FPCLIB =toro-src/Lib/fpclib/fpclib.o
 
 RM =rm
 
-FPC_FLAGS =-s -Sh -Sg -Cn -Sc -S2 -OG -Sm -Un -a -vwnh -Rintel
+FPC_FLAGS =-TEmbedded -Fu/home/debian/multibootfpc/fpc-3.2.0-i386-embedded.cross.x86_64-linux/fpc/units/i386-embedded/rtl -Fu../kernel/ -Fu../arch/ -Fu../memory/ -Fu../process/ -Fu../filesystem/ -Fu../drivers/ -Fu../drivers/block/ -s -a -Rintel -Sm -Si
 
 CP =cp
 
@@ -36,4 +25,3 @@ KERNEL_DIR =../../boot/
 RENAME = rname
 
 MV = mv
-

@@ -28,84 +28,117 @@
 }
 
 
-{$I-}
 {$M 2048,4096}
 
-{$I ../include/head/asm.h}
-{$I ../include/toro/procesos.inc }
-{$I ../include/toro/buffer.inc}
-{$I ../include/head/gdt.h}
-{$I ../include/head/malloc.h}
-{$I ../include/head/vmalloc.h}
-{$I ../include/head/mm.h}
-{$I ../include/head/paging.h}
-{$I ../include/head/mapmem.h}
-{$I ../include/head/init_.h}
-{$I ../include/head/cpu.h}
-{$I ../include/head/idt.h}
-{$I ../include/head/relog.h}
-{$I ../include/head/ll_rw_block.h}
-{$I ../include/head/scheduler.h}
-{$I ../include/head/procesos.h}
-{$I ../include/head/syscall.h}
-{$I ../include/head/devices.h}
-{$I ../include/head/irq.h}
-{$I ../include/head/printk_.h}
-{$I ../include/head/dma.h}
-{$I ../include/head/fat12fs/super.h}
-{$I ../include/toro/drivers/tty.inc}
-{$I ../include/toro/drivers/keyb.inc}
+uses multiboot, printk, arch, memory, process, filesystem, syscall, dma, floppy, tty, fat;
+{$define SHELL_PATH := '/bin/sh' }
 
-{Procedimiento que inicializan los drivers , por ahora se inician con el}
-{kernel}
-
-procedure pci_init;external name 'PCI_INIT';
-procedure Buffer_Init;external name 'BUFFER_INIT';
-procedure Fd_Init;external name 'FD_INIT';
-procedure Keyb_Init;external name 'KEYB_INIT';
-procedure Tty_Init;external name 'TTY_INIT';
-procedure kdev_init ;external name 'KDEV_INIT';
+procedure init_;
+var tmp:dword;
+    path: PChar;
+begin
+asm
+// MountRoot
+xor eax , eax
+int 50
+end;
+path := SHELL_PATH;
+asm
+// Exec
+mov eax , 25
+mov ebx , path
+mov ecx , 0
+int 50
+// WaitPid
+@loop:
+mov eax , 7
+mov ebx , tmp
+int 50
+mov tmp , ebx
+jmp @loop 
+end;
+end;
 
 var Init_proc , Null : p_tarea_struc;
     init_Page , Stack : pointer;
     ttyino , keybino : p_inode_t ;
     ttyfile,keybfile : p_file_t ;
     r : dword ;
+ 
+{$I ../arch/macros.inc}
 
 begin
 cerrar;
-printk('/nCargando Sistema TORO... \n',[]);
-
-{Son cargados todos los modulos del sistema}
-Gdt_Init;
-Mm_Init;
-
-
-Idt_Init;
-Cpu_Init;
-
-Proceso_Init;
+printkf('/nLoading Toro... \n',[]);
+ArchInit;
+MMInit;
+Process_Init;
 Devices_Init;
 Syscall_Init;
-
-{Son inicializados los drivers}
 dma_init;
 Fd_Init;
 tty_Init;
-while true do;
-kdev_Init;
-
 Buffer_Init;
-
 fatfs_init;
 
-Init_Task;
+ // init task 
+ Init_proc := Proceso_Crear(1,Sched_RR);
+ 
+ Init_Page:= get_free_page;
+ stack:= get_free_page;
+ umapmem(stack,pointer(HIGH_MEMORY),Init_Proc^.dir_page,Present_Page  or Write_Page or User_mode);
+ umapmem(Init_Page,pointer(HIGH_MEMORY+Page_Size),Init_Proc^.dir_page,Present_Page or User_mode);
+
+ memcopy(@Init_,Init_Page,Page_Size);
+
+With Init_Proc^ do
+ begin
+ text_area.add_l_comienzo := pointer(HIGH_MEMORY + Page_Size);
+ text_area.add_l_fin := pointer(HIGH_MEMORY + 2 * Page_Size);
+ text_area.size := Page_Size;
+ text_area.flags := VMM_READ;
+
+ stack_area.add_l_comienzo := pointer(HIGH_MEMORY);
+ stack_area.add_l_fin := pointer(HIGH_MEMORY + Page_Size - 1);
+ stack_area.size := Page_Size;
+ stack_area.flags := VMM_WRITE;
+
+ reg.eip:= pointer(HIGH_MEMORY + Page_Size);
+ reg.esp := pointer(HIGH_MEMORY + Page_Size -1);
+end;
+
+add_task(Init_Proc);
+
+ttyino := kmalloc(sizeof(inode_t));
+ttyfile := @Init_proc^.Archivos[1];
+
+keybino := kmalloc (sizeof(inode_t));
+keybfile := @Init_proc^.Archivos[2];
+
+ttyino^.mode := dt_chr ;
+ttyino^.flags := I_RO or I_WO ;
+ttyino^.rmayor := tty_mayor ;
+ttyino^.rmenor := 0  ;
+ttyfile^.f_op := chr_dev[tty_mayor].fops ;
+ttyfile^.inodo := ttyino ;
+ttyfile^.f_mode := O_RDWR ;
+
+ttyfile^.f_pos := y * 160 + x * 2 ;
+keybino^.mode := dt_chr ;
+keybino^.flags := I_RO or I_WO ;
+keybino^.rmayor := keyb_mayor ;
+keybino^.rmenor := 0  ;
+keybfile^.f_op := chr_dev[keyb_mayor].fops ;
+
+keybfile^.inodo := keybino ;
+keybfile^.f_mode := O_RDWR ;
 
 cerrar;
-
 scheduler_init;
 Scheduling;
 
-
-debug($1987);
+while true do;
+	{	
+kdev_Init;
+}
 end.

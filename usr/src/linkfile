@@ -1,0 +1,47 @@
+INPUT (
+./kernel/kernel.o
+/home/debian/multibootfpc/fpc-3.2.0-i386-embedded.cross.x86_64-linux/fpc/units/i386-embedded/rtl/system.o
+/home/debian/multibootfpc/fpc-3.2.0-i386-embedded.cross.x86_64-linux/fpc/units/i386-embedded/rtl/multiboot.o
+./kernel/printk.o
+./arch/arch.o
+./memory/memory.o
+./process/process.o
+./filesystem/filesystem.o
+./filesystem/fat.o
+./kernel/syscall.o
+./drivers/dma.o
+./drivers/floppy.o
+./drivers/tty.o
+./kernel/torosys.o
+)
+ENTRY(_START)
+SECTIONS
+{
+     . = 0x100000;
+     .text ALIGN (0x1000) :
+    {
+    _text = .;
+    KEEP(*(.init .init.*))
+    *(.text .text.*)
+    *(.strings)
+    *(.rodata .rodata.*)
+    *(.comment)
+    _etext = .;
+    }
+    .data ALIGN (0x1000) :
+    {
+    _data = .;
+    *(.data .data.*)
+    KEEP (*(.fpc .fpc.n_version .fpc.n_links))
+    _edata = .;
+    }
+    . = ALIGN(4);
+    .bss :
+    {
+    _bss_start = .;
+    *(.bss .bss.*)
+    *(COMMON)
+    }
+_bss_end = . ;
+}
+_end = .;

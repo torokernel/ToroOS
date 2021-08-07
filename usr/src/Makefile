@@ -6,18 +6,10 @@
 include make.rules
 
 toro-kernel : 
-	make -C asm
-	make -C boot
-	make -C cpu
-	make -C gdt
-	make -C procesos
-	make -C memoria
-	make -C int
+	make -C arch
+	make -C process
+	make -C memory
 	make -C kernel
 	make -C filesystem
-	make -C filesystem/fat
-	make -C drivers/bus
-	make -C drivers/char
-	make -C drivers/block
-	make -C lib/fpclib
-	ld -m elf_i386 -s -o ../../boot/toro-1.1.3 -T linkfile.txt
+	make -C drivers
+	$(LD) -g --gc-sections -L. -o toro.elf -T linkfile -Map toro.elf.map
