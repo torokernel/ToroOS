@@ -30,7 +30,7 @@ ToroOS is in the process to be ported to latest FPC. The goal is to sucessfully 
 * Ext2 filesystem
 
 ## How to build ToroOS?
-ToroOS is built by using FPC-3.2.0 and the RTL that corresponds with the target **embedded-i386** (get it from [here](https://sourceforge.net/projects/freepascal/files/Linux/3.2.0/fpc-3.2.0-i386-embedded.cross.x86_64-linux.tar/download)). To build the kernel, you have just to edit the file `usr/src/make.rules` and correct the paths, then run `make`. You will get the binary named *toro.elf* that can be executed in QEMU by using:
+ToroOS is built by using FPC-3.2.0 and the RTL that corresponds with the target **embedded-i386** (get it from [here](https://sourceforge.net/projects/freepascal/files/Linux/3.2.0/fpc-3.2.0-i386-embedded.cross.x86_64-linux.tar/download)). To build the kernel, you have just to edit the file `src/make.rules` and correct the paths, then run `make`. You will get the binary named *toro.elf* that can be executed in QEMU by using:
 ```bash
 qemu-system-x86_64 -kernel toro.elf
 ``` 
