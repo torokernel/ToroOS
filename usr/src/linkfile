@@ -12,7 +12,6 @@ INPUT (
 ./drivers/dma.o
 ./drivers/floppy.o
 ./drivers/tty.o
-./kernel/torosys.o
 )
 ENTRY(_START)
 SECTIONS
