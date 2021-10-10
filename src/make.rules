@@ -16,7 +16,7 @@ FPCLIB =toro-src/Lib/fpclib/fpclib.o
 
 RM =rm
 
-FPC_FLAGS =-TEmbedded -Fu/home/debian/multibootfpc/fpc-3.2.0-i386-embedded.cross.x86_64-linux/fpc/units/i386-embedded/rtl -Fu../kernel/ -Fu../arch/ -Fu../memory/ -Fu../process/ -Fu../filesystem/ -Fu../drivers/ -Fu../drivers/block/ -s -a -Rintel -Sm -Si
+FPC_FLAGS =-TEmbedded -Fu/home/debian/multibootfpc/fpc-3.2.0-i386-embedded.cross.x86_64-linux/fpc/units/i386-embedded/rtl -Fu../kernel/ -Fu../arch/ -Fu../memory/ -Fu../process/ -Fu../filesystem/ -Fu../drivers/ -Fu../drivers/block/ -s -a -Rintel -Sm -Si -MObjfpc
 
 CP =cp
 

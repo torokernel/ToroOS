@@ -305,7 +305,7 @@ function get_block(Mayor,Menor,Bloque,size:dword):p_buffer_head;
 function Put_Block(buffer:p_buffer_head):dword;
 function Get_Inode(sb : p_super_block_t ; ino : dword ):p_inode_t;
 function Register_Filesystem (fs : p_file_system_type) : dword ;
-function sys_exec(path , args : pchar):dword;cdecl ;
+function SysExec(path, args : pchar): dword; cdecl;
 function sys_open (path : pchar ; mode , flags : dword) : dword ; cdecl;
 function sys_read( File_Desc : dword ; buffer : pointer ; nbytes : dword ) : dword;cdecl;
 function sys_write ( file_desc : dword ; buffer : pointer ; nbytes : dword) : dword;cdecl;
@@ -2117,7 +2117,7 @@ if Max_dentrys = 0 then
 }
 
 
-const 
+const
 	DIR :  pchar = '.';
 	DIR_PREV  : pchar = '..';
 
@@ -2289,14 +2289,14 @@ begin
 
 id := 0 ;
 
-for tmp := 1 to High (fsid) do 
+for tmp := 1 to High (fsid) do
  begin
 	if chararraycmp(@fsid[tmp].name[1],@name[1],dword(name[0])) then
-        begin 
+        begin
        	 id := fsid[tmp].id ;
          break;
 	end;
- end;         
+ end;
 
 if id = 0 then exit(nil);
 
@@ -2682,6 +2682,36 @@ coff_optheader=record
 
 end;
 
+  PELFHeader = ^TELFHeader;
+  TELFHeader = packed record
+    e_ident: array [0..15] of byte;
+    e_type: word;   { Object file type }
+    e_machine: word;
+    e_version: dword;
+    e_entry: pointer;
+    e_phoff: pointer;
+    e_shoff: pointer;
+    e_flags: dword;
+    e_ehsize: word;
+    e_phentsize: word;
+    e_phnum: word;
+    e_shentsize: word;
+    e_shnum: word;
+    e_shstrndx: word;
+  end;
+
+  PELFProgramHeader = ^TELFProgramHeader;
+  TELFProgramHeader = packed record
+    p_type   : dword;
+    p_offset : dword;
+    p_vaddr  : dword;
+    p_paddr  : dword;
+    p_filesz : dword;
+    p_memsz  : dword;
+    p_flags  : dword;
+    p_align  : dword;
+  end;
+
 {$DEFINE set_errno := Tarea_Actual^.errno  }
 {$DEFINE clear_errno := Tarea_Actual^.errno := 0 }
 
@@ -2867,314 +2897,215 @@ exit(0);
 
 end;
 
-
-
-{$DEFINE mem_lock := lock (@mem_wait) ; }
-{$DEFINE mem_unlock := unlock (@mem_wait) ;}
-
-
-{ * Sys_Exec :                                                             *
-  *                                                                        *
-  * Path : Ruta donde se encuentra el archivo                              *
-  * args : Puntero a un array de argunmentos . No utilizado por ahora      *
-  * Devuelve : 0 si falla o El pid de la nueva tarea                       *
-  *                                                                        *
-  * Esta funcion carga en memoria un archivo ejecutable del tipo COFF      *
-  * y devuelve el PID del nuevo proceso  , si la operacion no hubiese sido *
-  * correcta devuelve 0                                                    *
-  * Esta basado en la llamada al sistema sys_exec del kernel de ROUTIX     *
-  * Routix / src / syscalls / sys_proc.c                                   *
-  * Routix.sourceforge.net                                                 *
-  *                                                                        *
-  **************************************************************************
-}
-
-function sys_exec(path , args : pchar):dword;cdecl ;
-var tmp:p_inode_t;
-    nr_sec,ver,count:word;
-    coff_hd:p_coff_header;
-    argccount , ret,count_pg,nr_page,ppid,argc:dword;
-    _text,_data,_bbs:coff_sections;
-    opt_hd:coff_optheader;
-    l:p_coff_sections;
-    tmp_fp:file_t;
-    buff:array[1..100] of byte;
-    new_tarea:p_tarea_struc;
-    cr3_save , page,page_args,pagearg_us: pointer;
-    nd : pchar ;
-    r : dword ;
-    k : dword ;
-
-label _exit;
+// SysExec:
+//
+// Path: path to a file
+// Args: pointer to an array of arguments. It is not used yet
+// Return: 0 if fails, or the PID of the new process if sucesses
+//
+// This function creates a new process from a ELF32 binary. It is based on the function implemented at
+// routix.sourceforge.net.
+//
+function SysExec(Path, Args : pchar): DWORD; cdecl;
+var tmp: p_inode_t;
+    elf_hd: TELFHeader;
+    argccount, count, startaddr, ret, count_pg, nr_page, ppid, argc: dword;
+    text_sec, data_sec: TELFProgramHeader;
+    tmp_fp: file_t;
+    new_tarea: p_tarea_struc;
+    cr3_save, page, page_args, pagearg_us: pointer;
+    nd: pchar ;
 begin
+  Result := 0;
+  ppid:= Tarea_Actual^.pid;
+  tmp:= name_i(path);
 
-r := contador ;
-
-ppid := Tarea_Actual^.pid;
-
-tmp := name_i(path);
-
-set_errno := -ENOENT ;
-
-{ruta invalida}
-If (tmp = nil) then exit(0);
-
-set_errno := -EACCES ;
-
-{el inodo deve tener permisos de ejecucion y de lectura}
-if (tmp^.flags and I_XO <> I_XO) and (tmp^.flags and I_RO <> I_RO) then goto _exit ;
-
-set_errno := -ENOEXEC ;
-
-if (tmp^.mode <> dt_Reg) then goto _exit ;
-
-{Se crea un descriptor temporal}
-tmp_fp.inodo := tmp;
-tmp_fp.f_pos := 0;
-tmp_fp.f_op := tmp^.op^.default_file_ops ;
-
-
-coff_hd:=@buff;
-
-{Leo la cabecera del archivo coff y la mando a un buffer}
-ret := tmp_fp.f_op^.read(@tmp_fp,sizeof(coff_header),coff_hd);
-
-set_errno := -EIO ;
-
-{Si hubiese algun error al leer el archivo}
-If (ret = 0) then goto _exit ;
-
-set_errno := -ENOEXEC;
-
-{Se chequea el numero magico}
-If (coff_hd^.f_magic <> COFF_MAGIC) then goto _exit;
-
-set_errno := -ENOEXEC;
-
-{El archivo COFF devera tener 3 secciones = TEXT , DATA, BBS}
-If coff_hd^.f_nscns <> 3 then goto _exit;
-
-ret := tmp_fp.f_op^.read(@tmp_fp,sizeof(coff_optheader),@opt_hd);
-
-{Me posiciono donde se encuentran las cabezas de secciones}
-tmp_fp.f_pos := sizeof(coff_header) + coff_hd^.f_opthdr;
-
-nr_sec := coff_hd^.f_nscns;
-ver := 0;
-l := @buff;
-
-set_errno := -EIO;
-
-while (nr_sec <> 0) do
- begin
-
- {Leo las secciones}
- ret := tmp_fp.f_op^.read(@tmp_fp,sizeof(coff_sections),l);
-
- {hubo un error de lectura}
- If (ret = 0) then goto _exit ;
-
- {Se evalua el tipo de seccion}
- Case l^.s_flags of
- COFF_TEXT:begin
-            memcopy(@buff,@_text,sizeof(coff_sections));
-            ver:=ver or COFF_TEXT;
-            end;
- COFF_DATA:begin
-            memcopy(@buff,@_data,sizeof(coff_sections));
-            ver:=ver or COFF_DATA;
-            end;
- COFF_BBS:begin
-            memcopy(@buff,@_bbs,sizeof(coff_sections));
-            ver:=ver or COFF_BBS;
-            end;
-    else  goto _exit ;
-
- end;
- nr_sec-=1;
-end;
-
- set_errno := -ENOEXEC;
-
- {Se chequea que se encuentren todas las secciones}
- If ver <> (COFF_BBS or COFF_DATA or COFF_TEXT) then goto _exit ;
-
- {Se crea el proceso}
- new_tarea := Proceso_Crear(ppid,Sched_RR);
-
- If (new_tarea=nil) then goto _exit ;
-
- Mem_Lock ;
-
-
- If (_text.s_size + _data.s_size + _bbs.s_size) >=  MM_MEMFREE then
+  set_errno := -ENOENT ;
+  If tmp = nil then
   begin
-   Proceso_Eliminar (new_tarea);
-   goto _exit ;
+    Result := 0;
+    Exit;
   end;
 
+  set_errno := -EACCES ;
 
- {Area de Codigo}
- {Aqui tambien se encuentran los datos  y el codigo}
-
- with new_tarea^.text_area do
+  if (tmp^.flags and I_XO <> I_XO) and (tmp^.flags and I_RO <> I_RO) then
   begin
-  size := 0 ;
-  flags := VMM_WRITE;
-  add_l_comienzo := pointer(HIGH_MEMORY);
-  add_l_fin := pointer(HIGH_MEMORY - 1);
- end;
+    put_dentry (tmp^.i_dentry);
+    Exit;
+  end;
 
- {Stack}
- with new_tarea^.stack_area do
+  set_errno := -ENOEXEC ;
+
+  if tmp^.mode <> dt_Reg then
   begin
-  size := 0;
-  flags := VMM_WRITE;
-  add_l_comienzo := pointer(STACK_PAGE);
-  add_l_fin := pointer(STACK_PAGE - 1);
- end;
+    put_dentry (tmp^.i_dentry);
+    Exit;
+  end;
 
- { tama¤o de los argumentos  }
- argc := get_args_size (args) ;
+  // create a temporal descriptor
+  tmp_fp.inodo := tmp;
+  tmp_fp.f_pos := 0;
+  tmp_fp.f_op := tmp^.op^.default_file_ops ;
 
- { cantidad de argumentos pasados }
- argccount := get_argc(args) ;
+  // get elf header
+  ret := tmp_fp.f_op^.read(@tmp_fp, sizeof(TELFHeader), @elf_hd);
 
- {Solo se soportan 4096 bytes de argumentos }
- page_Args := get_free_kpage ;
+  set_errno := -EIO ;
+
+  If ret = 0 then
+  begin
+    put_dentry(tmp^.i_dentry);
+    Exit;
+  end;
+
+  set_errno := -ENOEXEC;
+
+  // check magic number
+  If (elf_hd.e_ident[1] <> Byte('E')) or (elf_hd.e_ident[2] <> Byte('L')) then
+  begin
+    put_dentry(tmp^.i_dentry);
+    Exit;
+  end;
+
+  set_errno := -ENOEXEC;
+  startaddr := DWORD(elf_hd.e_entry);
+
+  // seek on the starting position of the program headers
+  tmp_fp.f_pos := DWORD(elf_hd.e_phoff);
+  set_errno := -EIO;
+
+  // The first programs-header must be the .text and the second one must be the .data + .bbs.
+  // These sections must be 4k-aligned and stored in the file one after the other.
+  ret := tmp_fp.f_op^.read(@tmp_fp, sizeof(TELFProgramHeader), @text_sec);
+
+  If ret = 0 then
+  begin
+    put_dentry(tmp^.i_dentry);
+    Exit;
+  end;
+
+  ret := tmp_fp.f_op^.read(@tmp_fp, sizeof(TELFProgramHeader), @data_sec);
+
+  If ret = 0 then
+  begin
+    put_dentry(tmp^.i_dentry);
+    Exit;
+  end;
+
+  set_errno := -ENOEXEC;
+
+  new_tarea := Proceso_Crear(ppid, Sched_RR);
+  If new_tarea = nil then
+  begin
+    put_dentry(tmp^.i_dentry);
+    Exit;
+  end;
+
+  lock(@mem_wait);
+
+  If (text_sec.p_memsz + data_sec.p_memsz) >=  MM_MEMFREE then
+  begin
+    unlock(@mem_wait);
+    Proceso_Eliminar (new_tarea);
+    put_dentry(tmp^.i_dentry);
+    Exit;
+  end;
+
+  // create two memory regions
+  // one for .text and .data
+  // and one for stack
+  with new_tarea^.text_area do
+  begin
+    size := 0 ;
+    flags := VMM_WRITE;
+    add_l_comienzo := pointer(HIGH_MEMORY);
+    add_l_fin := pointer(HIGH_MEMORY - 1);
+  end;
+
+  with new_tarea^.stack_area do
+  begin
+    size := 0;
+    flags := VMM_WRITE;
+    add_l_comienzo := pointer(STACK_PAGE);
+    add_l_fin := pointer(STACK_PAGE - 1);
+  end;
+
+  argc := get_args_size (args);
+  argccount := get_argc(args);
+  page_Args := get_free_kpage ;
 
   If argc > 1 then
-   begin
-
-   {Hay argumentos}
-   If argc > Page_Size then argc := Page_Size ;
-
-   {Son copiados los argumentos}
-   memcopy(args, page_Args + (Page_size - argc)-1 , argc);
-   end
-    else
-     begin
-     {No hay argumentos}
-
-     nd := Page_args;
-     nd += Page_size - 2 ;
-     nd^ := #0 ;
-     end;
-
-
- Save_Cr3;
- Load_Kernel_Pdt;
-
- {Es leido el archivo completo }
- count:=0;
- count_pg:=0;
- nr_page := (_text.s_size + _data.s_size) div Page_Size ;
- If ((_text.s_size + _data.s_size) mod Page_Size ) = 0 then else nr_page+=1;
-
- tmp_fp.f_pos:=_text.s_scnptr;
-
- k := contador ;
-
- repeat
- page := get_free_page;
-
- If page = nil then
   begin
-   vmm_free(new_tarea,@new_tarea^.text_area);
-   Proceso_Eliminar(new_tarea);
-   Mem_Unlock;
-   goto _exit ;
+    If argc > Page_Size then
+      argc := Page_Size;
+    memcopy(args, page_Args + (Page_size - argc)-1 , argc);
+  end else
+  begin
+    nd := Page_args;
+    Inc(nd, Page_size - 2);
+    nd^ := #0 ;
   end;
 
- count += tmp_fp.f_op^.read(@tmp_fp,Page_Size,page);
- vmm_map(page,new_tarea,@new_tarea^.text_area);
- count_pg+=1;
+  Save_Cr3;
+  Load_Kernel_Pdt;
 
- until (nr_page = count_pg);
- k := contador - k ;
+  // read .text and then .data
+  // this reads all the sections as multiples of of the PAGE_SIZE
+  count := 0;
+  count_pg := 0;
 
- {Se verifica que la cantidad leidos sean correctos}
- If count <> (_text.s_size + _data.s_size) then
-  begin
-   vmm_free(new_tarea,@new_tarea^.text_area);
-   vmm_free(new_tarea,@new_tarea^.data_area);
-   Proceso_Eliminar(new_tarea);
-   Mem_Unlock;
-   goto _exit ;
-  end;
+  // the binary must have at least two pages: one for data and one for text
+  nr_page := text_sec.p_memsz div Page_Size;
+  if text_sec.p_memsz mod Page_Size <> 0 then Inc(nr_page);
+  nr_page += data_sec.p_memsz div Page_Size;
+  If data_sec.p_memsz mod Page_Size <> 0 then Inc(nr_page);
 
+  tmp_fp.f_pos := text_sec.p_offset;
 
- {Las areas de datos no inicializados son alocadas}
- vmm_alloc(new_tarea,@new_tarea^.text_area,_bbs.s_size);
- vmm_alloc(new_tarea,@new_tarea^.stack_area,Page_Size);
+  repeat
+    page := get_free_page;
+    If page = nil then
+    begin
+      vmm_free(new_tarea,@new_tarea^.text_area);
+      Proceso_Eliminar(new_tarea);
+      unlock(@mem_wait);
+      put_dentry(tmp^.i_dentry);
+      Exit;
+    end;
+    Inc(count, tmp_fp.f_op^.read(@tmp_fp, Page_Size, page));
+    vmm_map(page,new_tarea,@new_tarea^.text_area);
+    Inc(count_pg);
+  until (nr_page = count_pg);
 
- {Entrada estandar y salida estandar}
- clone_filedesc(@Tarea_Actual^.Archivos[1],@new_tarea^.Archivos[1]);
- clone_filedesc(@Tarea_Actual^.Archivos[2],@new_tarea^.Archivos[2]);
+  vmm_alloc(new_tarea, @new_tarea^.stack_area, Page_Size);
 
+  clone_filedesc(@Tarea_Actual^.Archivos[1],@new_tarea^.Archivos[1]);
+  clone_filedesc(@Tarea_Actual^.Archivos[2],@new_tarea^.Archivos[2]);
 
- {La pagina deve ser de la zona alta y no de la del kernel}
- pagearg_us := get_free_page ;
- memcopy(page_args , pagearg_us , Page_Size);
+  // map args
+  pagearg_us := get_free_page ;
+  memcopy(page_args , pagearg_us , Page_Size);
+  free_page (page_args);
+  vmm_map(pagearg_us,new_tarea,@new_tarea^.stack_area);
 
- {No se necesita mas la pagina}
- free_page (page_args);
+  unlock(@mem_wait);
 
- {Se mapea la pagina de argumentos}
- vmm_map(pagearg_us,new_tarea,@new_tarea^.stack_area);
+  new_tarea^.reg.esp := pointer(new_tarea^.stack_area.add_l_fin - argc)  ;
+  new_tarea^.reg.eip := pointer(startaddr);
+  new_tarea^.reg.eax := argccount ;
+  new_tarea^.reg.ebx := LongInt(new_tarea^.reg.esp) ;
+  new_tarea^.reg.ecx := 0 ;
 
- {Se libera la proteccion de la memoria}
- Mem_Unlock;
+  Inc(Tarea_actual^.cwd^.count);
+  Inc(Tarea_Actual^.cwd^.i_dentry^.count);
+  new_tarea^.cwd := Tarea_Actual^.cwd ;
 
- new_tarea^.reg.esp := pointer(new_tarea^.stack_area.add_l_fin - argc)  ;
- new_tarea^.reg.eip := pointer(opt_hd.entry);
+  Restore_Cr3;
+  add_task (new_tarea);
+  put_dentry(tmp^.i_dentry);
 
- { son pasados los argumentos }
- new_tarea^.reg.eax := argccount ;
- new_tarea^.reg.ebx := longint(new_tarea^.reg.esp) ;
- new_tarea^.reg.ecx := 0 ;
-
-
- { la nueva tarea tiene como directorio de trabajo el cwd de la tarea que
- realizo el exec
- }
- Tarea_actual^.cwd^.count += 1 ;
- Tarea_Actual^.cwd^.i_dentry^.count += 1 ;
- new_tarea^.cwd := Tarea_Actual^.cwd ;
-
-
- Restore_Cr3;
-
-  {$IFDEF DEBUG}
-   printk('/nsys_exec  : Head Section Sizes\n',[],[]);
-   printk('/nText  : %d \n',[_text.s_size],[]);
-   printk('/nData  : %d \n',[_data.s_size],[]);
-   printk('/nBbs :  %d \n',[_bbs.s_size],[]);
-   printk('/npid : %d\n',[new_tarea^.pid],[]);
-   printk('/nDuracion : %d milis.\n',[contador-r],[]);
-   printk('/nTiempo de io : %d milise.\n',[k],[]);
-   printk('/nParametros : %d \n',[argccount],[]);
- {$ENDIF}
-
- add_task (new_tarea);
- put_dentry(tmp^.i_dentry);
-
- clear_errno;
-
- exit(new_tarea^.pid);
-
- _exit :
-
- {$IFDEF debug}
-  printkf('/Vexec/n: Error de lectura de archivo\n',[]);
- {$ENDIF}
-
- put_dentry (tmp^.i_dentry);
- exit(0);
-
+  clear_errno;
+  Result := new_tarea^.pid;
 end;
-
-
-
-
 end.
