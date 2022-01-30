@@ -126,11 +126,11 @@ interface
 
 {$I macros.inc}
 
-procedure Memcopy(origen , destino :pointer;tamano:dword);assembler;
+procedure Memcopy(origen , destino :pointer;tamano:dword);
 procedure debug(Valor:dword);
-function Bit_Test(Val:Pointer;pos:dword):boolean;
-procedure Bit_Reset(Cadena:pointer;pos:dword);assembler;
-procedure Bit_Set(ptr_dw:pointer;pos:dword);assembler;
+function Bit_Test(bitmap:Pointer;pos:dword):boolean;
+procedure Bit_Reset(bitmap:pointer;pos:dword);
+procedure Bit_Set(bitmap:pointer;pos:dword);
 procedure Panic(error:pchar);
 function Mapa_Get(Mapa:pointer;Limite:dword):word;
 procedure Limpiar_Array(p_array:pointer;fin:word);
@@ -665,22 +665,19 @@ delay_io;
 exit(leer_byte($71));
 end;
 
-{* Memcopy :                                                                 *
- *                                                                           *
- * Procedimiento para mover desde el puntero origen hasta el puntero destino *
- * ,la cantidad de bytes indicada en tamaño.                                 *
- *                                                                           *
- *****************************************************************************
- }
-
-procedure Memcopy(origen , destino :pointer;tamano:dword);assembler;
-asm
-mov esi , origen
-mov edi , destino
-mov ecx , tamano
-rep movsb
+procedure Memcopy(origen , destino :pointer;tamano:dword);
+begin
+  asm
+    push esi
+    push edi
+    mov esi , origen
+    mov edi , destino
+    mov ecx , tamano
+    rep movsb
+    pop edi
+    pop esi
+  end;
 end;
-
 
 procedure debug(Valor:dword);
 begin
@@ -692,64 +689,40 @@ mov edx , valor
 end;
 end;
 
-
-
-{ * Bit_Test :                                                          *
-  *                                                                     *
-  * Procedimiento que devuelve true si el bit dado en pos esta activo   *
-  *                                                                     *
-  ***********************************************************************
-}
-function Bit_Test(Val:Pointer;pos:dword):boolean;
-var s:byte;
+function Bit_Test(bitmap: Pointer; pos:dword):boolean;
+var
+ b: ^Byte;
+ bt, off: dword;
 begin
-asm
-xor eax , eax
-xor ebx , ebx
-mov ebx , pos
-mov esi , Val
-bt  dword [esi] , ebx
-jc  @si
-@no:
- mov s , 0
- jmp @salir
-@si:
-  mov s , 1
-@salir:
-end;
-exit(boolean(s));
+  Result := False;
+  b := bitmap;
+  bt := pos div 8;
+  off := pos mod 8;
+  if (b[bt] shr off) and 1 = 1 then
+    Result := True;
 end;
 
-
-{ * Bit_Reset                                                           *
-  *                                                                     *
-  * Procedimiento que baja el bit dado en pos en el buffer cadena       *
-  *                                                                     *
-  ***********************************************************************
-}
-procedure Bit_Reset(Cadena:pointer;pos:dword);assembler;
-asm
-mov ebx , pos
-mov esi , Cadena
-btr dword [esi] , ebx
+procedure Bit_Reset(bitmap: Pointer; pos: dword);
+var
+ b: ^Byte;
+ bt, off: dword;
+begin
+  b := bitmap;
+  bt := pos div 8;
+  off := pos mod 8;
+  b[bt] := b[bt] and (not(1 shl off));
 end;
 
-
-
-{ * Bit_Set                                                             *
-  *                                                                     *
-  * Procedimiento que activa el bit dado en pos                         *
-  *                                                                     *
-  ***********************************************************************
-}
-procedure Bit_Set(ptr_dw:pointer;pos:dword);assembler;
-asm
-mov esi , ptr_dw
-xor edx , edx
-mov edx , pos
-bts dword [esi] , edx
+procedure Bit_Set(bitmap: Pointer; pos:dword);
+var
+ b: ^Byte;
+ bt, off: dword;
+begin
+  b := bitmap;
+  bt := pos div 8;
+  off := pos mod 8;
+  b[bt] := b[bt] or (1 shl off);
 end;
-
 
 procedure Panic(error:pchar);
 begin
