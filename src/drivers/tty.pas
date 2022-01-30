@@ -113,6 +113,8 @@ flush : boolean;
 color : byte ;
 end;
 
+Const
+  KEYBUFFLEN = 128;
 
 procedure Setc(pos : word);
 procedure Flush;
@@ -123,7 +125,7 @@ var tty_ops : file_operations ;
 
     Shift,CapsLock,Crt,Alt : boolean;
 
-    buffer_keyb  : array[1..127] of char;
+    buffer_keyb  : array[0..KEYBUFFLEN-1] of char;
     buffer_count , last_c: dword;
 
     keyb_ops : file_operations ;
@@ -572,14 +574,9 @@ enviar_byte ($20,$20);
                      end;
          else
           begin
-
-              {Se incrementa el contador}
-              buffer_count += 1;
-
-              If buffer_count > 127 then buffer_count := 1 ;
-
-              {Puntero al buffer}
               p := @buffer_keyb[buffer_count];
+              Inc(buffer_count);
+              buffer_count := buffer_count mod KEYBUFFLEN;
 
 
            {Caracteres que necesitan el buffer}
@@ -647,70 +644,33 @@ end;
   ***********************************************************************
 }
 function keyb_read (Fichero : p_file_t ; count : dword ; buff : pointer ): dword ;
-var cont ,tmp : dword ;
-label wait_key , _back;
 begin
-
- { es verificado que el tamano del buffer sea correcto  }
- if not(Verify_User_Buffer(pointer(buff+count))) then exit(0);
-
- { El dipositivo es mio }
- keyb_lock;
-
- cont := 0 ;
-
- wait_key:
-
-  { No hay nada en el buffer devo esperar a que se pulse }
-  If buffer_count = last_c then Proceso_Interrumpir (Tarea_Actual , keyb_wait) ;
-
-
-  { Se pulso una tecla o hay que vaciar al buffer }
-
-     repeat
-
-     last_c += 1;
-
-     If last_c > 127 then last_c := 1 ;
-
-     { se copia al area de usuario }
-     memcopy (@buffer_keyb[last_c] , buff , 1);
-
-     { si hay un cambio de linea se vuelve al proceso }
-     if buffer_keyb[last_c] = #13 then
-      begin
-       cont += 1;
-
-       { cuando se preciona enter se genera un #13#10}
-       buffer_count += 1 ;
-       if buffer_count > 127 then buffer_count := 1 ;
-       buffer_keyb[buffer_count] := #10;
-
-
-       goto _back ;
-     end;
-
-     { se incrementan los contadores }
-     buff += 1;
-     cont += 1;
-
-     { Se llego a lo pedido }
-     if (count = cont) then
-      begin
-
-  _back :
-
+  Result := 0;
+  if not Verify_User_Buffer(pointer(buff+count)) then
+    Exit;
+  keyb_lock;
+  while true do
+  begin
+    If buffer_count = last_c then
+      Proceso_Interrumpir (Tarea_Actual , keyb_wait) ;
+    while (last_c < buffer_count) and (Result < count) do
+    begin
+      Inc(Result);
+      if buffer_keyb[last_c] = #13 then
+        buffer_keyb[last_c] := #10;
+      memcopy (@buffer_keyb[last_c] , buff , 1);
+      Inc(last_c);
+      last_c := last_c mod KEYBUFFLEN;
+      Inc(buff);
+      if buffer_keyb[last_c-1] = #10 then
+        Break;
+    end;
+    if (count = Result) or (buffer_keyb[last_c-1] = #10) then
+    begin
       keyb_unlock;
-      exit(cont);
-     end;
-
-     { hay que vaciar el buffer }
-     until (last_c = buffer_count ) ;
-
-     { Faltan teclas por leer }
-     goto wait_key;
-
-
+      Exit;
+    end;
+  end;
 end;
 
 
