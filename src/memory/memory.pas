@@ -929,7 +929,7 @@ oldpos := Tarea_Actual^.text_area.add_l_fin;
 {Se protege el recurso memoria}
 Mem_Lock;
 
-If vmm_alloc(Tarea_Actual,@Tarea_Actual^.text_area,size)=0 then printkf('/nSys_Brk : Ok\n',[])
+If vmm_alloc(Tarea_Actual,@Tarea_Actual^.text_area,size)=0 then
 else
  begin
  Mem_Unlock;
