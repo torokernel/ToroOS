@@ -272,7 +272,7 @@ for ret := 0 to 7 do
    dma_wait[ret].lock_wait := nil;
   end;
 
-printkf('/nIniciando dma ... /VOk \n',[]);
+printkf('/nInitializing dma ... /VOk \n',[]);
 end;
 
 end.
