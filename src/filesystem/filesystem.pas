@@ -206,13 +206,6 @@ flags     : dword;
 size     : dword;
 blksize  : dword;
 blocks   : dword;
-wait_on_inode : wait_queue;
-sb       : P_super_block_t;
-op       : P_inode_operations;
-i_dentry : p_dentry ;
-ino_next : p_inode_t ;
-ino_prev : p_inode_t ;
-ino_dirty_next : p_inode_t;
 end;
 
 
@@ -1763,8 +1756,8 @@ Max_Buffers := ((Buffer_Use_Mem * MM_MemFree ) div 100) div sizeof(buffer_head);
 Max_dentrys := Max_Buffers ;
 Max_Inodes := Max_dentrys ;
 
-printkf('/Vvfs/n ... Buffer - Cache /V%d /nBufferes\n',[Max_Buffers]);
-printkf('/Vvfs/n ... Inode  - Cache /V%d /nBufferes\n',[Max_Buffers]);
+printkf('/Vvfs/n ... Buffer - Cache /V%d /nBuffers\n',[Max_Buffers]);
+printkf('/Vvfs/n ... Inode  - Cache /V%d /nBuffers\n',[Max_Buffers]);
 
 end;
 
@@ -2134,7 +2127,7 @@ if (name[0]= #1) and (name[1]='.') then //chararraycmp(@name[1],@DIR[1],1) then
  tmp := ino_p^.i_dentry ;
  goto _1;
  end
-  else if chararraycmp(@name[1],@DIR_PREV[1],2) then
+  else if (name[0] = #2) and (name[1] = '.') and (name[2] = '.') then//if chararraycmp(@name[1],@DIR_PREV[1],2) then
    begin
     tmp := ino_p^.i_dentry^.parent ;
     goto _1 ;
@@ -2355,7 +2348,7 @@ i_root^.i_dentry^.count += 1;
 Tarea_Actual^.cwd := i_root ;
 
 
-printkf('/Vvfs/n ... root montada\n',[]);
+printkf('/Vvfs/n ... root mounted\n',[]);
 
 { bienvenida al usuario }
 //toro_msg;
@@ -2364,7 +2357,7 @@ exit;
 
 _exit :
 
-printkf('/Vvfs/n : No se ha podido montar la unidad root\n',[]);
+printkf('/Vvfs/n : Imposible to mount root\n',[]);
 debug($1987);
 
 end;
@@ -2825,7 +2818,7 @@ if (tmp = nil) then
   set_Errno := -ENOENT ;
   exit(-1);
  end;
-
+ 
 {si o si deve ser un dir}
 if not(Is_Dir (tmp)) then
  begin
@@ -2840,7 +2833,6 @@ put_dentry (Tarea_Actual^.cwd^.i_dentry);
 Tarea_Actual^.cwd := tmp ;
 
 clear_errno;
-
 exit(0);
 end;
 

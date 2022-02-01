@@ -148,7 +148,7 @@ function find_in_cache ( ino : dword ; sb : p_super_block_t ) : pfat_inode_cache
 function chararraycmp (ar1 , ar2 : pchar ; len :dword ): boolean ;inline;
 var ret :dword ;
 begin
-for ret := 1 to len do
+for ret := 0 to len-1 do
  begin
   if (ar1^ <> ar2^) then exit(false);
   ar1 += 1;
@@ -253,9 +253,13 @@ else retorno := ((msb shl 8) or lsb ) and $FFF ;
 if (retorno = $FFF) then exit(last_sector) else exit(retorno + 31) ;
 
 end;
+
+// TODO: remove this
 {$ASMMODE ATT}
 function strupper(p : pchar) : pchar;assembler;
 asm
+        push %esi
+        push %edi
         movl    p,%esi
         orl     %esi,%esi
         jz      .LStrUpperNil
@@ -273,7 +277,9 @@ asm
         jnz     .LSTRUPPER1
 .LStrUpperNil:
         movl    p,%eax
-end ['EAX','ESI','EDI'];
+        pop %edi
+        pop %esi
+end;
 
 { * Aclaracion !!! : los procedimientos de fechas estas mall!!! * }
 
@@ -425,7 +431,7 @@ _ext :
 
 _exit :
 
- memcopy(@tmp,@destino[1],count); //destino := tmp ;
+ memcopy(@tmp[0],@destino[1],count); //destino := tmp ;
  destino[0] := chr(count);
 
 end;
@@ -447,7 +453,6 @@ count := 1 ;
 lgcount := 0 ;
 
 repeat
-
   case pdir^.nombre[1] of
   #0 : exit(-1);
   #$E5 : lgcount := 0 ;
@@ -459,44 +464,31 @@ repeat
      lgcount += 1
       else
        begin
-
         { tiene entrada de nombre largo ? }
         if (lgcount > 0 ) then
          begin
           plgdir := pointer (pdir);
-
           buff := '';
-
-          { se trae todo el nombre }
           for cont := 0 to (lgcount-1) do
            begin
             plgdir -= 1 ;
             unicode_to_unix (plgdir,buff);
            end;
-
-           { puede ocacionar problemas futuros !! }
            strupper (@buff[1]);
-
-          { se compara y se sale }
-          if chararraycmp (@buff[1],name,byte(buff[0])) then
+          if chararraycmp (@buff[1], name, byte(buff[0])) then
            begin
             res := pdir ;
             exit(0);
            end;
-
          end
           else { no tiene entrada de nombre largo }
            begin
-
-             unix_name (@pdir^.nombre,buff);
-
-             { se compara solo con 11 caracteres }
-             if chararraycmp (@buff[1],name,byte(buff[0])) then
+            unix_name (@pdir^.nombre, buff);
+            if chararraycmp (@buff[1],name,byte(buff[0])) then
               begin
                res := pdir ;
                exit(0);
               end;
-
            end;
 
         lgcount := 0 ;
@@ -771,7 +763,6 @@ label _load_ino , find_in_dir ;
 begin
 fillbyte(fat_entry,sizeof(fat_entry),32);
 memcopy (@dt^.name[1],@fat_entry,byte(dt^.name[0]));
-
 { esto puede traer problemas }
 strupper (@fat_entry[1]);
 
@@ -844,7 +835,6 @@ _load_ino :
  {se llama al kernel y se devuelve una estructura de inodos que ya}
  {habia creado previamente}
  dt^.ino := get_inode (ino^.sb,ino_fat^.ino) ;
-
  exit(dt);
 end;
 
@@ -1337,7 +1327,7 @@ fat_file_op.ioctl := nil ;
 
 register_filesystem (@fat_fstype);
 
-printkf('/Vvfs/n ... registrando /Vfat\n',[]);
+printkf('/Vvfs/n ... registering /Vfat\n',[]);
 end;
 
 
