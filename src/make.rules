@@ -1,5 +1,6 @@
 LD=/home/debian/multibootfpc/fpc-3.2.0-i386-embedded.cross.x86_64-linux/fpc/bin/i386-unknown-elf-ld 
 FPC=/home/debian/multibootfpc/fpc-3.2.0-i386-embedded.cross.x86_64-linux/fpc/bin/x86_64-linux/ppcross386
 AS=/home/debian/multibootfpc/fpc-3.2.0-i386-embedded.cross.x86_64-linux/fpc/bin/i386-unknown-elf-as 
-FPC_FLAGS=-TEmbedded -Fu/home/debian/multibootfpc/fpc-3.2.0-i386-embedded.cross.x86_64-linux/fpc/units/i386-embedded/rtl -Fu../kernel/ -Fu../arch/ -Fu../memory/ -Fu../process/ -Fu../filesystem/ -Fu../drivers/ -Fu../drivers/block/ -s -a -Rintel -Sm -Si -MObjfpc
+FPC_EMB=/home/debian/multibootfpc/fpc-3.2.0-i386-embedded.cross.x86_64-linux/fpc/units/i386-embedded/rtl 
+FPC_FLAGS=-TEmbedded -Fu$FPC_EMB -Fu../kernel/ -Fu../arch/ -Fu../memory/ -Fu../process/ -Fu../filesystem/ -Fu../drivers/ -Fu../drivers/block/ -s -a -Rintel -Sm -Si -MObjfpc
 FPC_RTL=/home/debian/torokernel/fpc-3.2.0/rtl
