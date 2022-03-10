@@ -1,7 +1,8 @@
 INPUT (
-./kernel/kernel.o
 /home/debian/multibootfpc/fpc-3.2.0-i386-embedded.cross.x86_64-linux/fpc/units/i386-embedded/rtl/system.o
 /home/debian/multibootfpc/fpc-3.2.0-i386-embedded.cross.x86_64-linux/fpc/units/i386-embedded/rtl/multiboot.o
+/home/debian/multibootfpc/fpc-3.2.0-i386-embedded.cross.x86_64-linux/fpc/units/i386-embedded/rtl/objpas.o
+./kernel/kernel.o
 ./kernel/printk.o
 ./arch/arch.o
 ./memory/memory.o
