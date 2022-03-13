@@ -1,6 +1,5 @@
 #!/bin/bash
 QEMU_PATH=~/qemufortoroos/build/x86_64-softmmu/qemu-system-x86_64
-make
 mkdir -p floppy/bin
 sudo mount -o loop floppy-disk.img ./floppy/
 sudo cp ../tools/sh/sh ./floppy/bin/sh
