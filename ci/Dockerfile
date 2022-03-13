@@ -16,9 +16,6 @@ RUN sed -i '/FPC=/c\FPC="'"$PWD"'/fpc-3.2.0-i386-embedded.cross.x86_64-linux/bin
 RUN sed -i '/AS=/c\AS="'"$PWD"'/fpc-3.2.0-i386-embedded.cross.x86_64-linux/bin/i386-unknown-elf-as"' ./ToroOS/src/make.rules
 RUN sed -i '/FPC_RTL=/c\FPC_RTL="'"$PWD"'/fpc-for-toroos/rtl"' ./ToroOS/src/make.rules
 RUN sed -i '/FPC_EMB=/c\FPC_EMB="'"$PWD"'/fpc-3.2.0-i386-embedded.cross.x86_64-linux/units/i386-embedded/rtl"' ./ToroOS/src/make.rules
-RUN sed -i '2 c\"'"$PWD"'/fpc-3.2.0-i386-embedded.cross.x86_64-linux\/units\/i386-embedded\/rtl\/system.o"' ./ToroOS/src/linkfile
-RUN sed -i '3 c\"'"$PWD"'/fpc-3.2.0-i386-embedded.cross.x86_64-linux\/units\/i386-embedded\/rtl\/multiboot.o"' ./ToroOS/src/linkfile
-RUN sed -i '4 c\"'"$PWD"'/fpc-3.2.0-i386-embedded.cross.x86_64-linux\/units\/i386-embedded\/rtl\/objpas.o"' ./ToroOS/src/linkfile
 RUN sed -i '/QEMU_PATH=/c\QEMU_PATH="'"$PWD"'/qemufortoroos/build/x86_64-softmmu/qemu-system-x86_64"' ./ToroOS/src/run.sh
 run wget https://sourceforge.net/projects/toro/files/images/toro-1.1.3/toro-1.1.3.img/download && mv download /root/ToroOS/src/floppy-disk.img
 WORKDIR /root/ToroOS
