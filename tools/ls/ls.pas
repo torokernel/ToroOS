@@ -1,117 +1,82 @@
+//
+// ls.pas
+//
+// This application shows how ls is implemented in ToroOS.
+// 
+// Copyright (c) 2003-2022 Matias Vara <matiasevara@gmail.com>
+// All Rights Reserved
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
 
-{ * ls :                                                               *
-  *                                                                    *
-  * Lista un directorio                                                *
-  *                                                                    *
-  * Copyright (c) 2003-2007 Matias Vara <matiasevara@gmail.com>         *
-  * All Rights Reserved                                                *
-  *                                                                    *
-  * Versiones :                                                        *
-  *                                                                    *
-  * 14 / 02 / 06 : Es reescrito                                        *
-  *                                                                    *
-  **********************************************************************
-}
+uses crt, strings;
 
-uses toro,strings,crt;
+type
 
-var dir : pdir ;
-    buf : pdirent ;
-    tmp  : ansistring ;
-    tmp2 : pchar ;
+preaddir_entry = ^readdir_entry ;
 
-
-
-procedure mostrar_file(f : pchar) ;
-var i: stat ;
-begin
-
-gotoxy(1,25);
-
-{ llamada que me devuelve un inodo }
-if statf(f , i) = -1 then
- begin
-  writeln('error al abrir' , f);
-  exit;
- end;
-
-
-If (i.flags and STAT_IXOTH) = STAT_IXOTH then write('e') else write('-');
-if (i.flags and STAT_IWOTH) = STAT_IWOTH then write('w') else write('-');
-if (i.flags and STAT_IROTH) = STAT_IROTH then write('r') else write('-');
-
-
-if (i.mode and STAT_IFREG) = STAT_IFREG then write('r') else write('-');
-if (i.mode and STAT_IFDIR) = STAT_IFDIR then write('d') else write('-');
-if (i.mode and STAT_IFCHR) = STAT_IFCHR then write('c') else write('-');
-if (i.mode and STAT_IFBLK) = STAT_IFBLK then write('b') else write('-');
-
-write('--');
-
-case i.mode of
-STAT_IFDIR: textcolor(lightgreen) ;
-STAT_IFCHR: textcolor(blue);
-STAT_IFBLK : textcolor(white);
-STAT_IFREG : if (i.flags and STAT_IXOTH)= STAT_IXOTH then textcolor(lightblue) else textcolor(7);
+readdir_entry = record
+name : string ;
+ino : dword ;
 end;
 
-gotoxy(15,25);
-write(f);
+p_inode_tmp = ^inode_tmp;
 
-gotoxy(60,25);
-textcolor(7);
-
-write(i.size);
-writeln('');
+inode_tmp = packed record
+ino      : dword;
+mayor    : byte;
+menor    : byte;
+rmayor   : byte;
+rmenor   : byte;
+count    : byte;
+state    : byte;
+mode     : dword;
+atime    : dword;
+ctime    : dword;
+mtime    : dword;
+dtime    : dword;
+nlink    : word;
+flags     : dword;
+size     : dword;
+blksize  : dword;
+blocks   : dword;
 end;
 
+var
+  st: inode_tmp;
+  fd, count: LongInt;
+  buf: readdir_entry;
+  name: array[0..255] of Char;
+
 begin
-
-
-if paramcount = 0 then dir := opendir ('.')
- else if paramcount = 1 then
+  if Stat('.', Pointer(@st)) < 0 then 
+    Exit;
+  if st.mode and 4 <> 4 then
+    Exit;
+  fd := open('.', O_RDONLY, 0);
+  while true do
   begin
-
-   if paramstr(1) = '/?' then
-     begin
-      writeln('Lista un directorio mostrando los archivos y subdirectorios');
-      writeln('ls [path]');
-      writeln('by Matias Vara');
-      exit;
-     end;
-
-   tmp := paramstr(1);
-   dir := opendir(pchar(tmp));
-
-   { el directorio actual es cambiado }
-   chdir (pchar(tmp));
-
-   end
- else
-  begin
-   writeln('comandos incorrectos');
-   exit;
+    count := do_read(fd, Pointer(@buf), sizeof(buf));
+    if count = 0 then 
+      break;
+    // TODO: there is a bug in which empty directories are shown when reading
+    // for the moment, just ignore them
+    if byte(buf.name[0]) = 0 then
+      continue;
+    StrPCopy(@name[0], buf.name);
+    ttygotoxy(1, 25);
+    writeln(PChar(@name[0]));
   end;
-
- tmp2 := stralloc (255);
-
- if dir = nil then
-  begin
-   writeln ('directorio invalido');
-   exit;
-  end;
-
- buf := readdir (dir);
-
- gotoxy(1,25);
-
- while (buf <> nil) do
-  begin
-   strpcopy (tmp2,buf^.name);
-   mostrar_file(tmp2);
-   buf := readdir (dir);
-  end;
-
-
-
+  //do_close(fd);
 end.
