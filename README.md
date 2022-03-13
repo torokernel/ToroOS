@@ -35,7 +35,7 @@ ToroOS is built by using fpc-3.2.0 and the **embedded-i386** rtl. Also, we are c
 ```bash
 wget https://raw.githubusercontent.com/torokernel/ToroOS/master/ci/Dockerfile
 sudo docker build --no-cache -t toroos-dev .
-sudo docker run --privileged -it -p 5900:5900 toroos-dev
+sudo docker run --privileged=true --publish=0.0.0.0:5900:5900 -it toroos-dev
 ./run.sh
 ``` 
 This launches ToroOS by using QEMU. To watch the screen, you can simply run a VCN client on port 5900.
