@@ -1,9 +1,11 @@
-include $(TOP_DIR)../../toro-src/make.rules
+include $(TOP_DIR)../../src/make.rules
 
 all : sh.o
 
 sh.o : sh.pas
-	$(FPC)  -Sm -k-Ttext -k0x40000000 -k--oformat -kcoff-go32  sh.pas
-	$(RENAME) sh.exe sh
-	$(MV) sh ..\..\..\bin\sh
-	
+	$(FPC) -TEmbedded -Fi$(FPC_RTL)/i386 -Fi$(FPC_RTL)/embedded -Fi$(FPC_RTL)/inc -Fu$(FPC_RTL)/embedded -Us $(FPC_RTL)/embedded/system.pp
+	$(FPC) -s -Fi$(FPC_RTL)/i386 -Fi$(FPC_RTL)/inc -TEmbedded -Fu$(FPC_RTL)/inc/ -Fu$(FPC_RTL)/embedded -Sm sh.pas
+	$(LD) -g --gc-sections  -L. -o sh -T sh.ld -Map sh.map
+	rm sh.o
+clean : 
+	rm sh.o
