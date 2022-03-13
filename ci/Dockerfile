@@ -6,10 +6,10 @@ RUN wget https://sourceforge.net/projects/lazarus/files/Lazarus%20Linux%20amd64%
 RUN wget https://sourceforge.net/projects/freepascal/files/Linux/3.2.0/fpc-3.2.0-i386-embedded.cross.x86_64-linux.tar/download && mv download fpc-3.2.0-i386-embedded.cross.x86_64-linux.tar && tar -xf fpc-3.2.0-i386-embedded.cross.x86_64-linux.tar && rm fpc-3.2.0-i386-embedded.cross.x86_64-linux.tar
 RUN cd fpc-3.2.0-i386-embedded.cross.x86_64-linux && echo $PWD | ./install.sh && cd ..
 RUN ln -s /root /home/debian
-RUN git clone https://github.com/qemu/qemu.git qemuforvmm
+RUN git clone https://github.com/qemu/qemu.git qemufortoroos
 # TODO: remove branch
 RUN git clone https://github.com/torokernel/ToroOS.git -b fixforsprint ToroOS
-RUN cd qemuforvmm && git checkout 51204c2f && git apply ../ToroOS/patches/patch_for_fdc.patch && mkdir build && cd build && ../configure --target-list=x86_64-softmmu && make 
+RUN cd qemufortoroos && git checkout 51204c2f && git apply ../ToroOS/patches/patch_for_fdc.patch && mkdir build && cd build && ../configure --target-list=x86_64-softmmu && make 
 RUN git clone https://github.com/torokernel/freepascal.git -b fpc-for-toroos fpc-for-toroos
 RUN sed -i '/LD=/c\LD="'"$PWD"'/fpc-3.2.0-i386-embedded.cross.x86_64-linux/bin/i386-unknown-elf-ld"' ./ToroOS/src/make.rules
 RUN sed -i '/FPC=/c\FPC="'"$PWD"'/fpc-3.2.0-i386-embedded.cross.x86_64-linux/bin/x86_64-linux/ppcross386"' ./ToroOS/src/make.rules
@@ -19,4 +19,6 @@ RUN sed -i '/FPC_EMB=/c\FPC_EMB="'"$PWD"'/fpc-3.2.0-i386-embedded.cross.x86_64-l
 RUN sed -i '2 c\"'"$PWD"'/fpc-3.2.0-i386-embedded.cross.x86_64-linux\/units\/i386-embedded\/rtl\/system.o"' ./ToroOS/src/linkfile
 RUN sed -i '3 c\"'"$PWD"'/fpc-3.2.0-i386-embedded.cross.x86_64-linux\/units\/i386-embedded\/rtl\/multiboot.o"' ./ToroOS/src/linkfile
 RUN sed -i '4 c\"'"$PWD"'/fpc-3.2.0-i386-embedded.cross.x86_64-linux\/units\/i386-embedded\/rtl\/objpas.o"' ./ToroOS/src/linkfile
+RUN sed -i '/QEMU_PATH=/c\QEMU_PATH="'"$PWD"'/qemufortoroos/build/x86_64-softmmu/qemu-system-x86_64"' ./ToroOS/src/run.sh
+run wget https://sourceforge.net/projects/toro/files/images/toro-1.1.3/toro-1.1.3.img/download && mv download /root/ToroOS/src/floppy-disk.img
 WORKDIR /root/ToroOS
