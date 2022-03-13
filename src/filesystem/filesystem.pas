@@ -12,6 +12,9 @@ const
 {Maxima cantidad de archivos abiertos}
 Nr_Open = 32;
 
+// Standart IO descriptors
+F_STDIN = 2;
+F_STDOUT = 1;
 
 {Valores Whence}
 seek_set = 0;
@@ -3072,8 +3075,8 @@ begin
 
   vmm_alloc(new_tarea, @new_tarea^.stack_area, Page_Size);
 
-  clone_filedesc(@Tarea_Actual^.Archivos[1],@new_tarea^.Archivos[1]);
-  clone_filedesc(@Tarea_Actual^.Archivos[2],@new_tarea^.Archivos[2]);
+  clone_filedesc(@Tarea_Actual^.Archivos[F_STDIN],@new_tarea^.Archivos[F_STDIN]);
+  clone_filedesc(@Tarea_Actual^.Archivos[F_STDOUT],@new_tarea^.Archivos[F_STDOUT]);
 
   // map args
   pagearg_us := get_free_page ;

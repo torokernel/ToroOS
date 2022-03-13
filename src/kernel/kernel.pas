@@ -108,12 +108,11 @@ With Init_Proc^ do
 end;
 
 add_task(Init_Proc);
-
 ttyino := kmalloc(sizeof(inode_t));
-ttyfile := @Init_proc^.Archivos[1];
+ttyfile := @Init_proc^.Archivos[F_STDOUT];
 
 keybino := kmalloc (sizeof(inode_t));
-keybfile := @Init_proc^.Archivos[2];
+keybfile := @Init_proc^.Archivos[F_STDIN];
 
 ttyino^.mode := dt_chr ;
 ttyino^.flags := I_RO or I_WO ;
