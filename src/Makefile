@@ -1,8 +1,3 @@
-#
-#Este archivo utilizado por Make se encarga de compilar todo
-#el sistema y generar la imagen para el disquet de 3 1/2
-#
-
 include make.rules
 
 toro-kernel : 
