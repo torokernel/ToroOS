@@ -1,20 +1,7 @@
-INPUT (
-./kernel/kernel.o
-./kernel/printk.o
-./arch/arch.o
-./memory/memory.o
-./process/process.o
-./filesystem/filesystem.o
-./filesystem/fat.o
-./kernel/syscall.o
-./drivers/dma.o
-./drivers/floppy.o
-./drivers/tty.o
-)
 ENTRY(_START)
 SECTIONS
 {
-     . = 0x100000;
+     . = 0x40000000;
      .text ALIGN (0x1000) :
     {
     _text = .;

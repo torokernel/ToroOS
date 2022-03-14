@@ -1,22 +1,5 @@
 Unit kdev;
 
-{ * Kdev :                                                              *
-  *                                                                     *
-  * Unidad encarga del driver de kernel implementada para permitir el   *
-  * acceso a variables del kernel  , en un futuro puede tener mas       *
-  * implementaciones  , por ahora solo da acceso a un par de variables  *
-  *                                                                     *
-  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>          *
-  * All Rights Reserved                                                 *
-  *                                                                     *
-  *                                                                     *
-  * Versiones                                                           *
-  *                                                                     *
-  * 02 / 03 / 2006 : Primer Version                                     *
-  *                                                                     *
-  ***********************************************************************
-}
-
 interface
 
 {$I ../include/toro/kdev.inc}
@@ -42,16 +25,6 @@ var kdev_ops : file_operations ;
 implementation
 
 
-{ * kdev_ioctl :                                                        *
-  *                                                                     *
-  * Fichero : Puntero al descriptor de fichero                          *
-  * req : numero de peticion                                            *
-  * argp : Puntero a los argumentos                                     *
-  *                                                                     *
-  * Llamada de control al dispositivo de kernel                         *
-  *                                                                     *
-  ***********************************************************************
-}
 function kdev_ioctl (fichero : p_file_t ; req : dword ; argp : pointer ) : dword ;
 var tmp : ^dword;
 begin
@@ -90,7 +63,7 @@ kdev_ops.open := nil;
 kdev_ops.ioctl := @kdev_ioctl ;
 
 register_chrdev (kdev_mayor,'kdev',@kdev_ops);
-printk('/nIniciando kdev0 ... /VOk\n',[]);
+printk('/nInitializing kdev0 ... /VOk\n',[]);
 end;
 
 end.

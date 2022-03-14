@@ -1,20 +1,26 @@
+//
+// syscall.pas
+//
+// This unit contains the syscall interface.
+// 
+// Copyright (c) 2003-2022 Matias Vara <matiasevara@gmail.com>
+// All Rights Reserved
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
 Unit Syscall;
 
-{ * Syscall:
-  *                                                                         *
-  * Aqui se trata la interrupcion de soft 50 , con  DPL 3  , los parametros *
-  * de las funciones son pasados por los registros  , lo cual limite hasta  *
-  * 6 parametros  , el array Syscall_Table mantiene la lista de punteros    *
-  * de las syscall del sistema                                              *
-  *                                                                         *
-  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>              *
-  * All Rights Reserved                                                     *
-  *                                                                         *
-  * Versiones :                                                             *
-  * 10 / 03 / 2004 : Version Inicial                                        *
-  *                                                                         *
-  ***************************************************************************
-}
 interface
 
 const
@@ -25,14 +31,6 @@ procedure Syscall_Init;
 
 implementation
 uses arch, process, memory, filesystem;
-
-{ * Kernel_Entry :                                                       *
-  *                                                                      *
-  * Procedimiento que captura las Int. de soft  , busca la syscall segun *
-  * eax y salta a su puntero                                             *
-  *                                                                      *
-  ************************************************************************
-}
 
 procedure kernel_entry;assembler;
 asm
@@ -83,14 +81,6 @@ asm
    end;
 
 
-
-{ * Sycall_Init :                                                        *
-  *                                                                      *
-  * Proceso que es llamado solo una vez al cargar el nucleo , este inic  *
-  * ializa el array de punteros que mantiene las syscall , syscall_table *
-  *                                                                      *
-  ************************************************************************
-}
 procedure Syscall_Init;
 var 
 m: dword;
@@ -99,7 +89,7 @@ Set_Int_Gate_User(50,@kernel_entry);
 for m := 0 to 34 do
   syscall_table[m] := nil;
 
-syscall_table[0]:= @Sys_MountRoot; {Solo puede ser llamada una vez}
+syscall_table[0]:= @Sys_MountRoot;
 Syscall_Table[1]:= @Sys_Exit;
 Syscall_Table[2]:= @Sys_Fork;{
 Syscall_Table[3]:= @Sys_Mkdir;
@@ -123,7 +113,7 @@ Syscall_Table[21]:= @Sys_Detener;}
 Syscall_Table[22] := @Sys_Stat;{
 Syscall_Table[23] := @Sys_Utime;
 Syscall_Table[24] := @Sys_Stime ;
-}Syscall_Table[25]:= @Sys_exec;
+}Syscall_Table[25]:= @SysExec;
 {Syscall_Table[26] := @sys_getitimer;}
 Syscall_Table[27] := @Sys_chdir ;
 Syscall_Table[28] := @Sys_ReadErrno ;{

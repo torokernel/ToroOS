@@ -1,23 +1,5 @@
 Unit ToroSys;
 
-{ * Toro_Sys :                                                          *
-  *                                                                     *
-  * Esta unidad contiene las llamadas al sistema para el sistema TORO   *
-  * que deveran ser compiladas y enlazadas , al momento de crear un     *
-  * prog . Su contenido va variando continuamente con la implementacion *
-  * de nuevas syscalls                                                  *
-  *                                                                     *
-  * Copyright (c) 2003-2006 Matias Vara <matiasvara@yahoo.com>          *
-  * All Rights Reserved                                                 *
-  *                                                                     *
-  * Versiones :                                                         *
-  *                                                                     *
-  * 20 - 08 - 04 : Primera Version                                      *
-  ***********************************************************************
-}
-
-
-
 interface
 
 

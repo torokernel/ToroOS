@@ -1,7 +1,26 @@
+//
+// filesystem.pas
+//
+// This unit contains the vfs.
+// 
+// Copyright (c) 2003-2022 Matias Vara <matiasevara@gmail.com>
+// All Rights Reserved
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+
 Unit filesystem;
-
-
-
 
 interface
 
@@ -9,56 +28,43 @@ uses arch, printk, memory;
 
 const
 
-{Maxima cantidad de archivos abiertos}
 Nr_Open = 32;
 
+// Standart IO descriptors
+F_STDIN = 2;
+F_STDOUT = 1;
 
-{Valores Whence}
 seek_set = 0;
 seek_cur = 1;
 seek_eof = 2;
 
-
-{sb flags bits }
 Sb_Rdonly = 1;
 Sb_Rw = 2 ;
 
-
-{inode state bits }
 I_Dirty = 1 ;
 
-{inode flags bits }
 I_RO = 4 ;
 I_WO = 2 ;
 I_XO = 1 ;
 
-
-{inode mode }
 dt_chr = 2;
 dt_dir = 4;
 dt_blk = 6;
 dt_reg = 8;
 
-{open flags}
 O_CREAT = 1;
 O_TRUNC = 2;
 
-
-{open mode}
 O_WRONLY = 2;
 O_RDONLY = 4;
 O_RDWR = 6 ;
 
-
-{Numero Maximo de dispositivos soportados}
 Nr_Blk = 30 ;
 Nr_Chr = 50 ;
 Max_Spblk = 5 ;
 Max_Path = 4096 ;
 
-{ dispositivo de caracteres para acceso a las variables del kernel }
 kdev_mayor = 49 ;
-
 
 Nr_Menor : array[0..5] of char =('0','1','2','3','4','5');
 
@@ -74,9 +80,6 @@ p_dentry = ^dentry ;
 p_file_t = ^file_t;
 
 
-
-{ **************** Metodos principales del vfs ************************** }
-
 file_operations = record
  open :function (Inodo : p_inode_t ; Fichero : p_file_t): dword;
  read :function (Fichero : p_file_t ; count : dword ; buff : pointer): dword;
@@ -85,7 +88,6 @@ file_operations = record
  seek :function (Fichero : p_file_t ; whence , offset : dword): dword;
  ioctl :function (Fichero : p_file_t ; req : dword ; argp : pointer): dword;
 end;
-
 
 super_operations = record
  read_inode : procedure(ino : P_inode_t);
@@ -110,18 +112,9 @@ rename : function (dentry , ndentry : p_dentry ) : dword ;
 truncate : procedure (ino : p_inode_t) ;
 end;
 
-
-
-{ ****************** estructuras principales del vfs ********************* }
-
-
-{ estructura de un sistema de archivo }
-
 file_system_type = record
 
- {numero identificador del fs}
  fs_id      : dword ;
- {por ahora no es utilizado este campo }
  fs_flag    : dword;
  read_super : function (sb : P_super_block_t) : P_super_block_t;
  next_fs    : p_file_system_type;
@@ -129,15 +122,10 @@ file_system_type = record
 end;
 
 
-{ Estructura de un Dispositivo }
-
 device = record
 name : string[20] ;
 fops : p_file_ops;
 end;
-
-
-{  estructura de un sp en el vfs}
 
 super_block_t = record
 mayor : dword;
@@ -155,9 +143,6 @@ next_spblk : p_super_block_t;
 prev_spblk : p_super_block_t;
 ino_hash : p_inode_t;
 end;
-
-
-{ estructura de un inodo }
 
 inode_t = record
 ino      : dword;
@@ -206,16 +191,7 @@ flags     : dword;
 size     : dword;
 blksize  : dword;
 blocks   : dword;
-wait_on_inode : wait_queue;
-sb       : P_super_block_t;
-op       : P_inode_operations;
-i_dentry : p_dentry ;
-ino_next : p_inode_t ;
-ino_prev : p_inode_t ;
-ino_dirty_next : p_inode_t;
 end;
-
-
 
 file_t = record
 f_op : p_file_ops ;
@@ -226,7 +202,6 @@ Inodo:p_inode_t;
 end;
 
 
-{estructura devuelta por readdir }
 preaddir_entry = ^readdir_entry ;
 
 readdir_entry = record
@@ -234,7 +209,6 @@ name : string ;
 ino : dword ;
 end;
 
-{entrada dentro del cache de nombre }
 dentry = record
 ino : p_inode_t ;
 state : dword ;
@@ -262,13 +236,10 @@ st_incache = 3;
 fsid : array [1..2] of t_fsid = ((id : 1 ; name : 'torofs'),
                                 (id : 2 ; name : 'fatfs'));
 
-{ Maximo tama¤ode bloque manejable }
 Max_blk_size = 4096 ;
 
-{Porcentage de utilizacion del buffer-cache de la memoria}
 Buffer_Use_Mem  = 1 ;
 
-{ valores del mapa de bits de state }
 Bh_Dirty = 2 ;
 
 type
@@ -305,7 +276,7 @@ function get_block(Mayor,Menor,Bloque,size:dword):p_buffer_head;
 function Put_Block(buffer:p_buffer_head):dword;
 function Get_Inode(sb : p_super_block_t ; ino : dword ):p_inode_t;
 function Register_Filesystem (fs : p_file_system_type) : dword ;
-function sys_exec(path , args : pchar):dword;cdecl ;
+function SysExec(path, args : pchar): dword; cdecl;
 function sys_open (path : pchar ; mode , flags : dword) : dword ; cdecl;
 function sys_read( File_Desc : dword ; buffer : pointer ; nbytes : dword ) : dword;cdecl;
 function sys_write ( file_desc : dword ; buffer : pointer ; nbytes : dword) : dword;cdecl;
@@ -327,7 +298,6 @@ uses process;
 function name_i (path : pchar ) : p_inode_t ; forward;
 function last_dir (path : pchar ) : p_inode_t ; forward;
 
-{Tabla con los inodos en memoria}
 const Inodes_Lru : p_inode_t = nil ;
       Inodes_Free : p_inode_t = nil ;
       Inodes_Dirty : p_inode_t = nil;
@@ -347,8 +317,6 @@ function chararraycmp (ar1 , ar2 : pchar ; len :dword ): boolean ; forward;
 function Alloc_Entry ( ino_p : p_inode_t ; const name : string ) : p_dentry ; forward;
 function Alloc_dentry (const name : string ) : p_dentry ; forward;
 procedure Sys_Sync ;forward;
-
-{ * pcharlen : funcion simple que devuelve la longitud de un pchar * }
 
 function pcharlen ( pc : pchar ) : dword ; inline;
 var cont : dword ;
@@ -378,17 +346,6 @@ memcopy(path, @name[1], len);
 name[0] := chr(len) ;
 end;
 
-
-{ * Register_Chrdev :                                                   *
-  *                                                                     *
-  * nb : Numero mayor                                                   *
-  * name : Nombre del Dispositivo                                       *
-  * fops : Puntero a un array de manejadores del dispositivo            *
-  *                                                                     *
-  * Procedimiento que registra un dispositivo de caracteres             *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure Register_Chrdev(nb : byte ; name : pchar ; fops : p_file_ops);
 begin
 
@@ -410,18 +367,6 @@ abrir;
 
 end;
 
-
-
-{ * Register_Blkdev :                                                   *
-  *                                                                     *
-  * nb : Numero mayor                                                   *
-  * name : Nombre del Dispositivo                                       *
-  * fops : Puntero al array de manejadores                              *
-  *                                                                     *
-  * Procedimiento que registra un dispositivo de bloque                 *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure Register_Blkdev (nb : byte ; name : pchar ; fops : p_file_ops);
 begin
 
@@ -454,9 +399,6 @@ fs_type := nil ;
 
 end;
 
-
-{ * funcion que quita de la cola simple un inodo sucio * }
-
 procedure remove_ino_dirty ( ino : p_inode_t);inline;
 var tmp : p_inode_t ;
 begin
@@ -466,7 +408,6 @@ if inodes_dirty = ino then
   else
    begin
 
-   {se busca por toda la cola }
    while (tmp^.ino_dirty_next <> ino)   do tmp := tmp^.ino_dirty_next ;
 
    tmp^.ino_dirty_next := ino^.ino_dirty_next ;
@@ -474,15 +415,6 @@ if inodes_dirty = ino then
 
 end;
 
-{ * Inode_Update :                                                      *
-  *                                                                     *
-  * Ino : Puntero a un inodo                                            *
-  * Retorno : 0 si ok o -1 si falla                                     *
-  *                                                                     *
-  * Funcion que actualiza la version en el dev dado                     *
-  *                                                                     *
-  ***********************************************************************
-}
 function Inode_Update (Ino : p_inode_t ) : dword ;inline;
 begin
 if (ino^.state and I_Dirty ) <> I_Dirty then exit(0)
@@ -495,17 +427,6 @@ if (ino^.state and I_Dirty ) <> I_Dirty then exit(0)
   end;
 end;
 
-
-
-
-{ * Inode_Uptodate :                                                    *
-  *                                                                     *
-  * Ino : Puntero a un inodo                                            *
-  *                                                                     *
-  * Funcion que trae un inodo al cache                                  *
-  *                                                                     *
-  ***********************************************************************
-}
 function Inode_Uptodate (Ino : p_inode_t ) : dword ;inline;
 begin
 ino^.sb^.op^.read_inode (ino) ;
@@ -549,9 +470,6 @@ nodo_tail^.ino_prev^.ino_next := Nodo ;
 nodo_tail^.ino_prev := Nodo ;
 end;
 
-
-{ * devuelve un inodo libre de la cola de inodos invalidados * }
-
 function alloc_from_free : p_inode_t ; inline ;
 var tmp : p_inode_t ;
 begin
@@ -567,9 +485,6 @@ end;
 
 procedure Free_Dentry ( dt : p_dentry ) ;forward;
 
-
-{ * devuelve un inodo libre de la cola de inodos no utilizados * }
-
 function alloc_from_lru : p_inode_t ; inline ;
 var tmp : p_inode_t ;
 begin
@@ -578,35 +493,19 @@ if Inodes_Lru = nil then exit(nil);
 
 tmp := Inodes_Lru^.ino_prev;
 
-{por si esta sucio , esto es un grave error}
 if Inode_Update (tmp) <> 0 then
     printkf('/VVFS/n : Error de escritura del Inodo : %d dev : %d \n',[tmp^.ino,tmp^.mayor,tmp^.menor]);
 
-{fue quitado de la cola de sucios}
 remove_ino_dirty (tmp);
 
-{si actualmente no posee enlaces en el arbol puede liberarse sino
-permanecera como vacio}
 if tmp^.i_dentry^.l_count = 0 then Free_dentry (tmp^.i_dentry)
  else tmp^.state := st_vacio;
 
-{se informa al driver que el inodo fue totalmente quitado del sistema}
 tmp^.sb^.op^.delete_inode (tmp);
 
 Pop_Inode (Inodes_Lru,tmp);
 end;
 
-
-
-
-
-{ * Alloc_Inode :                                                        *
-  *                                                                      *
-  * Funcion que devuelve un inodo libre y llena los campos mayor , menor *
-  * y ino                                                                *
-  *                                                                      *
-  ************************************************************************
-}
 
 function Alloc_Inode (mayor , menor , inode : dword ) : p_inode_t ;
 var tmp : p_inode_t ;
@@ -617,18 +516,14 @@ begin
 if Max_Inodes = 0 then
   begin
 
-    {se trata de alocar de los inodos invalidos}
     tmp := alloc_from_free ;
 
     if tmp <> nil then goto _exit ;
 
-    {se alocara tomando de la cola lru}
     tmp := alloc_from_lru ;
 
     if tmp = nil then exit (nil) else goto _exit ;
   end;
-
-{hay memoria como para seguir alocando}
 
 tmp := alloc_from_free;
 
@@ -653,11 +548,6 @@ tmp^.count := 0 ;
 exit(tmp);
 end;
 
-
-
-
-{ *  se encarga de buscar un ino en la cola en uso de un sb * }
-
 function Find_in_Hash (sb : p_super_block_t ; ino : dword ) : p_inode_t ;inline;
 var tmp  : p_inode_t ;
 begin
@@ -673,9 +563,6 @@ until (tmp = sb^.ino_hash) ;
 
 exit(nil);
 end;
-
-
-{ * busca un inodo en la cola lru * }
 
 function Find_in_Lru (mayor,menor,ino : dword) : p_inode_t ;inline;
 var tmp : p_inode_t ;
@@ -694,26 +581,12 @@ until (tmp = inodes_lru) ;
 exit(nil);
 end;
 
-
-
-
-{ * Get_Inode :                                                         *
-  *                                                                     *
-  * Dev_blk : Dispostivo logico de donde sera leido el inodo            *
-  * Inode : Numero de Inodo                                             *
-  * Devuelve : Puntero al inodo o nil si falla                          *
-  *                                                                     *
-  * Carga un Inodo en memoria y devuelve su puntero                     *
-  *                                                                     *
-  ***********************************************************************
-}
 function Get_Inode(sb : p_super_block_t ; ino : dword ):p_inode_t;
 var tmp : p_inode_t ;
 begin
 
 if sb = nil then exit(nil);
 
-{puede estar en uso}
 tmp := Find_in_Hash (sb,ino);
 
 if tmp <> nil then
@@ -724,7 +597,6 @@ if tmp <> nil then
 
 tmp := Find_in_Lru (sb^.mayor,sb^.menor,ino);
 
-{estaba en la cola de libres}
 if tmp <> nil then
  begin
   Pop_Inode (inodes_lru,tmp);
@@ -733,13 +605,10 @@ if tmp <> nil then
   exit(tmp);
  end;
 
-{se crea o reutiliza una estructura}
 tmp := Alloc_Inode (sb^.mayor,sb^.menor,ino);
 
 if tmp = nil then exit(nil);
 
-
-{sp del inodo}
 tmp^.sb := sb ;
 tmp^.blksize := sb^.blocksize;
 tmp^.count := 1 ;
@@ -751,22 +620,10 @@ if Inode_Uptodate (tmp) = -1 then
  exit(nil);
  end;
 
-{se coloca en la cola en uso}
 Push_Inode (sb^.ino_hash,tmp);
 
 exit(tmp);
 end;
-
-
-
-
-{ * Put_Inode :                                                          *
-  *                                                                      *
-  * Inode : Puntero a un inodo                                           *
-  * Devuelve : 0 si fue correcto o -1 sino                               *
-  *                                                                      *
-  ************************************************************************
-}
 
 function Put_Inode ( ino:p_inode_t ):dword;[public , alias :'PUT_INODE'];
 begin
@@ -775,17 +632,11 @@ if (ino^.count = 0) then Panic ('/nSe devuelve un inodo con count =  0\n');
 
 ino^.count -= 1;
 
- {el dentry del inodo permanece en la cache de dentrys hasta que el inodo}
- {sea quitado totalmente del sistema}
  if (ino^.count = 0) then
   begin
-
     Pop_Inode (ino^.sb^.ino_hash,ino);
     Push_Inode (Inodes_lru,ino);
-
-    {se le informa al driver que el inodo paso a la cola de desuso}
     ino^.sb^.op^.put_inode(ino)
-
  end;
 
 exit(0);
@@ -803,60 +654,30 @@ begin
 filp^.f_op := nil ;
 end;
 
-
-{ * Clone_Filedesc :                                            *
-  *                                                             *
-  * pfile_p  : descriptor de origen                             *
-  * pfile_c  : descriptor de destino                            *
-  *                                                             *
-  * procedimiento que duplica un descriptor de archivo          *
-  *                                                             *
-  ***************************************************************
-}
 procedure clone_filedesc (pfile_p , pfile_c : p_file_t ) ;
 begin
 pfile_c^ := pfile_p^;
-
 if (nr_filp(pfile_c) = 2 )  or (nr_filp(pfile_c)= 1) then else
 pfile_p^.inodo^.i_dentry^.count += 1;
-
 end;
 
-
-{ * Sys_Close :                                                           *
-  *                                                                       *
-  * File_desc : Descriptor del archivo                                    *
-  *                                                                       *
-  * Este proc. se encarga de cerrar una archivo , liberando de la memoria *
-  * su INODE y liberando la entrada en la tabla de archivos               *
-  *                                                                       *
-  *************************************************************************
-  }
 procedure sys_close (File_desc:dword) ; cdecl ;
 begin
-
 If (file_desc > 32) or (file_desc = 0 ) then exit;
-
 If Tarea_Actual^.Archivos[File_desc].f_op = nil then exit;
-
 Tarea_Actual^.Archivos[file_desc].f_op := nil ;
 Put_dentry (Tarea_Actual^.Archivos[file_desc].inodo^.i_dentry);
 end;
-
 
 function Is_Dir (ino : p_inode_t ) : boolean;
 begin
 if ino^.mode and dt_dir = dt_dir then exit(true) else exit(false);
 end;
 
-
-
 function Is_Blk (ino : p_inode_t ) : boolean ;
 begin
 if ino^.mode and dt_blk = dt_blk then exit(true) else exit(false);
 end;
-
-
 
 function Is_chr (ino : p_inode_t) : boolean;
 begin
@@ -902,13 +723,9 @@ end;
 
 function file_create (ino : p_inode_t ; dt : p_dentry ) : boolean ;inline;
 begin
-
-{la llamada create del driver se limita a crear el archivo}
 if ino^.op^.create (ino,dt,0) = -1 then  exit(false)
  else exit(true);
-
 end;
-
 
 function filp_open (filp : p_file_t)  : dword ;inline;
 begin
@@ -953,62 +770,29 @@ name[0] := char(len);
 exit(true);
 end;
 
-
-{ * Sys_Seek :                                                             *
-  *                                                                        *
-  * File_Desc : Descriptor del archivo                                     *
-  * offset : Posicion donde se quiere posicionar el archivo                *
-  * whence : Algoritmo que se utilizara                                    *
-  * Devuelve : La nueva posicion del archivo o 0 si falla                  *
-  *                                                                        *
-  * Se encarga de posicionar un archivo en un byte dado , segun el         *
-  * algoritmo en whence  , si la llamada fue correcta devuelve la          *
-  * nueva posicion sino devuelve 0                                         *
-  *                                                                        *
-  **************************************************************************
-}
 function sys_seek ( File_desc : dword ; offset , whence : dword ) : dword ; cdecl;
 var ret : dword ;
     p_file : p_file_t ;
 begin
 
-{Se chequea el descriptor}
 If File_desc > 32 then exit(0);
 
-{Puntero al descriptor}
 p_file := @Tarea_Actual^.Archivos[File_desc];
 
 If p_file^.f_op = nil then exit(0);
 
 if p_file^.f_op^.seek = nil then exit(0);
 
-{no se puede hacer un seek sobre un inodo dir}
 if p_file^.inodo^.mode = dt_dir then exit(0);
 
 Inode_lock (@p_file^.inodo^.wait_on_inode);
 
-{se llama al driver para que haga el trabajo}
 if p_file^.f_op^.seek (p_file,whence,offset) = -1 then ret := 0 else ret := (p_file^.f_pos);
 Inode_unlock (@p_file^.inodo^.wait_on_inode);
 
 exit(ret);
 end;
 
-
-
-{ * Sys_Open :                                                          *
-  *                                                                     *
-  * path : Ruta del archivo                                             *
-  * Modo : Modo de acceso                                               *
-  * flags : Modo de la llamada                                          *
-  * Devuelve :El descriptor del archivo                                 *
-  *                                                                     *
-  * Realiza la apertura de un archivo a traves del VFS no importa       *
-  * el tipo de archivo  , devuelve el descriptor de archivo o -1 si     *
-  * falla y el error queda en errno                                     *
-  *                                                                     *
-  ***********************************************************************
-}
 function sys_open (path : pchar ; mode , flags : dword) : dword ; cdecl;
 var tmp : p_inode_t ;
     filp : p_file_t ;
@@ -1026,40 +810,31 @@ if pathcopy (path,dt.name) then  else exit(0);
 
 dt.len := dword(dt.name[0]);
 
-{se trae el inodo}
 tmp := name_i (path);
 
 set_errno := -ENOTDIR;
 
-{ruta invalida!!!!}
 if (tmp = nil) then
  begin
 
-  {bandera de crear archivo !!!!}
   if (flags and O_CREAT) = O_CREAT  then
    begin
 
-    {lugar donde creare el archivo}
      tmp := last_dir (path) ;
 
      if tmp = nil then exit(0) ;
 
-     {se tratara de crear el archivo regular }
      if file_create (tmp,@dt) then
       begin
 
-       {aloja la entrada en el cache}
        p_dt := alloc_entry (tmp,dt.name) ;
 
-       {que kilombo!!! paso algo en el cache!!!!}
        if p_dt = nil then goto _exit;
 
-       {se devuelve el ultimo directorio}
        put_dentry (tmp^.i_dentry);
 
        tmp := p_dt^.ino ;
 
-       {ya esta metido en el cache toda la direccion!! se creara el descr.}
        goto _filp
 
         end
@@ -1069,21 +844,17 @@ if (tmp = nil) then
 
  end;
 
-{si existe bandera de truncar tu tamao a 0 !!!}
 if (flags and O_TRUNC) = O_TRUNC then tmp^.op^.truncate (tmp);
 
 set_errno := -EACCES ;
 
-{no se puede escribir el inodo!!}
 if ((tmp^.flags and I_WO ) <> I_WO) and (mode and O_WRONLY = O_WRONLY) then goto _exit;
 
-{no se puede leer!!!}
 if ((tmp^.flags and I_RO ) <> I_RO) and (mode and O_RDONLY = O_RDONLY) then goto _exit;
 
 
 _filp :
 
-{hay lugar en la tabla de archivos??}
 filp := get_free_filp;
 
 set_errno := -EMFILE;
@@ -1111,7 +882,6 @@ filp^.f_mode := mode ;
 filp^.f_pos := 0 ;
 filp^.inodo := tmp ;
 
-{se llamara al procedimiento del driver que lo abrira!!}
 if filp_open (filp) = -1 then
  begin
   free_filp (filp);
@@ -1128,18 +898,6 @@ exit(0);
 
 end;
 
-
-{ * Sys_Read:                                                           *
-  *                                                                     *
-  * File_Desc : Descriptor del archivo                                  *
-  * buffer : Puntero donde sera almacemado el contenido                 *
-  * nbytes : Numero de bytes leidos                                     *
-  * Devuelve : El numero de bytes leidos                                *
-  *                                                                     *
-  * Se encarga de la lectura de un fichero cualquiera sea este          *
-  *                                                                     *
-  ***********************************************************************
-  }
 function sys_read( File_Desc : dword ; buffer : pointer ; nbytes : dword ) : dword;cdecl;
 var pfile:p_file_t;
     ret : dword ;
@@ -1147,7 +905,6 @@ label _exit ;
 begin
 
 
-{Aqui es protegida el area del kernel}
 If Buffer < pointer(High_Memory) then
  begin
   set_errno := -EFAULT ;
@@ -1158,13 +915,10 @@ set_errno := -EBADF ;
 
 If File_desc > 31 then goto _exit ;
 
-{Se puntea al descriptor del archivo}
 pfile:=@Tarea_Actual^.Archivos[File_Desc];
 
-{estan definidos los handlers??}
 if (pfile^.f_op = nil) then goto _exit ;
 
-{no se abrio para lectura!!}
 if (pfile^.f_mode and O_RDONLY = O_RDONLY) then
  else
   begin
@@ -1179,7 +933,6 @@ if (pfile^.inodo^.mode = dt_dir ) and (pfile^.f_op^.readdir = nil) then exit(0)
 
 clear_errno;
 
-{esto me asegura la consistencia del archivo}
 Inode_lock (@pfile^.inodo^.wait_on_inode);
 
 case pfile^.inodo^.mode of
@@ -1198,25 +951,10 @@ _exit :
 exit(0);
 end;
 
-
-
-{ * Sys_Write :                                                         *
-  *                                                                    *
-  * File_desc : Descriptor del archivo                                 *
-  * Buffer : Lugar de donde se extraeran los datos                     *
-  * nbytes : Numero de bytes                                           *
-  * Devuelve : Numero de bytes escritos                                *
-  *                                                                    *
-  * Se encarga de escribir cualquier tipo de fichero                   *
-  *                                                                    *
-  **********************************************************************
-}
 function sys_write ( file_desc : dword ; buffer : pointer ; nbytes : dword) : dword;cdecl;
 var pfile : p_file_t;
     ret : dword ;
 begin
-
-{El buffer devera estar en el area del usuario}
 If buffer < pointer(High_Memory) then
  begin
   set_errno := -EFAULT ;
@@ -1227,13 +965,10 @@ set_errno := -EBADF;
 
 If File_Desc > 31 then exit(0);
 
-{Se puntea al descriptor del archivo}
 pfile:=@Tarea_Actual^.Archivos[File_Desc];
 
-{estan definidos los handlers??}
 if (pfile^.f_op = nil) then exit(0);
 
-{no se abrio para escritura!!}
 if (pfile^.f_mode and O_WRONLY = O_WRONLY) then
  else
   begin
@@ -1248,11 +983,8 @@ if (pfile^.inodo^.mode = dt_dir ) then exit(0)
 
 clear_errno;
 
-{esta proteccion me asegura que dos procesos no escriban a la ves un mismo}
-{archivo}
 Inode_lock (@pfile^.inodo^.wait_on_inode);
 
-{segun el tipo de archivo!!!}
 case pfile^.inodo^.mode of
 dt_reg : ret := (pfile^.f_op^.write (pfile,nbytes,buffer));
 //dt_blk : ret := (Blk_write (pfile, nbytes ,buffer ));
@@ -1263,7 +995,6 @@ Inode_unlock (@pfile^.inodo^.wait_on_inode);
 
 exit(ret);
 end;
-
 
 const Free_dentrys : p_dentry = nil ;
 
@@ -1303,39 +1034,17 @@ nodo_tail^.prev_dentry^.next_dentry := Nodo ;
 nodo_tail^.prev_dentry := Nodo ;
 end;
 
-
-{ * Put_dentry :                                                         *
-  *                                                                      *
-  * dt : puntero al dentry                                               *
-  *                                                                      *
-  * Decrementa el uso de una dentry si no posee mas usuarios se devuelve *
-  * el inodo al cache . Cuando un  inodo quitado totalmente del sistema  *
-  * si no posee enlaces se libera la estructura , si posee se vuelve un  *
-  * dentry vacio puesto que podra ser utilizada en una futura busqueda   *
-  * Las que poseen enlaces son enlazadas ya que es muy posible que se    *
-  * vuelven totalmente obsoletas , proc. sync rastrea esta cola en busca *
-  * de dentrys obsoletas y las coloca en la cola de libres               *
-  * (no implementado)                                                    *
-  *                                                                      *
-  ************************************************************************
-}
 procedure Put_dentry (dt : p_dentry ) ;
 begin
 dt^.count -= 1;
 if dt^.count = 0 then put_inode (dt^.ino);
 end;
 
-
-{ * quita un dentry de su padre * }
-
 procedure Remove_queue_dentry (dt :p_dentry );inline;
 begin
 Pop_dentry (dt,dt^.parent^.down_tree);
 dt^.parent^.l_count -= 1;
 end;
-
-
-{ * Llamada que quita un dentry y la coloca como libre * }
 
 procedure Free_Dentry ( dt : p_dentry ) ;
 begin
@@ -1356,23 +1065,10 @@ for ret := 1 to len do
 exit(true);
 end;
 
-
-// here are the low level buffer API
-
 {$define Buffer_Lock := lock }
 {$define Buffer_Unlock := unlock }
 
 const block_size = 512 ;
-
-{ * Buffer_Write :                                                         *
-  *                                                                        *
-  * Buffer : Puntero a un buffer_head                                      *
-  * Retorno : 0 si ok o -1 si falla                                        *
-  *                                                                        *
-  * Funcion q escribe sobre el disco un buffer dado                        *
-  *                                                                        *
-  **************************************************************************
-}
 
 function buffer_write(bh:p_buffer_head):dword;
 var fd : file_t ;
@@ -1382,7 +1078,6 @@ begin
 
 buffer_lock (@bh^.wait_on_buffer);
 
-{ Es creado el inodo temporal }
 fd.inodo := @i ;
 fd.f_pos := bh^.bloque * ( bh^.size div block_size) ;
 
@@ -1407,7 +1102,6 @@ begin
 
 buffer_lock (@bh^.wait_on_buffer);
 
-{Es creado el inodo temporal}
 fd.inodo := @i ;
 fd.f_pos := bh^.bloque * ( bh^.size div block_size) ;
 
@@ -1423,15 +1117,9 @@ buffer_unlock (@bh^.wait_on_buffer);
 
 end;
 
-
-
-
-// Buffer cache
-
 var Buffer_Hash:array[1..Nr_blk] of p_buffer_head;
     Buffer_Lru : p_buffer_head ;
     Max_Buffers:dword;
-
 
 procedure Init_Bh (bh : p_buffer_head ; mayor , menor , bloque : dword) ;inline;
 begin
@@ -1446,19 +1134,6 @@ bh^.prev_buffer := nil ;
 bh^.next_buffer := nil ;
 end;
 
-
-{ * Lru_Find :                                                          *
-  *                                                                     *
-  * Dev_blk : Dispositivo de Bloque                                     *
-  * Bloque : Numero de Bloque                                           *
-  * Retorno : Puntero buffer_head o nil se falla                        *
-  *                                                                     *
-  * Esta funcion busca dentro de la cola Lru un bloque dado y si lo     *
-  * encuentra devuelve un puntero a la estructura buffer_head o de lo   *
-  * contrario nil                                                       *
-  *                                                                     *
-  ***********************************************************************
-}
 function lru_find(Mayor,Menor,Bloque,Size:dword):p_buffer_head;
 var tmp:p_buffer_head;
 begin
@@ -1476,14 +1151,11 @@ until ( tmp = Buffer_Lru);
 exit(nil);
 end;
 
-
 procedure free_buffer (bh : p_buffer_head );inline;
 begin
 kfree_s (bh^.data,bh^.size);
 kfree_s (bh,sizeof(buffer_head));
 end;
-
-
 
 function buffer_update (Buffer:p_buffer_head):dword;
 begin
@@ -1536,24 +1208,10 @@ nodo_tail^.prev_buffer^.next_buffer := Nodo ;
 nodo_tail^.prev_buffer := Nodo ;
 end;
 
-
-{ * Push_Hash :                                                         *
-  *                                                                     *
-  * Procedimiento que coloca un buffer_head en la cola hash             *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure push_hash(buffer:p_buffer_head);
 begin
 Push_Buffer (buffer , Buffer_Hash[buffer^.mayor]);
 end;
-
-{ * Pop_Hash :                                                          *
-  *                                                                     *
-  * Procedimiento que quita un buffer_head de la cola hash              *
-  *                                                                     *
-  ***********************************************************************
-}
 
 procedure pop_hash(Buffer:p_buffer_head);
 begin
@@ -1576,21 +1234,11 @@ until (tmp=Buffer_Hash[Mayor]);
 exit(nil);
 end;
 
-
-{ * Alloc_Buffer :                                                      *
-  *                                                                     *
-  * size : Tama¤o del nuevo bloque a crear                              *
-  *                                                                     *
-  * crea un buffer utilizando la variable Max_Buffers como indicador    *
-  *                                                                     *
-  ***********************************************************************
-}
 function alloc_buffer (size : dword ) : p_buffer_head ;
 var tmp :p_buffer_head ;
     tm : pointer ;
 begin
 
-{situacion critica}
 if Max_Buffers = 0 then
  begin
 
@@ -1598,10 +1246,8 @@ if Max_Buffers = 0 then
 
  tmp := Buffer_Lru^.prev_buffer;
 
- {limpiar la cola de sucios}
  if (tmp^.state and BH_dirty ) = Bh_Dirty then sys_sync;
 
- {si el tama¤o del buffer no es igual habra que liberar y solicitar}
  if tmp^.size <> size then
   begin
    tm := kmalloc (size);
@@ -1615,8 +1261,6 @@ if Max_Buffers = 0 then
 
  exit(tmp);
  end;
-
-{hay suficiente memoria como para seguir creando estructuras}
 
 tmp := kmalloc (sizeof (buffer_head));
 
@@ -1637,40 +1281,23 @@ Max_Buffers -= 1;
 exit (tmp);
 end;
 
-
-{ * Get_Block :                                                         *
-  *                                                                     *
-  * Mayor : Dev Mayor                                                   *
-  * Menor : Dev Menor                                                   *
-  * Bloque  : Numero de bloque                                          *
-  * Retorno : nil si fue incorrecta o puntero a los datos               *
-  *                                                                     *
-  * Esta funcion es el nucleo del buffer , por ahora solo trabaja con   *
-  * bloques de dispostivos de bloque y con un tamano constante          *
-  *                                                                     *
-  ***********************************************************************
-}
 function get_block(Mayor,Menor,Bloque,size:dword):p_buffer_head;
 var tmp:p_buffer_head;
 begin
 
-{Busco en la tabla hash}
 tmp := Hash_Find(Mayor,Menor,Bloque,size);
 
-{esta en uso}
 If tmp <> nil then
  begin
  tmp^.count += 1;
  exit (tmp);
 end;
 
-{Es Buscado en la tabla Lru}
 tmp := Lru_Find(Mayor,Menor,Bloque,size);
 
 If tmp <> nil then
  begin
 
-  { En la Lru se guardan los q no estan en uso}
    Pop_Buffer(tmp,Buffer_Lru);
 
    tmp^.count := 1;
@@ -1681,8 +1308,6 @@ end;
 
 tmp := alloc_buffer (size);
 
-{situacion poco querida}
-
 if tmp = nil then
  begin
  printkf('/Vvfs/n : No hay mas buffer-heads libres\n',[]);
@@ -1691,7 +1316,6 @@ if tmp = nil then
 
 Init_Bh (tmp,mayor,menor,bloque);
 
-{se trae la data del disco}
  If  Buffer_Read(tmp) = 0 then
   begin
   Push_Hash(tmp);
@@ -1699,7 +1323,6 @@ Init_Bh (tmp,mayor,menor,bloque);
   end
   else
    begin
-     {hubo un error se devuelve el buffer}
      printkf('/Vvfs/n : Error de Lectura : block %d dev %d %d \n',[tmp^.bloque,tmp^.mayor,tmp^.menor]);
      free_buffer (tmp);
      Max_Buffers += 1;
@@ -1708,22 +1331,6 @@ Init_Bh (tmp,mayor,menor,bloque);
 
 end;
 
-
-{ * Put_Block :                                                                *
-  *                                                                            *
-  * Mayor   : Dispositivo de bloque                                            *
-  * Menor   : Dispositvo Menor                                                 *
-  * Bloque : Numero de bloque                                                  *
-  *                                                                            *
-  * Devuelve el uso de un bloque , y es llamado cada vez que se termina su uso *
-  * y decrementa su uso                                                        *
-  * Es importante , ya que luego de un GET_BLOCK deve venir un PUT_BLOCK , que *
-  * devuelva a la reserva , y si el bloque es del sistema se actualizara la    *
-  * version del disco , ademas se decrementara el uso , para que pueda salir de*
-  * la cola hash                                                               *
-  *                                                                            *
-  ******************************************************************************
-  }
 function Put_Block(buffer:p_buffer_head):dword;
 var tmp : p_buffer_head ;
 begin
@@ -1732,8 +1339,6 @@ if buffer=nil then panic('VFS : Se quita un buffer no pedido');
 
 buffer^.count -= 1;
 
-{ya nadie lo esta utilizando}
-
 If buffer^.count = 0 then
  begin
   Pop_Hash (buffer);
@@ -1741,14 +1346,6 @@ If buffer^.count = 0 then
  end;
 end;
 
-
-{ * Buffer_Init :                                                          *
-  *                                                                        *
-  * Proceso q inicializa la unidad de Buffer Cache  , se inicializa la     *
-  * cola Lru y la cola Hash  y se calcula el numero maximo de Bufferes     *
-  *                                                                        *
-  **************************************************************************
-}
 procedure buffer_init;
 var tmp:dword;
 begin
@@ -1756,29 +1353,16 @@ Buffer_Lru := nil;
 Buffer_Dirty := nil;
 for tmp:= 1 to Nr_blk do Buffer_Hash[tmp]:=nil;
 
-{Este numero es muy grande aunque Buffer_Use_mem solo valga 1%}
 Max_Buffers := ((Buffer_Use_Mem * MM_MemFree ) div 100) div sizeof(buffer_head);
 
-{aqui son configuradas las variables }
 Max_dentrys := Max_Buffers ;
 Max_Inodes := Max_dentrys ;
 
-printkf('/Vvfs/n ... Buffer - Cache /V%d /nBufferes\n',[Max_Buffers]);
-printkf('/Vvfs/n ... Inode  - Cache /V%d /nBufferes\n',[Max_Buffers]);
+printkf('/Vvfs/n ... Buffer - Cache /V%d /nBuffers\n',[Max_Buffers]);
+printkf('/Vvfs/n ... Inode  - Cache /V%d /nBuffers\n',[Max_Buffers]);
 
 end;
 
-
-
-// Inodes
-
-{ * Sync_Inode :                                                        *
-  *                                                                     *
-  * Marca los bufferes de los inodos como sucios para que luego una     *
-  * llamada del sistema sync los envie a disco                          *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure Sync_Inodes ;
 var tmp : p_inode_t ;
 begin
@@ -1794,26 +1378,12 @@ end;
 inodes_dirty := nil ;
 end;
 
-
-{ * Sys_Sync  :                                                         *
-  *                                                                     *
-  * Implementacion de la llamada al sistema Sync() que actualiza todos  *
-  * bloques no utilizados al disco                                      *
-  *                                                                     *
-  * Versiones :                                                         *
-  *                                                                     *
-  * 20 / 06 / 2005 : Rescritura con el nuevo modelo de FS               *
-  * 26 / 12 / 2004 : Son escritos tambien los bloques en la cola Hash   *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure Sys_Sync ;
 var tmp:p_buffer_head;
 begin
 
 sync_inodes ;
 
-{es simple se rastrea toda la cola de sucios}
 tmp := Buffer_Dirty ;
 
 while (tmp <> nil) do
@@ -1825,18 +1395,8 @@ end;
 Buffer_Dirty := nil ;
 end;
 
-// SuperBlock
 var i_root : p_inode_t ;
 
-{ * Invalid_Sb                                                          *
-  *                                                                     *
-  * sb : Puntero a un superbloque                                       *
-  *                                                                     *
-  * Procedimiento que limpia todos los bloques y dado un sb manda los   *
-  * bloques en uso de ese sb a la cola LRU                              *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure Invalid_Sb ( sb : p_super_block_t) ;
 var mayor,menor : dword ;
     bh , tbh : p_buffer_head ;
@@ -1845,15 +1405,10 @@ begin
 mayor := sb^.mayor ;
 menor := sb^.menor ;
 
-{primero mando a todos al disco}
 sys_sync ;
 
-{ahora que estan todos limpios los quita de las de en uso}
-
-{si no hay salgo!}
 if Buffer_Hash[mayor] = nil then exit ;
 
-{todos los bufferes en uso son movidos a la cola lru}
 bh := Buffer_Hash [mayor]^.prev_buffer ;
 
 repeat
@@ -1920,16 +1475,6 @@ super^.wait_on_sb.lock := false ;
 super^.ino_hash := nil ;
 end;
 
-{ * Read_Super :                                                        *
-  *                                                                     *
-  * Mayor  , Menor : Dev                                                *
-  * Flags : tipo de sb                                                  *
-  * fs : Puntero al driver de fs                                        *
-  *                                                                     *
-  * Funcion que lee un superbloque y lo agrega a la cola de sp montados *
-  *                                                                     *
-  ***********************************************************************
-  }
 function read_super ( Mayor , Menor , flags : dword ; fs : p_file_system_type ) : p_super_block_t ;
 var tmp : p_super_block_t;
     p : p_inode_t ;
@@ -1955,14 +1500,10 @@ if  fs^.read_super (tmp) = nil then
   exit(nil);
  end;
 
-
-{es metido en la cola de spb}
 push_spblk (tmp, Super_Tail);
 
-{este debera permanecer el memoria}
 p := get_inode (tmp,tmp^.ino_root);
 
-{no se pudo traer !!!}
 if (p = nil) then
  begin
   Invalid_sb (tmp);
@@ -1970,14 +1511,10 @@ if (p = nil) then
   exit(nil);
  end;
 
-{el driver nunca trabaja con el dcache , por eso el campo i_dentry debe }
-{estar a nil!!!}
 tmp^.pino_root := p;
 
-{se puede crear un dentry para el cache??}
 tmp^.pino_root^.i_dentry := alloc_dentry (' ');
 
-{error al crear el la entrada}
 if tmp^.pino_root^.i_dentry = nil then
  begin
   put_inode (tmp^.pino_root);
@@ -1988,8 +1525,6 @@ if tmp^.pino_root^.i_dentry = nil then
 
 tmp^.pino_root^.i_dentry^.ino := tmp^.pino_root;
 
-{siempre estara en memoria , prevego a que un put_dentry me saque el ino}
-{root}
 tmp^.pino_root^.i_dentry^.count := 1;
 
 Nr_Spblk += 1;
@@ -1998,22 +1533,14 @@ exit(tmp);
 
 end;
 
-// Dentry cache
-
 {$define inode_lock := lock }
 {$define inode_unlock := unlock }
-
-
-{ * encola un dentry en su padre * }
 
 procedure Enqueue_dentry (dt : p_dentry );
 begin
 Push_dentry (dt,dt^.parent^.down_tree);
 dt^.parent^.l_count += 1;
 end;
-
-
-{ * busca un nombre dentro de un dentry  y devuelve un puntero dentry * }
 
 function Find_in_Dentry (const name : string ; dt : p_dentry ) : p_dentry ;
 var tmp : p_dentry ;
@@ -2031,7 +1558,6 @@ until (tmp = dt^.down_tree) ;
 
 exit(nil);
 end;
-
 
 procedure Init_dentry (dt : p_dentry);
 begin
@@ -2051,16 +1577,6 @@ with dt^ do
 end;
 end;
 
-{ * Alloc_dentry  :                                                     *
-  *                                                                     *
-  * name : Nombre de la entrada                                         *
-  *                                                                     *
-  * Esta funcion devuelve un estructura dentry libre , primero tratara  *
-  * de crear y si no hay memoria suficiente tomara una estrutura de la  *
-  * cola de libres ,  y si en este caso no puede devuelve nil           *
-  *                                                                     *
-  ***********************************************************************
-}
 function Alloc_dentry (const name : string ) : p_dentry ;
 var tmp : p_dentry ;
 
@@ -2074,7 +1590,6 @@ if Max_dentrys = 0 then
 
   if Free_dentrys = nil then exit(nil);
 
-  {se toma el menos utilizado}
   tmp := free_dentrys^.prev_dentry ;
 
   goto _exit ;
@@ -2097,27 +1612,7 @@ if Max_dentrys = 0 then
  exit (tmp);
  end;
 
-
-{ * Alloc_Entry :                                                       *
-  *                                                                     *
-  * ino_p : puntero al inodo directorio padre                           *
-  * name : nombre de la entrada                                         *
-  *                                                                     *
-  * Esta funcion es bastante compleja , lo que hace primeramente es     *
-  * buscar name en el arbol del padre , si la encuentra aumenta el      *
-  * contador del dentry y devuelve la dentry  . Si fuese una entrada    *
-  * vacia hace un lookup sobre el ino_p para traer el inodo a memoria   *
-  *  . Llena la dentry con el inodo y el driver devera puntear el       *
-  * campo i_dentry del inodo al dentry que se le pasa como parametro    *
-  * Si no estubiese trata de crear la estruc. busca un dentry libre     *
-  * y hace un lookup con name , es encolada y devera ser devuelta con   *
-  * Put_dentry                                                          *
-  *                                                                     *
-  ***********************************************************************
-}
-
-
-const 
+const
 	DIR :  pchar = '.';
 	DIR_PREV  : pchar = '..';
 
@@ -2128,13 +1623,12 @@ begin
 
 Inode_Lock (@ino_p^.wait_on_inode);
 
-{entradas estandart}
 if (name[0]= #1) and (name[1]='.') then //chararraycmp(@name[1],@DIR[1],1) then
  begin
  tmp := ino_p^.i_dentry ;
  goto _1;
  end
-  else if chararraycmp(@name[1],@DIR_PREV[1],2) then
+  else if (name[0] = #2) and (name[1] = '.') and (name[2] = '.') then//if chararraycmp(@name[1],@DIR_PREV[1],2) then
    begin
     tmp := ino_p^.i_dentry^.parent ;
     goto _1 ;
@@ -2147,12 +1641,10 @@ if tmp <> nil then
 
 _1:
 
-  {esta encache}
   if (tmp^.state = st_incache) then
    begin
     tmp^.count += 1;
 
-    {esta en cache pero el inodo esta en lru}
     if tmp^.ino^.count = 0 then
      begin
      get_inode (tmp^.ino^.sb,tmp^.ino^.ino);
@@ -2167,15 +1659,11 @@ _1:
     exit (tmp);
    end;
 
-  {entrada zombie}
   if (tmp^.state = st_vacio) then
    begin
 
-    {una parte del arbol esta invalidado por que fue eliminada una entrada fisica}
     if ino_p^.op^.lookup (ino_p , tmp) = nil then Panic ('VFS : Arbol invalido!!!!');
 
-    {se trae el inodo al cache de inodos}
-    {lookup deve llenar el campo ino del cache y poner al campo count en 1}
     tmp^.state := st_incache;
     tmp^.flags := tmp^.ino^.flags;
     tmp^.l_count := 0 ;
@@ -2188,14 +1676,12 @@ end;
 
 tmp := alloc_dentry (name) ;
 
-{no se puede seguir la ruta!!!}
 if tmp = nil then
  begin
   Inode_Unlock (@ino_p^.wait_on_inode);
   exit(nil);
  end;
 
-{no existe la dentry!!!??}
 if ino_p^.op^.lookup (ino_p,tmp) = nil then
  begin
   Push_dentry (free_dentrys,tmp);
@@ -2209,7 +1695,6 @@ tmp^.flags := tmp^.ino^.flags ;
 tmp^.count := 1 ;
 tmp^.ino^.i_dentry := tmp;
 
-{se pone en la cola del padre}
 Enqueue_Dentry (tmp);
 
  {$IFDEF DEBUG}
@@ -2238,22 +1723,12 @@ nodo_tail^.prev_fs^.next_fs := Nodo ;
 nodo_tail^.prev_fs := Nodo ;
 end;
 
-
-{ * Register_Filesystem :                                               *
-  *                                                                     *
-  * fs : Puntero a un driver de Sistema de archivo                      *
-  *                                                                     *
-  * Procedimiento que registra un driver de Fs                          *
-  *                                                                     *
-  ***********************************************************************
-}
 function Register_Filesystem (fs : p_file_system_type) : dword ;
 var tmp : p_file_system_type ;
 begin
 
 tmp := Fs_Type ;
 
-{fue agregado el driver??}
 while (tmp <> nil) do
  begin
   if tmp^.fs_id = fs^.fs_id then exit (-1);
@@ -2269,18 +1744,6 @@ abrir;
 exit(0);
 end;
 
-
-
-{ * Get_Fstype :                                                        *
-  *                                                                     *
-  * name : Nombre del sistema de archivo                                *
-  * retorno : a la estructura del driver                                *
-  *                                                                     *
-  * funcionque que devuelve un puntero al driver dado en name dentro de *
-  * los drivers instalados                                              *
-  *                                                                     *
-  ***********************************************************************
-}
 function get_fstype ( const name : string ) : p_file_system_type ;
 var tmp  , id : dword ;
     fs : p_file_system_type ;
@@ -2289,20 +1752,19 @@ begin
 
 id := 0 ;
 
-for tmp := 1 to High (fsid) do 
+for tmp := 1 to High (fsid) do
  begin
 	if chararraycmp(@fsid[tmp].name[1],@name[1],dword(name[0])) then
-        begin 
+        begin
        	 id := fsid[tmp].id ;
          break;
 	end;
- end;         
+ end;
 
 if id = 0 then exit(nil);
 
 if fs_type = nil then exit(nil);
 
-{se buscara el id en la cola de driver instalados}
 fs := fs_type ;
 
 repeat
@@ -2315,13 +1777,6 @@ until ( fs = fs_type) ;
 exit(nil);
 end;
 
-{ * Sys_Mountroot :                                                     *
-  *                                                                     *
-  * Se encarga de montar la unidad que sera utilizada como root es      *
-  * llamada por el proceso init                                         *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure sys_mountroot ; cdecl ;
 var fs_type : p_file_system_type ;
     spbmount : p_super_block_t ;
@@ -2329,12 +1784,10 @@ var fs_type : p_file_system_type ;
 label _exit;
 begin
 
-{este campo sera modificado de acuerdo al fs del root}
 fs_type := get_fstype ('fatfs');
 
 if fs_type = nil then goto _exit ;
 
-{aca es donde se especifica el dispositivo de montage}
 spbmount := read_super (2 , 0 , sb_rdonly or sb_rw , fs_type);
 
 if spbmount = nil then goto _exit ;
@@ -2342,7 +1795,6 @@ if spbmount = nil then goto _exit ;
 i_root := spbmount^.pino_root ;
 dentry_root := i_root^.i_dentry ;
 
-{importante!!}
 dentry_root^.name := '/' ;
 dentry_root^.len := 1 ;
 dentry_root^.down_tree := nil ;
@@ -2355,30 +1807,17 @@ i_root^.i_dentry^.count += 1;
 Tarea_Actual^.cwd := i_root ;
 
 
-printkf('/Vvfs/n ... root montada\n',[]);
-
-{ bienvenida al usuario }
-//toro_msg;
+printkf('/Vvfs/n ... root mounted\n',[]);
 
 exit;
 
 _exit :
 
-printkf('/Vvfs/n : No se ha podido montar la unidad root\n',[]);
+printkf('/Vvfs/n : Imposible to mount root\n',[]);
 debug($1987);
 
 end;
 
-{ * name_i :                                                    *
-  *                                                             *
-  * path : puntero a una ruta                                   *
-  * retorno : puntero a el ultimo inodo de ruta                 *
-  *                                                             *
-  * Funcion que realiza la busqueda de una ruta a traves del    *
-  * cache del sistema                                           *
-  *                                                             *
-  ***************************************************************
-}
 function name_i (path : pchar ) : p_inode_t ;
 var ini,act : p_dentry ;
     tmp : string ;
@@ -2388,7 +1827,6 @@ begin
 act := nil ;
 cont := 1 ;
 
-{posicion relativa de comienzo}
 if path^ = '/' then
  begin
   ini := dentry_root;
@@ -2404,7 +1842,6 @@ while (path^ <> #0) do
    if path^ = '/' then
     begin
 
-     {marco el final de cadena}
      tmp[0] := char(cont - 1 );
 
      if ini^.down_mount_tree <> nil then
@@ -2414,21 +1851,18 @@ while (path^ <> #0) do
        ini^.count += 1;
       end;
 
-     {la busqueda solo se realiza sobre inodos dir!!}
      if (ini^.ino^.mode  <> dt_dir) then
       begin
        put_dentry (ini);
        exit (nil);
       end;
 
-     {se pide la entrada al cache}
      act := Alloc_Entry (ini^.ino,tmp);
 
      put_dentry (ini);
 
      if act = nil then exit(nil);
 
-     {los permisos me permiten leer??}
      if (act^.flags and I_RO <> I_RO ) then
       begin
        put_dentry(act);
@@ -2454,7 +1888,6 @@ while (path^ <> #0) do
 
     tmp[0] := char(cont - 1);
 
-    {es un dentry de montage??}
     if ini^.down_mount_tree <> nil then
       begin
        put_dentry (ini);
@@ -2475,7 +1908,6 @@ while (path^ <> #0) do
 
     if act = nil then exit(nil);
 
-    {se poseen permisos de lectura???}
     if (act^.flags and I_RO <> I_RO ) then
      begin
       Put_dentry (act);
@@ -2487,21 +1919,6 @@ while (path^ <> #0) do
 
 end;
 
-
-
-
-
-{ * Last_dir                                                            *
-  *                                                                     *
-  * path : Puntero a una ruta                                           *
-  * retorno : ultimo inodo accedido                                     *
-  *                                                                     *
-  * rastrea una ruta hasta el ultimo archivo y si este no existe devue  *
-  * lve el directorio ultimo                                            *
-  *                                                                     *
-  ***********************************************************************
-}
-
 function last_dir (path : pchar ) : p_inode_t ;
 var ini,act : p_dentry ;
     tmp : string ;
@@ -2511,7 +1928,6 @@ begin
 act := nil ;
 cont := 1 ;
 
-{posicion relativa de comienzo}
 if path^ = '/' then
  begin
   ini := dentry_root;
@@ -2527,7 +1943,6 @@ while (path^ <> #0) do
    if path^ = '/' then
     begin
 
-     {marco el final de cadena}
      tmp[0] := char(cont - 1 );
 
      if ini^.down_mount_tree <> nil then
@@ -2537,7 +1952,6 @@ while (path^ <> #0) do
        ini^.count += 1;
       end;
 
-     {la busqueda solo se realiza sobre inodos dir!!}
      if (ini^.ino^.mode  <> dt_dir) then
       begin
        ini^.parent^.count += 1;
@@ -2546,12 +1960,10 @@ while (path^ <> #0) do
        exit;
       end;
 
-     {se pide el dentry al cache}
      act := Alloc_Entry (ini^.ino,tmp);
 
      if act = nil then exit(ini^.ino);
 
-     {los permisos me permiten leer??}
      if (act^.flags and I_RO <> I_RO ) then
       begin
        put_dentry(act);
@@ -2576,7 +1988,6 @@ while (path^ <> #0) do
  if (path-1)^ = '/' then
   begin
 
-   {siempre sale con un dir!!}
    if (ini^.ino^.mode = dt_dir) then exit(ini^.ino)
     else
      begin
@@ -2592,7 +2003,6 @@ while (path^ <> #0) do
 
     tmp[0] := char(cont - 1);
 
-    {es un dentry de montage??}
     if ini^.down_mount_tree <> nil then
       begin
        put_dentry (ini);
@@ -2608,12 +2018,10 @@ while (path^ <> #0) do
       exit;
      end;
 
-    {aqui se realiza todo el lookup y devuelve una entrada en el cache de nombres}
     act := Alloc_Entry (ini^.ino,tmp);
 
     if act = nil then exit(ini^.ino);
 
-    {se poseen permisos de lectura???}
     if (act^.flags and I_RO <> I_RO ) then
      begin
       last_dir := ini^.ino;
@@ -2682,13 +2090,41 @@ coff_optheader=record
 
 end;
 
+  PELFHeader = ^TELFHeader;
+  TELFHeader = packed record
+    e_ident: array [0..15] of byte;
+    e_type: word;   { Object file type }
+    e_machine: word;
+    e_version: dword;
+    e_entry: pointer;
+    e_phoff: pointer;
+    e_shoff: pointer;
+    e_flags: dword;
+    e_ehsize: word;
+    e_phentsize: word;
+    e_phnum: word;
+    e_shentsize: word;
+    e_shnum: word;
+    e_shstrndx: word;
+  end;
+
+  PELFProgramHeader = ^TELFProgramHeader;
+  TELFProgramHeader = packed record
+    p_type   : dword;
+    p_offset : dword;
+    p_vaddr  : dword;
+    p_paddr  : dword;
+    p_filesz : dword;
+    p_memsz  : dword;
+    p_flags  : dword;
+    p_align  : dword;
+  end;
+
 {$DEFINE set_errno := Tarea_Actual^.errno  }
 {$DEFINE clear_errno := Tarea_Actual^.errno := 0 }
 
 const MAX_ARG_PAGES = 10 ;
 
-{ * get_args_size : simple funcion que devuelve el tama¤o de los argumentos *
-}
 function get_args_size (args : pchar) : dword;
 var cont : dword ;
 begin
@@ -2705,9 +2141,6 @@ end;
 exit(cont + 1);
 end;
 
-
-{ * get_argc : devuelve la cantidad de argumentos pasados * }
-
 function get_argc ( args : pchar) : dword ;
 var tmp : dword ;
 begin
@@ -2716,7 +2149,6 @@ if args = nil then exit(0);
 
 tmp := 0 ;
 
-{ esto puede seguir hasta el infinito!!! }
 while (args^ <> #0) do
  begin
   if args^ = #32 then tmp += 1;
@@ -2729,22 +2161,6 @@ if (args-1)^ = #32 then tmp -= 1 ;
 
 exit(tmp);
 end;
-
-
-{ * Sys_Ioctl :                                                         *
-  *                                                                     *
-  * Fichero : Descriptor de Archivo                                     *
-  * req : Numero de procedimiento                                       *
-  * argp : Puntero a los argumentos                                     *
-  * Retorno : -1 si fallo                                               *
-  *                                                                     *
-  *                                                                     *
-  * Implementacion de la llamada al sistema IOCTL donde se llama a un   *
-  * procedimiento de control de un  driver dado                         *
-  *                                                                     *
-  ***********************************************************************
-}
-
 
 function sys_ioctl (Fichero , req : dword ; argp : pointer) : dword ;cdecl;
 var fd : p_file_t ;
@@ -2774,17 +2190,6 @@ exit(fd^.f_op^.ioctl(fd,req,argp));
 
 end;
 
-
-{ * Sys_chdir :                                                         *
-  *                                                                     *
-  * path : Puntero a ruta del nuevo dir                                 *
-  * retorno : 0 si ok o -1 si falla                                     *
-  *                                                                     *
-  * Implementacion de la llamada al sistema que cambia el directorio    *
-  * actual de  trabajo                                                  *
-  *                                                                     *
-  ***********************************************************************
-}
 function sys_chdir(path : pchar) : dword ; cdecl ;
 var tmp : p_inode_t ;
 begin
@@ -2795,8 +2200,7 @@ if (tmp = nil) then
   set_Errno := -ENOENT ;
   exit(-1);
  end;
-
-{si o si deve ser un dir}
+ 
 if not(Is_Dir (tmp)) then
  begin
   put_dentry (tmp^.i_dentry);
@@ -2804,39 +2208,19 @@ if not(Is_Dir (tmp)) then
   exit(-1);
  end;
 
-{se devuelve el q estaba antes}
 put_dentry (Tarea_Actual^.cwd^.i_dentry);
 
 Tarea_Actual^.cwd := tmp ;
 
 clear_errno;
-
 exit(0);
 end;
-
-
-
-{ * Sys_Stat :                                                         *
-  *                                                                    *
-  * path : Ruta al archivo                                             *
-  * buffer : Lugar donde sera copiado el inodo                         *
-  * Devuelve : 0 si fue correcto o <> 0 sino                           *
-  *                                                                    *
-  * Esta llamada al sistema devuelve la informacion guardada dentro de *
-  * un inodo de un archivo dado                                        *
-  *                                                                    *
-  **********************************************************************
-}
 
 function sys_stat ( path : pchar ; buffer : pointer ) : dword ; cdecl;
 var tmp : p_inode_t;
     s: p_inode_tmp;
 begin
 tmp := name_i(path);
-
-{Esto es importante puesto que puede ocacionar la escritura}
-{de areas de codigo del sistema}
-
 
 If buffer < pointer(High_Memory) then
  begin
@@ -2867,314 +2251,215 @@ exit(0);
 
 end;
 
-
-
-{$DEFINE mem_lock := lock (@mem_wait) ; }
-{$DEFINE mem_unlock := unlock (@mem_wait) ;}
-
-
-{ * Sys_Exec :                                                             *
-  *                                                                        *
-  * Path : Ruta donde se encuentra el archivo                              *
-  * args : Puntero a un array de argunmentos . No utilizado por ahora      *
-  * Devuelve : 0 si falla o El pid de la nueva tarea                       *
-  *                                                                        *
-  * Esta funcion carga en memoria un archivo ejecutable del tipo COFF      *
-  * y devuelve el PID del nuevo proceso  , si la operacion no hubiese sido *
-  * correcta devuelve 0                                                    *
-  * Esta basado en la llamada al sistema sys_exec del kernel de ROUTIX     *
-  * Routix / src / syscalls / sys_proc.c                                   *
-  * Routix.sourceforge.net                                                 *
-  *                                                                        *
-  **************************************************************************
-}
-
-function sys_exec(path , args : pchar):dword;cdecl ;
-var tmp:p_inode_t;
-    nr_sec,ver,count:word;
-    coff_hd:p_coff_header;
-    argccount , ret,count_pg,nr_page,ppid,argc:dword;
-    _text,_data,_bbs:coff_sections;
-    opt_hd:coff_optheader;
-    l:p_coff_sections;
-    tmp_fp:file_t;
-    buff:array[1..100] of byte;
-    new_tarea:p_tarea_struc;
-    cr3_save , page,page_args,pagearg_us: pointer;
-    nd : pchar ;
-    r : dword ;
-    k : dword ;
-
-label _exit;
+// SysExec:
+//
+// Path: path to a file
+// Args: pointer to an array of arguments. It is not used yet
+// Return: 0 if fails, or the PID of the new process if sucesses
+//
+// This function creates a new process from a ELF32 binary. It is based on the function implemented at
+// routix.sourceforge.net.
+//
+function SysExec(Path, Args : pchar): DWORD; cdecl;
+var tmp: p_inode_t;
+    elf_hd: TELFHeader;
+    argccount, count, startaddr, ret, count_pg, nr_page, ppid, argc: dword;
+    text_sec, data_sec: TELFProgramHeader;
+    tmp_fp: file_t;
+    new_tarea: p_tarea_struc;
+    cr3_save, page, page_args, pagearg_us: pointer;
+    nd: pchar ;
 begin
+  Result := 0;
+  ppid:= Tarea_Actual^.pid;
+  tmp:= name_i(path);
 
-r := contador ;
-
-ppid := Tarea_Actual^.pid;
-
-tmp := name_i(path);
-
-set_errno := -ENOENT ;
-
-{ruta invalida}
-If (tmp = nil) then exit(0);
-
-set_errno := -EACCES ;
-
-{el inodo deve tener permisos de ejecucion y de lectura}
-if (tmp^.flags and I_XO <> I_XO) and (tmp^.flags and I_RO <> I_RO) then goto _exit ;
-
-set_errno := -ENOEXEC ;
-
-if (tmp^.mode <> dt_Reg) then goto _exit ;
-
-{Se crea un descriptor temporal}
-tmp_fp.inodo := tmp;
-tmp_fp.f_pos := 0;
-tmp_fp.f_op := tmp^.op^.default_file_ops ;
-
-
-coff_hd:=@buff;
-
-{Leo la cabecera del archivo coff y la mando a un buffer}
-ret := tmp_fp.f_op^.read(@tmp_fp,sizeof(coff_header),coff_hd);
-
-set_errno := -EIO ;
-
-{Si hubiese algun error al leer el archivo}
-If (ret = 0) then goto _exit ;
-
-set_errno := -ENOEXEC;
-
-{Se chequea el numero magico}
-If (coff_hd^.f_magic <> COFF_MAGIC) then goto _exit;
-
-set_errno := -ENOEXEC;
-
-{El archivo COFF devera tener 3 secciones = TEXT , DATA, BBS}
-If coff_hd^.f_nscns <> 3 then goto _exit;
-
-ret := tmp_fp.f_op^.read(@tmp_fp,sizeof(coff_optheader),@opt_hd);
-
-{Me posiciono donde se encuentran las cabezas de secciones}
-tmp_fp.f_pos := sizeof(coff_header) + coff_hd^.f_opthdr;
-
-nr_sec := coff_hd^.f_nscns;
-ver := 0;
-l := @buff;
-
-set_errno := -EIO;
-
-while (nr_sec <> 0) do
- begin
-
- {Leo las secciones}
- ret := tmp_fp.f_op^.read(@tmp_fp,sizeof(coff_sections),l);
-
- {hubo un error de lectura}
- If (ret = 0) then goto _exit ;
-
- {Se evalua el tipo de seccion}
- Case l^.s_flags of
- COFF_TEXT:begin
-            memcopy(@buff,@_text,sizeof(coff_sections));
-            ver:=ver or COFF_TEXT;
-            end;
- COFF_DATA:begin
-            memcopy(@buff,@_data,sizeof(coff_sections));
-            ver:=ver or COFF_DATA;
-            end;
- COFF_BBS:begin
-            memcopy(@buff,@_bbs,sizeof(coff_sections));
-            ver:=ver or COFF_BBS;
-            end;
-    else  goto _exit ;
-
- end;
- nr_sec-=1;
-end;
-
- set_errno := -ENOEXEC;
-
- {Se chequea que se encuentren todas las secciones}
- If ver <> (COFF_BBS or COFF_DATA or COFF_TEXT) then goto _exit ;
-
- {Se crea el proceso}
- new_tarea := Proceso_Crear(ppid,Sched_RR);
-
- If (new_tarea=nil) then goto _exit ;
-
- Mem_Lock ;
-
-
- If (_text.s_size + _data.s_size + _bbs.s_size) >=  MM_MEMFREE then
+  set_errno := -ENOENT ;
+  If tmp = nil then
   begin
-   Proceso_Eliminar (new_tarea);
-   goto _exit ;
+    Result := 0;
+    Exit;
   end;
 
+  set_errno := -EACCES ;
 
- {Area de Codigo}
- {Aqui tambien se encuentran los datos  y el codigo}
-
- with new_tarea^.text_area do
+  if (tmp^.flags and I_XO <> I_XO) and (tmp^.flags and I_RO <> I_RO) then
   begin
-  size := 0 ;
-  flags := VMM_WRITE;
-  add_l_comienzo := pointer(HIGH_MEMORY);
-  add_l_fin := pointer(HIGH_MEMORY - 1);
- end;
+    put_dentry (tmp^.i_dentry);
+    Exit;
+  end;
 
- {Stack}
- with new_tarea^.stack_area do
+  set_errno := -ENOEXEC ;
+
+  if tmp^.mode <> dt_Reg then
   begin
-  size := 0;
-  flags := VMM_WRITE;
-  add_l_comienzo := pointer(STACK_PAGE);
-  add_l_fin := pointer(STACK_PAGE - 1);
- end;
+    put_dentry (tmp^.i_dentry);
+    Exit;
+  end;
 
- { tama¤o de los argumentos  }
- argc := get_args_size (args) ;
+  // create a temporal descriptor
+  tmp_fp.inodo := tmp;
+  tmp_fp.f_pos := 0;
+  tmp_fp.f_op := tmp^.op^.default_file_ops ;
 
- { cantidad de argumentos pasados }
- argccount := get_argc(args) ;
+  // get elf header
+  ret := tmp_fp.f_op^.read(@tmp_fp, sizeof(TELFHeader), @elf_hd);
 
- {Solo se soportan 4096 bytes de argumentos }
- page_Args := get_free_kpage ;
+  set_errno := -EIO ;
+
+  If ret = 0 then
+  begin
+    put_dentry(tmp^.i_dentry);
+    Exit;
+  end;
+
+  set_errno := -ENOEXEC;
+
+  // check magic number
+  If (elf_hd.e_ident[1] <> Byte('E')) or (elf_hd.e_ident[2] <> Byte('L')) then
+  begin
+    put_dentry(tmp^.i_dentry);
+    Exit;
+  end;
+
+  set_errno := -ENOEXEC;
+  startaddr := DWORD(elf_hd.e_entry);
+
+  // seek on the starting position of the program headers
+  tmp_fp.f_pos := DWORD(elf_hd.e_phoff);
+  set_errno := -EIO;
+
+  // The first programs-header must be the .text and the second one must be the .data + .bbs.
+  // These sections must be 4k-aligned and stored in the file one after the other.
+  ret := tmp_fp.f_op^.read(@tmp_fp, sizeof(TELFProgramHeader), @text_sec);
+
+  If ret = 0 then
+  begin
+    put_dentry(tmp^.i_dentry);
+    Exit;
+  end;
+
+  ret := tmp_fp.f_op^.read(@tmp_fp, sizeof(TELFProgramHeader), @data_sec);
+
+  If ret = 0 then
+  begin
+    put_dentry(tmp^.i_dentry);
+    Exit;
+  end;
+
+  set_errno := -ENOEXEC;
+
+  new_tarea := Proceso_Crear(ppid, Sched_RR);
+  If new_tarea = nil then
+  begin
+    put_dentry(tmp^.i_dentry);
+    Exit;
+  end;
+
+  lock(@mem_wait);
+
+  If (text_sec.p_memsz + data_sec.p_memsz) >=  MM_MEMFREE then
+  begin
+    unlock(@mem_wait);
+    Proceso_Eliminar (new_tarea);
+    put_dentry(tmp^.i_dentry);
+    Exit;
+  end;
+
+  // create two memory regions
+  // one for .text and .data
+  // and one for stack
+  with new_tarea^.text_area do
+  begin
+    size := 0 ;
+    flags := VMM_WRITE;
+    add_l_comienzo := pointer(HIGH_MEMORY);
+    add_l_fin := pointer(HIGH_MEMORY - 1);
+  end;
+
+  with new_tarea^.stack_area do
+  begin
+    size := 0;
+    flags := VMM_WRITE;
+    add_l_comienzo := pointer(STACK_PAGE);
+    add_l_fin := pointer(STACK_PAGE - 1);
+  end;
+
+  argc := get_args_size (args);
+  argccount := get_argc(args);
+  page_Args := get_free_kpage ;
 
   If argc > 1 then
-   begin
-
-   {Hay argumentos}
-   If argc > Page_Size then argc := Page_Size ;
-
-   {Son copiados los argumentos}
-   memcopy(args, page_Args + (Page_size - argc)-1 , argc);
-   end
-    else
-     begin
-     {No hay argumentos}
-
-     nd := Page_args;
-     nd += Page_size - 2 ;
-     nd^ := #0 ;
-     end;
-
-
- Save_Cr3;
- Load_Kernel_Pdt;
-
- {Es leido el archivo completo }
- count:=0;
- count_pg:=0;
- nr_page := (_text.s_size + _data.s_size) div Page_Size ;
- If ((_text.s_size + _data.s_size) mod Page_Size ) = 0 then else nr_page+=1;
-
- tmp_fp.f_pos:=_text.s_scnptr;
-
- k := contador ;
-
- repeat
- page := get_free_page;
-
- If page = nil then
   begin
-   vmm_free(new_tarea,@new_tarea^.text_area);
-   Proceso_Eliminar(new_tarea);
-   Mem_Unlock;
-   goto _exit ;
+    If argc > Page_Size then
+      argc := Page_Size;
+    memcopy(args, page_Args + (Page_size - argc)-1 , argc);
+  end else
+  begin
+    nd := Page_args;
+    Inc(nd, Page_size - 2);
+    nd^ := #0 ;
   end;
 
- count += tmp_fp.f_op^.read(@tmp_fp,Page_Size,page);
- vmm_map(page,new_tarea,@new_tarea^.text_area);
- count_pg+=1;
+  Save_Cr3;
+  Load_Kernel_Pdt;
 
- until (nr_page = count_pg);
- k := contador - k ;
+  // read .text and then .data
+  // this reads all the sections as multiples of of the PAGE_SIZE
+  count := 0;
+  count_pg := 0;
 
- {Se verifica que la cantidad leidos sean correctos}
- If count <> (_text.s_size + _data.s_size) then
-  begin
-   vmm_free(new_tarea,@new_tarea^.text_area);
-   vmm_free(new_tarea,@new_tarea^.data_area);
-   Proceso_Eliminar(new_tarea);
-   Mem_Unlock;
-   goto _exit ;
-  end;
+  // the binary must have at least two pages: one for data and one for text
+  nr_page := text_sec.p_memsz div Page_Size;
+  if text_sec.p_memsz mod Page_Size <> 0 then Inc(nr_page);
+  nr_page += data_sec.p_memsz div Page_Size;
+  If data_sec.p_memsz mod Page_Size <> 0 then Inc(nr_page);
 
+  tmp_fp.f_pos := text_sec.p_offset;
 
- {Las areas de datos no inicializados son alocadas}
- vmm_alloc(new_tarea,@new_tarea^.text_area,_bbs.s_size);
- vmm_alloc(new_tarea,@new_tarea^.stack_area,Page_Size);
+  repeat
+    page := get_free_page;
+    If page = nil then
+    begin
+      vmm_free(new_tarea,@new_tarea^.text_area);
+      Proceso_Eliminar(new_tarea);
+      unlock(@mem_wait);
+      put_dentry(tmp^.i_dentry);
+      Exit;
+    end;
+    Inc(count, tmp_fp.f_op^.read(@tmp_fp, Page_Size, page));
+    vmm_map(page,new_tarea,@new_tarea^.text_area);
+    Inc(count_pg);
+  until (nr_page = count_pg);
 
- {Entrada estandar y salida estandar}
- clone_filedesc(@Tarea_Actual^.Archivos[1],@new_tarea^.Archivos[1]);
- clone_filedesc(@Tarea_Actual^.Archivos[2],@new_tarea^.Archivos[2]);
+  vmm_alloc(new_tarea, @new_tarea^.stack_area, Page_Size);
 
+  clone_filedesc(@Tarea_Actual^.Archivos[F_STDIN],@new_tarea^.Archivos[F_STDIN]);
+  clone_filedesc(@Tarea_Actual^.Archivos[F_STDOUT],@new_tarea^.Archivos[F_STDOUT]);
 
- {La pagina deve ser de la zona alta y no de la del kernel}
- pagearg_us := get_free_page ;
- memcopy(page_args , pagearg_us , Page_Size);
+  // map args
+  pagearg_us := get_free_page ;
+  memcopy(page_args , pagearg_us , Page_Size);
+  free_page (page_args);
+  vmm_map(pagearg_us,new_tarea,@new_tarea^.stack_area);
 
- {No se necesita mas la pagina}
- free_page (page_args);
+  unlock(@mem_wait);
 
- {Se mapea la pagina de argumentos}
- vmm_map(pagearg_us,new_tarea,@new_tarea^.stack_area);
+  new_tarea^.reg.esp := pointer(new_tarea^.stack_area.add_l_fin - argc)  ;
+  new_tarea^.reg.eip := pointer(startaddr);
+  new_tarea^.reg.eax := argccount ;
+  new_tarea^.reg.ebx := LongInt(new_tarea^.reg.esp) ;
+  new_tarea^.reg.ecx := 0 ;
 
- {Se libera la proteccion de la memoria}
- Mem_Unlock;
+  Inc(Tarea_actual^.cwd^.count);
+  Inc(Tarea_Actual^.cwd^.i_dentry^.count);
+  new_tarea^.cwd := Tarea_Actual^.cwd ;
 
- new_tarea^.reg.esp := pointer(new_tarea^.stack_area.add_l_fin - argc)  ;
- new_tarea^.reg.eip := pointer(opt_hd.entry);
+  Restore_Cr3;
+  add_task (new_tarea);
+  put_dentry(tmp^.i_dentry);
 
- { son pasados los argumentos }
- new_tarea^.reg.eax := argccount ;
- new_tarea^.reg.ebx := longint(new_tarea^.reg.esp) ;
- new_tarea^.reg.ecx := 0 ;
-
-
- { la nueva tarea tiene como directorio de trabajo el cwd de la tarea que
- realizo el exec
- }
- Tarea_actual^.cwd^.count += 1 ;
- Tarea_Actual^.cwd^.i_dentry^.count += 1 ;
- new_tarea^.cwd := Tarea_Actual^.cwd ;
-
-
- Restore_Cr3;
-
-  {$IFDEF DEBUG}
-   printk('/nsys_exec  : Head Section Sizes\n',[],[]);
-   printk('/nText  : %d \n',[_text.s_size],[]);
-   printk('/nData  : %d \n',[_data.s_size],[]);
-   printk('/nBbs :  %d \n',[_bbs.s_size],[]);
-   printk('/npid : %d\n',[new_tarea^.pid],[]);
-   printk('/nDuracion : %d milis.\n',[contador-r],[]);
-   printk('/nTiempo de io : %d milise.\n',[k],[]);
-   printk('/nParametros : %d \n',[argccount],[]);
- {$ENDIF}
-
- add_task (new_tarea);
- put_dentry(tmp^.i_dentry);
-
- clear_errno;
-
- exit(new_tarea^.pid);
-
- _exit :
-
- {$IFDEF debug}
-  printkf('/Vexec/n: Error de lectura de archivo\n',[]);
- {$ENDIF}
-
- put_dentry (tmp^.i_dentry);
- exit(0);
-
+  clear_errno;
+  Result := new_tarea^.pid;
 end;
-
-
-
-
 end.

@@ -1,3 +1,24 @@
+//
+// process.pas
+//
+// This unit contains functions to handle processes.
+// 
+// Copyright (c) 2003-2022 Matias Vara <matiasevara@gmail.com>
+// All Rights Reserved
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
 Unit process;
 
 interface
@@ -135,27 +156,22 @@ uses memory, printk, arch, filesystem;
  ENOMEDIUM	 = 123;	{ No medium found }
  EMEDIUMTYPE	 = 124;	{ Wrong medium type }
  EEOF = 125 ;
- {Comienzo del area de pila del usuario}
- Stack_Page = $80000000;
+ 
+Stack_Page = $80000000;
 
- {Tiempo  de Cpu}
  Quantum = 100;
 
- {Numero de entradas en el array de la tabla Hash}
  Max_HashPid = 1000 ;
 
- {Estados de los Procesos }
  Tarea_Lista=1;
  Tarea_Corriendo=2;
  Tarea_Interrumpida=4;
  Tarea_Zombie=5;
 
- {Valores de Prioridad}
  nice_bajo = 1 ;
  nice_normal = 2 ;
  nice_alto = 3 ;
 
- {Maxima cantidad de llamadas al sistema}
  Nr_Syscall=50;
 
  Sched_Fifo = $1 ;
@@ -181,11 +197,9 @@ Sig_Name : array[0..8] of string[20] = ('Sig_Morir'#0,' ',' ','Sig_ili'#0,
                                         'Sig_Segv'#0 , 'Sig_DivE'#0 ,
                                         'Sig_FpuE'#0 , 'Sig_BrkPoint'#0 ,
                                         'Sig_Overflow'#0 );
- {Estructura de un proceso cualquiera}
 Type
  p_struc_timer=^struc_timer;
 
- {estrutura general de los timer}
  struc_timer = record
  interval : dword ;
  time_action:dword;
@@ -193,7 +207,6 @@ Type
 
  p_timer_kernel = ^struc_timer_kernel ;
 
- {estructura utilizada para los timers de kernel}
  struc_timer_kernel = record
  timer : struc_timer ;
  handler : procedure ( param : dword ) ;
@@ -204,8 +217,6 @@ Type
 
 
  p_timer_user = ^struc_timer_user ;
-
- {estructura de los timers de usuarios}
 
  struc_timer_user = record
  timer : struc_timer;
@@ -219,64 +230,50 @@ end;
 
  Tarea_struc=record
 
- pid : dword;           {Ident. de procesos}
- PaDre_Pid : dword;       {pid del Padre     }
- estado : byte;         {Estado del proceso}
- Terminacion : byte;    {Causa de que termino }
- Politica : byte;       {Politica empleada para la planificacion }
+ pid : dword;           
+ PaDre_Pid : dword;     
+ estado : byte;         
+ Terminacion : byte;   
+ Politica : byte; 
 
- quantum_a : byte;      {cantidad de tiempo que lleva }
+ quantum_a : byte;
  errno : dword ;
 
- {Numero de milisegundos consumidos en cpu}
  virtual_time : dword ;
 
- {tiempo real de milisegundos en cpu , este indica el momento en que entro
- a la ejecucion devera ser restado a contador para saber su edad}
  real_time : dword ;
  nice : word ;
 
- tss_descp : word;      {Descriptor a la TSS dentro de la GDT para cuando se libera}
- tss_p : ^struc_descriptor; {Puntero al descriptor dentro de la GDT}
+ tss_descp : word;
+ tss_p : ^struc_descriptor;
 
- {Registros Generales de la TAREA}
  reg:tss_struc;
 
- {punteros a los retornos cuando el proceso entra en modo nucleo}
  ret_eip  , ret_esp : pointer;
 
- {Punteros a tratamientos de ejecucion}
  signals : array[0..31] of pointer;
- flags_de_signal : dword;{Flags que ordenan la ejecucion de signals}
+ flags_de_signal : dword;
 
- {puntero al pdt de usurio}
  dir_page : pointer;
 
- {puntero a la pagina de pila 0 }
  stack0_page : pointer;
 
- {area de memoria virtual}
  text_area  : vmm_area_struc;
  data_area  : vmm_area_struc;
  stack_area : vmm_area_struc;
 
- {Los timer de usuarios}
  Despertador : struc_timer;
  Timer : struc_timer_user;
 
- {Area de fs del proceso}
  Archivos:array[0..32] of file_t;
  cwd:p_inode_t;
 
- {puntero a las colas ligadas }
  next_tarea:p_tarea_struc;
  prev_tarea:p_tarea_struc;
  hash_next:p_tarea_struc;
  hash_prev:p_tarea_struc;
  end;
  
-
-{ colas que aqui son manipuladas }
 const Tq_WaitPid : p_tarea_struc = nil ;
       Tq_Zombies : p_tarea_struc = nil ;
       tq_ktimers: p_timer_kernel = nil;
@@ -368,23 +365,12 @@ pid_t += 1;
 exit (pid_t);
 end;
 
-{ * Thread_Crear :                                                      *
-  *                                                                     *
-  * Kernel_Ip : Puntero a codigo del kernel                             *
-  * Retorno : puntero al thread o nil se falla                          *
-  *                                                                     *
-  * Funcion que crea un thread de kernel , por ahora no estan implemen  *
-  * tados dentro del sistema                                            *
-  *                                                                     *
-  ***********************************************************************
-}
 function thread_crear(Kernel_IP:pointer):p_tarea_struc;
 var stack,stack0:pointer;
     nuevo_tss,cont:word;
     tmp:^struc_descriptor;
     begin
 
-{ son protegidos los recursos }
 Gdt_Lock;
 Mem_Lock;
 
@@ -402,14 +388,12 @@ If (nr_free_page < 3) then
    exit(nil);
   end;
 
-{ Se pide memoria para la imagen de thread y el stack }
 Thread_Crear := get_free_kpage;
 
 stack := get_free_kpage;
 
 nuevo_tss := Gdt_Set_Tss(@Thread_Crear^.reg);
 
-{ son liberados los recursos }
 Mem_Unlock;
 Gdt_Unlock;
 
@@ -448,32 +432,15 @@ add_task(Thread_Crear);
 exit(Thread_Crear);
 end;
 
-
-
-{ * Proceso_Crear :                                                      *
-  *                                                                      *
-  * Ppid : Pid del Padre                                                 *
-  * Politica : Politica para la planif el proceso                        *
-  *                                                                      *
-  * Esta funcion devuelve un puntero a una nueva tarea , esta es creada  *
-  * pero no agregada a la cola de listas  , tampoco el PDT de usuario    *
-  * El proceso es creado "limpio"                                        *
-  * Trabaja sobre la zona alta                                           *
-  *                                                                      *
-  ************************************************************************
-}
-
 function proceso_crear (ppid:dword;sched:word):p_tarea_struc;
 var nuevo_tss , ret : word;
     stack0 , pdt : pointer;
 
 begin
 
-{ Es protegido el acceso a los recursos }
 Gdt_Lock;
 Mem_Lock;
 
-{ ahora se vera si hay recursos para la operacion }
 If (Gdt_Huecos_Libres = 1) then
  begin
   Mem_Unlock;
@@ -488,7 +455,6 @@ If nr_free_page < 3 then
   exit(nil);
  end;
 
-{ estas llamadas no pueden devolver nil }
 Proceso_Crear := get_free_kpage;
 stack0 := get_free_kpage;
 
@@ -496,14 +462,8 @@ pdt   := get_free_kpage;
 
 nuevo_tss := Gdt_Set_Tss(@Proceso_Crear^.reg);
 
-{ son liberados }
 Mem_Unlock;
 Gdt_Unlock;
-
-{ Es copiada la zona baja donde se encuentra el codigo  y datos del kernel }
-{ en maquinas en que la memoria supere 1GB , el kernel no puede acceder con }
-{ el pdt del usuario a mas alla de el primer GB , por lo tanto devera abrir }
-{ el Kernel_PDT y luego restaurarlo }
 
 memcopy(Kernel_Pdt , pdt , Page_Size);
 
@@ -532,7 +492,6 @@ With Proceso_Crear^ do
   reg.ss0 :=KERNEL_DATA_SEL;
   reg.esp0:= stack0 + Page_Size -1;
 
-  { Punteros de retorno del proceso del modo nucleo }
   ret_esp := reg.esp0 - 8 ;
   ret_eip := reg.esp0 - 20;
 
@@ -540,7 +499,6 @@ With Proceso_Crear^ do
 
   flags_de_signal:=0;
 
-  { Directorio de inicio }
   cwd := nil ;
 
   for ret:= 0 to NR_OPEN do
@@ -559,24 +517,10 @@ With Proceso_Crear^ do
   virtual_time := 0 ;
   end;
 
-{ Cola ordenada por nacimiento }
 Hash_Push(Proceso_Crear);
 
 end;
 
-
-
-{ * Proceso_Clonar                                                      *
-  *                                                                     *
-  * Tarea_Padre : Tarea que sera clonada                                *
-  * Retorno : Puntero a la nueva tarea o nil si falla                   *
-  *                                                                     *
-  * Esta funcion se encarga de crear un copia exacta del proceso dado   *
-  * y de todas las area de memoria , estas son recreadas y no comparti  *
-  * das                                                                 *
-  *                                                                     *
-  ***********************************************************************
-}
 function proceso_clonar(Tarea_Padre:p_tarea_struc):p_tarea_struc;
 var size,tmp:dword;
     tarea_hijo:p_tarea_struc;
@@ -589,12 +533,10 @@ tarea_hijo := Proceso_Crear(Tarea_Padre^.pid,Tarea_Padre^.Politica);
 
 If tarea_hijo=nil then exit(nil);
 
-{ Tama¤o del proceso padre }
 size := Tarea_Padre^.text_area.size + Tarea_Padre^.data_area.size + Tarea_Padre^.stack_area.size;
 
 Mem_Lock;
 
-{ Hay memoria para clonar el proceso? }
 If nr_free_page < (size div Page_Size) then
  begin
  Mem_Unlock;
@@ -605,7 +547,6 @@ If nr_free_page < (size div Page_Size) then
 Save_Cr3;
 Load_Kernel_Pdt;
 
-{ Son creadas las areas vmm }
 With Tarea_Hijo^ do
  begin
  text_area.size := 0;
@@ -620,21 +561,17 @@ With Tarea_Hijo^ do
 end;
 
 
-  { La zona de codigo es duplicada }
   vmm_alloc(Tarea_Hijo,@Tarea_Hijo^.text_area,Tarea_Padre^.text_area.size);
   vmm_copy(Tarea_Padre,Tarea_Hijo,@Tarea_Padre^.text_area,@Tarea_Hijo^.text_area);
 
 
-  { El area de pila es alocada y copiada tal cual }
   vmm_alloc(Tarea_hijo,@Tarea_Hijo^.stack_area,Tarea_Padre^.stack_area.size);
   vmm_copy(Tarea_Padre,Tarea_Hijo,@Tarea_Padre^.stack_area,@Tarea_Hijo^.stack_area);
 
 Mem_Unlock;
 
-{ Se heredan los desc de archivos }
 for ret:= 0 to NR_OPEN do Clone_Filedesc(@Tarea_Padre^.Archivos[ret],@Tarea_Hijo^.Archivos[ret]);
 
-{ es heredado el inodo de trabajo }
 Tarea_hijo^.cwd := Tarea_Padre^.cwd ;
 Tarea_hijo^.cwd^.count += 1;
 
@@ -643,56 +580,22 @@ Restore_Cr3;
 exit(Tarea_Hijo);
 end;
 
-
-
-
-{ * Proceso_Interrumpir:                                                  *
-  *                                                                       *
-  * Tarea:Tarea que sera interrumpida                                     *
-  * Cola : Cola donde se encuentra interrumpida                           *
-  *                                                                       *
-  * Este procedimiento detiene la ejecucion de un procedimiento           *
-  * que no estuviese ya interrumpido . Luego de detenerlo llama al        *
-  * planificador para que cambie de tarea                                 *
-  *                                                                       *
-  *************************************************************************
-}
-
 procedure proceso_interrumpir(Tarea:p_tarea_struc ; var Cola : p_tarea_struc);
 begin
 
-{ Zona critica }
 cerrar;
 
-{ Esto nunca puede ocurrir }
 If Tarea^.estado = Tarea_Interrumpida Then exit;
 
-{ Pasa a estado interrumpida }
 Tarea^.estado := Tarea_Interrumpida;
 
-{ Es agregada a la cola de interrumpidas }
 Push_Task(tarea,Cola);
 
-{ Re planificar }
 Scheduling;
 
-{ Aqui vuelve y son manejadas las se¤ales }
 Signaling;
-
 end;
 
-
-
-{ * Proceso_Reanudar                                                      *
-  *                                                                       *
-  * Tarea : Puntero a la tarea interrumpida                               *
-  * Cola : Cola ligada donde se encuentra la tarea                        *
-  *                                                                       *
-  * Este procedimiento Reanuda una tarea que estubiese interrumpiada      *
-  * por IO o por un despertador                                           *
-  *                                                                       *
-  *************************************************************************
-}
 procedure proceso_reanudar(Tarea:p_tarea_struc;var Cola : p_tarea_struc );
 begin
 
@@ -700,29 +603,13 @@ if (Tarea = nil ) or (Cola = nil ) then exit ;
 
 Tarea^.estado := Tarea_Lista ;
 
-{ Se quita la tarea de la cola interrumpida }
 Pop_Task (tarea,Cola);
 
-{ la tarea pasa a la cola para ser planificado rapidamente }
 add_interrupt_task (tarea);
 
-{ se llamara al planificador en la proxima irq de relog }
 if Tarea_Actual <> tarea then need_sched := true
-
 end;
 
-
-
-
-{ * Proceso_Eliminar :                                                  *
-  *                                                                     *
-  * Tarea : Puntero a la tarea eliminada                                *
-  *                                                                     *
-  * Procedimiento usado pocas veces para eliminar un proceso totalmente *
-  * de la memoria                                                       *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure proceso_eliminar(Tarea:p_tarea_struc);
 begin
 Hash_Pop(Tarea);
@@ -731,21 +618,6 @@ Gdt_Quitar(Tarea^.tss_descp);
 free_page(Tarea^.dir_page);
 free_page(Tarea);
 end;
-
-
-
-
-{ * Proceso_Destruir :                                                 *
-  *                                                                    *
-  * Tarea : Tarea q sera destruida                                     *
-  *                                                                    *
-  * llamada para destruir un proceso , que puede ser provocada por una *
-  * execpcion o una se¤al  , si es un proceso padre es eliminada tota  *
-  * talmente del sistema pero si posee padre , se vuelve un zombie , y *
-  * sera destruida cuando el padre realice un WAITPID                  *
-  *                                                                    *
-  **********************************************************************
-}
 
 procedure proceso_destruir(Tarea:p_tarea_struc);
 var padre,hijos:p_tarea_struc;
@@ -756,27 +628,20 @@ begin
  printk('/VProcesos/n : Tiempo de vida de Pid %d : /V%d \n',[tarea^.pid , contador - tarea^.real_time],[]);
 {$ENDIF}
 
-{ es devuelto el inodo de trabajo }
 put_dentry (Tarea_actual^.cwd^.i_dentry);
 
 Load_Kernel_Pdt;
 
-{ las areas de codigo son liberadas }
 vmm_free(Tarea,@Tarea^.text_area);
 vmm_free(Tarea,@Tarea^.stack_area);
 
-{ Son cerrados todos los archivos }
 for tmp := 0 to Nr_Open do If Tarea^.Archivos[tmp].f_op <> nil then  Sys_Close(tmp);
-
-{ Si el proceso padre tuviera hijos al morir este todos los hijos }
-{se volverian hijos directos de INIT }
 
 hijos := Tq_Zombies;
 
 If hijos = nil then
  else
 
- { se rastrea la cola en busca de hijos }
  repeat
 
   If hijos^.padre_pid=Tarea^.padre_pid then hijos^.padre_pid:=1;
@@ -784,15 +649,9 @@ If hijos = nil then
 
  until (Hijos = Tq_Zombies);
 
-{ La tarea ahora sera zombie }
 Tarea^.estado := Tarea_Zombie;
 
-{ Se agrega a la cola de zombies }
 Push_Task (Tarea,Tq_Zombies);
-
-
-{ Si el padre estubiese esperando en la cola WaitPid , se reanuda }
-{para que mate al proceso hijo }
 
 padre := Tq_WaitPid;
 
@@ -800,7 +659,6 @@ If padre = nil then
  else
   begin
 
-  { Se rastrea todo la cola en busca del padre }
   repeat
    If padre^.pid = Tarea^.padre_pid then
     begin
@@ -814,26 +672,11 @@ If padre = nil then
 
  end;
 
-{ el padre esta interrumpido o en la cola listos }
 padre := Hash_Get (Tarea^.padre_pid);
 
-{ se le avisa al padre que devera hacer Wait_Pid }
 Signal_Send (padre , Sig_Hijo);
-
 end;
 
-
-{ * Esperar_Hijo :                                                      *
-  *                                                                     *
-  * Tarea_Padre : Puntero a la tarea en busca de hijos                  *
-  * Pidh : Devuelve el Pid del hijo muerto                              *
-  * Err_code : devuelve el numero de error del proceso hijo             *
-  *                                                                     *
-  * Se encarga de devolver la causa de terminacion de un proceso hijo   *
-  *  y si no hubiese ninguno se interrumpe en espera de un proceso hijo *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure esperar_hijo(Tarea_Padre:p_tarea_struc;var PidH:dword;var err_code:word);
 var tmp:p_tarea_struc;
 label 1,2;
@@ -846,19 +689,14 @@ If (tmp = nil) then goto 2;
 
 repeat
 
- { la tarea busca a sus hijos }
-
- { se encontro un hijo }
  If (tmp^.padre_pid = Tarea_Padre^.pid) then
   begin
 
   PidH := tmp^.pid;
   err_code := tmp^.terminacion;
 
-  { se quita de la cola zombie }
   Pop_Task(tmp,Tq_Zombies);
 
-  { Es eliminada todo la memoria que queda del proceso }
   Proceso_Eliminar (tmp);
   exit;
  end;
@@ -867,7 +705,6 @@ repeat
 
 until (tmp=nil) or (tmp=Tq_Zombies);
 
-{ Parece que no hay hijos la tarea es interrumpida }
 2 : Proceso_Interrumpir (Tarea_Padre , Tq_WaitPid);
 
 goto 1;
@@ -939,13 +776,10 @@ begin
 
 pos := Pid mod Max_HashPid ;
 
-{Si esta primera}
-
 If Hash_Pid[pos]^.pid = Pid  then
  exit(Hash_Pid[pos])
  else
   begin
-   {Se deve realizar la busqueda dentro de la cola ligada}
    l := Hash_Pid[pos] ;
 
    repeat
@@ -953,7 +787,6 @@ If Hash_Pid[pos]^.pid = Pid  then
    l := l^.hash_next;
    until (l = Hash_Pid[pos]);
   end;
-{No se encontro el Pid}
 exit(nil);
 end;
 
@@ -1000,9 +833,6 @@ pos := Tarea^.pid mod Max_HashPid ;
     end;
 end;
 
-
-{ * Agrega una tarea a alguna de las dos colas de tareas convencionales * }
-
 procedure add_task(tarea:p_tarea_struc) ;
 begin
 case Tarea^.politica of
@@ -1010,9 +840,6 @@ Sched_RR : Push_Task(Tarea,Tq_rr);
 Sched_FIFO : Push_Task (Tarea,Tq_FIFO);
 end;
 end;
-
-
-{ * Quita una tarea de alguna de las dos colas de tareas convecionales  * }
 
 procedure remove_task(tarea:p_tarea_struc) ;
 begin
@@ -1022,7 +849,6 @@ Sched_FIFO : Pop_Task (Tarea , Tq_FIFO);
 end;
 end;
 
-{ * agrega una tarea que estubo bloqueada a la cola de listas * }
 procedure add_interrupt_task ( tarea : p_tarea_struc ) ;
 begin
 if tarea^.politica = sched_fifo then Push_Task_first (tarea , tq_fifo)
@@ -1076,14 +902,6 @@ nodo^.prev_timer^.next_timer := nodo^.next_timer ;
 nodo^.next_timer^.prev_timer := nodo^.prev_timer ;
 end;
 
-{ * Add_timer :                                                         *
-  *                                                                     *
-  * timer : puntero a un timer de kernel                                *
-  *                                                                     *
-  * Coloca un timer de kernel en la cola de timers                      *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure add_timer ( timer : p_timer_kernel ) ;
 begin
 cerrar;
@@ -1092,16 +910,6 @@ push_timer(timer);
 abrir;
 end;
 
-
-
-{ * Del_timer :                                                         *
-  *                                                                     *
-  * timer : puntero a un timer de kernel                                *
-  *                                                                     *
-  * Quita un timer de la cola de timers                                 *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure del_timer ( timer : p_timer_kernel ) ;
 begin
 cerrar;
@@ -1109,15 +917,6 @@ pop_timer (timer);
 abrir;
 end;
 
-
-{ * Do_ktimer :                                                         *
-  *                                                                     *
-  * Chequea lo timers que han vencido y los ejecuta y luego los elimina *
-  * de la cola                                                          *
-  * Es llamada en cada irq de relog                                     *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure do_ktimer;
 var tm , tmp : p_timer_kernel ;
 begin
@@ -1142,20 +941,12 @@ until ( tm = tq_ktimers) or ( tq_ktimers = nil) ;
 
 end;
 
-{ * Timer_Inc :                                                         *
-  *                                                                     *
-  * Este procedimiento es llamado en cada irq de relog y mantiene el    *
-  * contador del sistema y los timers                                   *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure timer_Inc;
 var tarea_d,Tarea_p : p_tarea_struc;
     timer_tmp  , timer_t : p_timer_user;
 
 begin
 
-{ Incremento el contador del Sistema }
 contador += 1;
 
 tarea_d := tq_dormidas;
@@ -1165,7 +956,6 @@ tarea_d := tq_dormidas;
 
     repeat
 
-     { Esta Tarea cumplio su tiempo ?  , entonces la despierto }
       if (tarea_d^.Despertador.time_action <= contador) then
        begin
         Tarea_p := Tarea_d^.prev_tarea;
@@ -1173,67 +963,47 @@ tarea_d := tq_dormidas;
         Tarea_d := Tarea_p;
        end;
 
-    { Se continua la busqueda }
     Tarea_d := Tarea_d^.next_tarea;
     until (Tarea_D=tq_dormidas) or (tq_dormidas=nil) ;
 
   end;
 
-{ Ahora busco tareas con alarmas }
 if (tq_alarmas = nil) then exit;
 
 timer_tmp := tq_alarmas;
 
   repeat
 
-  { el timer vencio!!! }
   if (Timer_tmp^.timer.time_action <= contador) then
    begin
     timer_tmp^.estado := false;
     timer_t := timer_tmp^.prev_timer ;
 
-    { se quita el timer y se envia la se¤al }
     Pop_User_Timer(timer_tmp);
     Signal_Send(Timer_tmp^.tarea,SIG_ALARM);
 
     timer_tmp := timer_t ;
     end;
 
-  { Continuo con la ejecucion }
   timer_tmp := timer_tmp^.next_timer;
 
   until (Timer_tmp = tq_alarmas);
 
 end;
 
-
-{ * Scheduler_Handler:                                                     *
-  *                                                                        *
-  * Este procedimiento declarado como interrupt , se encarga de captar las *
-  * interrupciones generadas por el relog del sistma IRQ 0 , suma el       *
-  * contador de quantums de la tarea actual y si su tiempo expira llama al *
-  * scheduling que planifica otra tarea                                    *
-  *                                                                        *
-  **************************************************************************
-}
 procedure scheduler_handler;interrupt;
 label _back , _sched ;
 begin
 enviar_byte ($20,$20);
 
-{ or la ejecucion de timers del nucleo }
 do_ktimer ;
 
-{ Incremento el contador de tiemers de usuarios  }
 timer_inc;
 
-{ incremento del tiempo virtual del proceso }
 Tarea_Actual^.virtual_time += 1;
 
-{ Se solicito que se llame al planificador }
 if need_sched then goto _sched ;
 
-{ las tareas fifo no poseen quantums y no pueden ser desalojadas }
 if Tarea_Actual^.politica = Sched_FIFO then goto _back;
 
 Tarea_Actual^.quantum_a += 1;
@@ -1242,34 +1012,15 @@ if (Tarea_Actual^.quantum_a <> quantum) then goto _back;
 
  _sched :
 
- { La tarea vuelve a la cola listos  , solo las rr llegan aqui}
  Push_Task (Tarea_Actual,Tq_rr);
  Tarea_Actual^.estado := Tarea_Lista ;
  Scheduling;
 
 _back:
 
-{ Se verifican las se¤ales pendientes }
 Signaling;
 
 end;
-
-
-{ * Scheduling:                                                           *
-  *                                                                       *
-  * Aqui se encuentra todo el proceso de planificacion se poseen dos al   *
-  * goritmos FIFO y RR                                                    *
-  *                                                                       *
-  * Versiones :                                                           *
-  *                                                                       *
-  * 04 / 01 / 2006 : Es modificada la planificacion para optimizar los    *
-  * procesos con mucha io                                                 *
-  *                                                                       *
-  * 05 / 04 / 2005 : Se aplica el nuevo modelo de planificacion           *
-  *                                                                       *
-  * ?? / ?? / ???? : Primera Version                                      *
-  *************************************************************************
-}
 
 procedure scheduling ;
 label _load , _fifo ;
@@ -1277,8 +1028,6 @@ var  task_sched : p_tarea_struc ;
 begin
 
 cerrar;
-
-        { las fifo se encuentran por sobre las RR }
 
 _fifo :
 
@@ -1288,15 +1037,12 @@ _fifo :
          goto _load ;
          end;
 
-        { si no hay ninguna tarea aguardo por alguna irq }
-
         if tq_rr = nil then
          begin
           abrir ;
           while (tq_rr = nil ) do  if (tq_fifo <> nil) then goto _fifo ;
          end;
 
-         { simple turno rotatorio RR }
          Task_sched := Tq_rr ;
 
 _load :
@@ -1315,52 +1061,28 @@ _load :
 
 end;
 
-{ * Empilar_Signal :                                                       *
-  *                                                                        *
-  * new_ret : Nuevo punto de retorno                                       *
-  *                                                                        *
-  * Proceso que se encarga de anidar las se¤ales de un proceso             *
-  *                                                                        *
-  **************************************************************************
-}
-
 function enpilar_signal (new_ret : pointer ) : dword ;
 var tmp , esp : ^dword ;
     s : dword ;
 begin
 
-{ Puntero  donde se encuentra la direcion de retorno }
 tmp := Tarea_Actual^.ret_eip ;
 
-{ la salvo }
 s := tmp^ ;
 
-{ nueva direccion de retorno }
 tmp^ := longint(new_ret);
 
-{ esp de retorno }
 tmp := Tarea_Actual^.ret_esp ;
 
-{ ahora devo decrementar para guardar el retorno anterior }
 tmp^ -= 4;
 
 esp := pointer(tmp^) ;
 
-{ coloco en la pila de usuario el retorno anterior }
 esp^ := s ;
 
 exit(0);
 end;
 
-
-{ * Kernel_Signal_Handler :                                             *
-  *                                                                     *
-  * Manejador de las se¤ales del kernel , cuando un proceso no quiere   *
-  * controlarlas el mismo el kernel lo hara , siempre se destruye al    *
-  * proceso si recibe una se¤al no esperada no procesable               *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure kernel_signal_handler;
 var tarea:pointer ;
 begin
@@ -1373,33 +1095,20 @@ Proceso_destruir (Tarea_Actual);
 scheduling;
 end;
 
-
-{ * Signaling :                                                         *
-  *                                                                     *
-  * Este proceso es el nucleo de las se¤ales , este es llamado cada vez *
-  * que se vuelve a ejecutar una tarea , y evalua que bit de signal esta*
-  * activo y de acuerdo a estos bit , ejecuta su hilo correspondiente , *
-  *                                                                     *
-  ***********************************************************************
-}
-
 procedure signaling;
 var tmp  , ret : dword ;
     ret2 : word;
     signal_handler , tarea: pointer ;
 begin
 
-{ Son rastreadas todas las signal }
 for tmp:= 0 to 31 do
  begin
 
-  { Se esta aguardando por su ejecucion ? }
   if Bit_Test(@Tarea_Actual^.flags_de_signal,tmp) then
    begin
 
    signal_handler := Tarea_actual^.signals[tmp];
 
-   { Se baja el bit de pendiente }
    bit_reset(@Tarea_Actual^.flags_de_signal,tmp);
 
    case tmp of
@@ -1412,7 +1121,6 @@ for tmp:= 0 to 31 do
               Tarea_Actual^.terminacion := Sig_Morir ;
               Proceso_Destruir (Tarea_Actual) ;
 
-              { Se replanifica }
               Scheduling;
 
               exit;
@@ -1426,7 +1134,6 @@ for tmp:= 0 to 31 do
               Tarea_Actual^.signals[Sig_Alarm] := nil ;
              end;
    Sig_ili : begin
-             { puede ser que el kernel deva ocuparse de la se¤al }
 
              if signal_handler = nil then
               begin
@@ -1437,8 +1144,6 @@ for tmp:= 0 to 31 do
              end;
    Sig_Segv : begin
 
-              { puede ser que el kernel deva ocuparse de la se¤al }
-
               if signal_handler = nil then
                begin
                 Tarea_actual^.terminacion := Sig_Segv ;
@@ -1447,7 +1152,6 @@ for tmp:= 0 to 31 do
 
               end;
    Sig_Dive : begin
-              { puede ser que el kernel deva ocuparse de la se¤al }
 
               if signal_handler = nil then
                begin
@@ -1457,7 +1161,6 @@ for tmp:= 0 to 31 do
 
               end;
    Sig_Fpue : begin
-              { puede ser que el kernel deva ocuparse de la se¤al }
 
               if signal_handler = nil then
                begin
@@ -1488,7 +1191,6 @@ for tmp:= 0 to 31 do
 
        end;
 
-   { la se¤al es procesada por el usuario }
    Enpilar_Signal (signal_handler);
    Tarea_Actual^.signals[tmp] := nil ;
    end;
@@ -1496,29 +1198,15 @@ for tmp:= 0 to 31 do
 
 end;
 
-{ * Signal_Send :                                                         *
-  *                                                                       *
-  * Tarea:Tarea a la que se le envia la se¤al                             *
-  * signal: Numero de se¤al                                               *
-  *                                                                       *
-  * Esta funcion envia una se¤al a la tarea indicada en TAREA , activando *
-  * el correspondiente BIT                                                *
-  * Devolvera error si no hubiera un tratamiento para la se¤al            *
-  *                                                                       *
-  *************************************************************************
-}
 procedure signal_send(Tarea:p_tarea_struc;signal:word);
 begin
 
-{ Zona critica }
 cerrar;
 
 if Tarea_Actual= nil then Panic ('/nImposible cargar toro  , excepcion desconocida !!!!\n');
 
-{ Ya se esta procesando otra signal }
 if Bit_test(@tarea^.flags_de_signal,signal) then exit;
 
-{ Se activa su bit }
 Bit_Set(@Tarea^.flags_de_signal,signal);
 
 abrir;
@@ -1533,18 +1221,18 @@ Procedure irq_master;interrupt;
 var irq:byte;
 begin
 asm
-mov dx , $20                            {Como la interrupcion es producida }
-mov al , $b                             {por el 1ø 8259 , quiero saber cual}
-out dx , al                             {es                                }
+mov dx , $20                            
+mov al , $b                             
+out dx , al                             
 nop
 nop
 nop
 xor ax , ax
-in  al , dx                             {Al= va a tener el numero de IRQ   }
+in  al , dx                             
 mov irq , al
 xor ax , ax
 
-mov ax , $20                            { aqui se envia el eoi }
+mov ax , $20                            
 out dx , al
 end;
 
@@ -1589,18 +1277,6 @@ Proceso_Reanudar(Irq_Wait[irq] , Tq_WaitIrq);
 abrir;
 end;
 
-
-{ * Wait_Long_Irq :                                                     *
-  *                                                                     *
-  * Irq : Numero de Irq                                                 *
-  *                                                                     *
-  * Procedimiento utilizado para esperar una irq por lo general de      *
-  * lenta o mejor dicho aquellas que se producen entre lasgos inter     *
-  * valos de tiempo como la de la disketera el disco duro               *
-  * Duerme al proceso solicitante!!                                     *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure wait_long_irq(Irq:byte);
 var cont : dword ;
 begin
@@ -1619,18 +1295,6 @@ Dhabilitar_irq (irq);
 abrir;
 end;
 
-{ * Wait_Short_Irq :                                                    *
-  *                                                                     *
-  * Irq : Numero de Irq                                                 *
-  * Handler : Puntero al tratamiento                                    *
-  *                                                                     *
-  * Este procedimiento se utiliza para captar irqs que se generan       *
-  * continuamente como son las del teclado  o los puertos seriales      *
-  * que deven recibir tratamiento inmediatamente                        *
-  * No duerme al proceso solicitante!!!                                 *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure wait_short_irq(Irq:byte;Handler:pointer);
 begin
 If Bit_Test(@Irq_Flags,Irq) then exit
@@ -1639,17 +1303,6 @@ set_int_gate(Irq + 32 , Handler);
 Habilitar_Irq(irq);
 end;
 
-{ * Vmm_Map :                                                           *
-  *                                                                     *
-  * Page : Puntero a una pagina                                         *
-  * Task : Tarea donde sera mapeada la pagina                           *
-  * Vmm_Area : Area donde sera mapeada la pagina                        *
-  *                                                                     *
-  * Esta funcion mapeada un pagina dada dentro de un area vmm , a dife  *
-  * rencia de vmm_alloc , solo se limita a mapear un pagina             *
-  *                                                                     *
-  ***********************************************************************
-}
 function vmm_map(page:pointer;Task:p_tarea_struc;vmm_area:p_vmm_area):dword;
 var total_pg,tmp:dword;
     at:word;
@@ -1671,54 +1324,26 @@ begin
 exit(0);
 end;
 
-
-{ * Vmm_Alloc :                                                        *
-  *                                                                    *
-  * Task : Tarea donde sera alocada el area                            *
-  * Vmm_Area : Puntero al area donde sera alocada                      *
-  * Size : Tamano de la que sera alocado                               *
-  *                                                                    *
-  * Esta funcion agrega la cantidad de memoria pedida en size al final *
-  * del area punteada en VMM_AREA                                      *
-  *                                                                    *
-  **********************************************************************
-}
 function vmm_alloc(Task:p_tarea_struc;vmm_area:p_vmm_area;size:dword):dword;
 var total_pg,tmp:dword;
     page,add_l:pointer;
     at:word;
 begin
 
-{ Tamano del area }
 total_pg := (size div Page_Size);
 If (size mod Page_Size)=0 then else total_pg+=1;
 
-{ Hay espacio para el area }
 If total_pg > nr_free_page then exit(-1);
 
-{ Se mapean todas las nuevas paginas en el dir de usuario }
 for tmp:= 1 to total_pg do
  begin
  page := get_free_page;
- { No se evaluo page que puede ser nil }
  vmm_map(page,Task,vmm_area);
-
  end;
 
 exit(0);
 end;
 
-
-{ * Vmm_Free :                                                          *
-  *                                                                     *
-  * Task : Tarea donde sera liberada la zona                            *
-  * Vmm_area : Area que sera liberada                                   *
-  *                                                                     *
-  * Esta funcion desmapea toda la memoria utilizada por una vmm         *
-  * Aclaracion : Deve trabajar con Kernel_PDT                           *
-  *                                                                     *
-  ***********************************************************************
-}
 function vmm_free(Task:p_tarea_struc;vmm_area:p_vmm_area):dword;
 var i,f:dword;
     pg,fpg:pointer;
@@ -1742,25 +1367,6 @@ exit(0);
 
 end;
 
-
-
-{ * Vmm_Clone :                                                         *
-  *                                                                     *
-  * Task_p : Tarea Padre                                                *
-  * Task_H : Tarea Hijo                                                 *
-  * Vmm_area_p : Area de origen                                         *
-  * Vmm_area_h : Area de distino                                        *
-  * ret : 0 si fue correcta o -1 si no                                  *
-  *                                                                     *
-  * Esta funcion duplica una vmm , lo que hace basicamente es copiar    *
-  * las tablas de pagina de la zona del padre a la misma area logica    *
-  * dentro del PDT del hijo , aumentando el contador de uso de cada pag *
-  * ina                                                                 *
-  * Aclaracion : Devemos utilizar Kernel_PDT                            *
-  *                                                                     *
-  ***********************************************************************
-}
-
 function vmm_clone(Task_P,Task_H:p_tarea_struc;vmm_area_p,vmm_area_h:p_vmm_area):dword;
 var add_f:pointer;
     total_tp,tmp:dword;
@@ -1774,38 +1380,20 @@ fin := Get_Page_Index(vmm_area_p^.add_l_fin);
 pt_p := Task_P^.dir_page;
 pt_h := Task_H^.dir_page;
 
-{ Duplica las tablas de pagina }
 for tmp:= i.dir_I to fin.dir_i do
   begin
-  { direccion de la tp }
   add_f := pointer(longint(pt_p[tmp]) and $FFFFF000);
 
-  { se duplica la tp }
   dup_page_table(add_f);
 
   pt_h[tmp] := pt_p[tmp];
 end;
 
-{ el descriptor del area es duplicado }
 vmm_area_h^:=vmm_area_p^;
 
 exit(0);
 end;
 
-
-{ * Vmm_Copy:                                                           *
-  *                                                                     *
-  * Task_Ori : Tarea de origen                                          *
-  * Task_Dest : Tarea de destino                                        *
-  * vmm_area_ori : Area de origen                                       *
-  * vmm_area_dest : Area de destino                                     *
-  *                                                                     *
-  * Esta funcion a diferencia de vmm_dup copia una vmm aa otra pagina   *
-  * por pagina .                                                        *
-  * Esta funcion deve trabajar sobre Kernel_Pdt                         *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure vmm_copy(Task_Ori,Task_Dest:p_tarea_struc;vmm_area_ori,vmm_area_dest:p_vmm_area);
 var tmp:dword;
     ori,dest:pointer;
@@ -1863,7 +1451,7 @@ begin
 {Exceciones NMI}
 Panic('/nExecp NMI!!!!\n');
 asm
-hlt {Bloque el bus }
+hlt
 end;
 end;
 
@@ -1958,13 +1546,6 @@ Signal_Send (Tarea_Actual,Sig_Fpue);
 Signaling;
 end;
 
-
-{ * Excep_Init :                                                        *
-  *                                                                     *
-  * Proceso que inicializa los manejadores de excepciones               *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure excep_init;
 var m: dword;
 begin
@@ -1986,17 +1567,6 @@ set_int_gate(15,@Excep_ignore);
 set_int_gate(16,@excep_16);
 end;
 
-
-{ * Sys_WaitPid :                                                          *
-  *                                                                        *
-  * status : Causa de la terminacion                                       *
-  * Retorno : Pid del proceso Hijo                                         *
-  *                                                                        *
-  * Llamada al sistema que duerme a un padre que espera por la terminacion *
-  * de un hijo y devuelve la causa de terminacion                          *
-  *                                                                        *
-  **************************************************************************
-}
 function sys_waitpid(var status:dword):dword;cdecl;
 var pid:dword;
     err:word;
@@ -2009,15 +1579,6 @@ end;
 {$DEFINE set_errno := Tarea_Actual^.errno  }
 {$DEFINE clear_errno := Tarea_Actual^.errno := 0 }
 
-{ * Sys_ReadErrno :                                                     *
-  *                                                                     *
-  * Retorno : Numero de error                                           *
-  *                                                                     *
-  * Funcion que devuelve el codigo de error generado por la ultima      *
-  * llamada al sistema , luego el campo errno es limpiado               *
-  *                                                                     *
-  ***********************************************************************
-}
 function sys_readerrno : dword ; cdecl ;
 var errno : dword ;
 begin
@@ -2026,17 +1587,6 @@ clear_errno ;
 exit(errno);
 end;
 
-{ * Sys_Fork :                                                        *
-  *                                                                   *
-  * Unas de las mas importantes llamadas al sistema , puesto que crea *
-  * un proceso a partir del proceso padre , es una copia exacta del   *
-  * padre                                                             *
-  *                                                                   *
-  * Versiones :                                                       *
-  * 4 / 01 / 2005 : Primera Version                                   *
-  *                                                                   *
-  *********************************************************************
-}
 function sys_fork:dword;cdecl;
 var hijo:p_tarea_struc;
     err:word;
@@ -2065,22 +1615,12 @@ If hijo = nil then exit(0);
 Hijo^.reg.eip := pointer(ip_ret) ;
 Hijo^.reg.esp := pointer(esp_ret) ;
 Hijo^.reg.ebp := pointer(ebp_ret);
-Hijo^.reg.eax := 0 ; { Resultado de operacion para el hijo }
+Hijo^.reg.eax := 0 ;
 
 add_task (Hijo);
 exit(hijo^.pid);
 end;
 
-
-
-{ * Sys_Exit :                                                        *
-  *                                                                   *
-  * status : Causa de la muerte                                       *
-  *                                                                   *
-  * Llamada al sistema que envia la se¤al de muerte al proceso actual *
-  *                                                                   *
-  *********************************************************************
-}
 procedure sys_exit(status:word);cdecl;
 begin
 cerrar;
@@ -2089,14 +1629,6 @@ Signal_Send(Tarea_Actual,Sig_Morir);
 Signaling;
 end;
 
-
-
-{ * Proceso_Init :                                                      *
-  *                                                                     *
-  * Aqui se inicializan las variables de la unidad procesos             *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure Process_init ;
 var ret : dword ;
 begin
@@ -2104,12 +1636,10 @@ Pid_t := 0 ;
 Tq_Interrumpidas := nil ;
 Tarea_Actual := nil ;
 contador := 0 ;
-{ Son inicializadas todas las colas }
 for ret := 1 to Max_HashPid do Hash_Pid[ret] := nil;
 // irqs
 irq_flags := 0 ;
 for ret:= 0 to 15 do Irq_Wait[ret] := nil ;
-{Son capturadas todas las irq}
 for ret:= 33 to 39 do set_int_gate(ret,@Irq_Master);
 for ret:= 40 to 47 do set_int_gate(ret,@Irq_Esclavo);
 excep_init;

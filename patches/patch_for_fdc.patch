@@ -1,0 +1,14 @@
+diff --git a/hw/block/fdc.c b/hw/block/fdc.c
+index 9014cd30b3..75f6d13391 100644
+--- a/hw/block/fdc.c
++++ b/hw/block/fdc.c
+@@ -1514,7 +1514,8 @@ static void fdctrl_start_transfer(FDCtrl *fdctrl, int direction)
+         tmp = (fdctrl->fifo[6] - ks + 1);
+         if (fdctrl->fifo[0] & 0x80)
+             tmp += fdctrl->fifo[6];
+-        fdctrl->data_len *= tmp;
++        if (tmp)
++            fdctrl->data_len *= tmp;
+     }
+     fdctrl->eot = fdctrl->fifo[6];
+     if (fdctrl->dor & FD_DOR_DMAEN) {

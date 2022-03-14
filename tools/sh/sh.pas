@@ -1,177 +1,89 @@
+// sh.pas
+//
+// This application shows how a shell is implemented in ToroOS.
+//
+// Copyright (c) 2003-2022 Matias Vara <matiasevara@gmail.com>
+// All Rights Reserved
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+
 {$ASMMODE INTEL}
 {$I-}
 
-{ * Sh :
-  *                                                                  *
-  * Shell basica para el sistema toro                                *
-  *                                                                  *
-  * Versiones :                                                      *
-  *                                                                  *
-  * 11 / 02 / 2006 : Es totalmente reescritra .                      *
-  * 09 / 02 / 2005 : Ahora envia parametros                          *
-  * 02 / 08 / 2004 : Se utiliza la unidad stdio                      *
-  * 20 / 04 / 2004 : Version Inicial                                 *
-  *                                                                  *
-  ********************************************************************
+uses Strings, crt;
 
-}
-
-uses crt,toro,strings;
-
-var err : longint ;
-    cmd , path , args , dir ,rela_path: pchar ;
-    r : char ;
+var err : dword;
+    cmd: array[0..254] of char;
+    fullcmd: array[0..254] of char;
+    dir: array[0..254] of char;
+    p, s, a: Pchar;
 
 const root : pchar = '/' ;
       version = '1' ;
-      subversion = '2';
+      subversion = '3';
       binpath = '/BIN/';
 
-
-procedure shell ;
-var ret , len  : longint ;
-    p : pchar ;
 begin
+  fillbyte(dir, 0, 255); //this is not working
+  fillbyte(fullcmd, 0, 254); //this is not working
+  fillbyte(cmd, 0, 254); //this is not working
+  dir[0]:= '/';
+  writeln('Shell ', version, '.', subversion);
+  write('root:', dir);
+  while true do
+  begin
+    readln(fullcmd); 
+    p := @fullcmd[0];
+    s := @cmd[0];
+    a := @dir[0];
 
-
-if (strscan(cmd,#32) = nil) or (strscan(cmd,#32) = (strend(cmd) -1)) then
- begin
-
-  {cd es considera un un comando de la shell}
-  if cmd ='cd' then
-   begin
-    writeln(dir);
-    exit;
-   end
-   else
+    while (p^ <> #32) and (p^ <> #0) do
     begin
+      s^ := p^;
+      Inc(s);    
+      Inc(p);
+    end;
 
-     { si la ruta comienza con / no se utiliza la ruta relativa }
-     if cmd^ = '/' then ret := exec (cmd,nil)
-     else
+    s^ := #0;
+
+    if p^ = #32 then
+    begin
+      Inc(p);
+      while p^ <> #0 do
       begin
-       strcopy (rela_path , binpath);
-       strcat (rela_path,cmd);
-       ret := exec (rela_path,nil)
+        a^ := p^;
+        Inc(a);
+        Inc(p);
       end;
-
+      a^ := #0;
     end;
 
-  end
-  else
-   begin
-
-    strcopy (args , (strscan (cmd,#32)) + 1 ) ;
-
-    len := longint(pointer(strscan (cmd,#32)) - pointer (cmd) );
-
-    strlcopy (path , cmd, len ) ;
-
-    if (path = 'cd' ) then
-     begin
-      chdir (string(args)) ;
-
-     {la llamada fue incorrecta ? }
-      if ioresult <> 0 then writeln('comando incorrecto')
-       else
-        begin
-
-         if (args^ = '/') then
-          begin
-
-          if strlen(args) = 1 then strcopy(dir,args)
-           else
-            begin
-             if (strend(args)-1)^ = '/' then strcopy(dir,args)
-              else
-               begin
-                strcopy(dir,args);
-                strcat (dir,root);
-               end;
-
-            end;
-         end
-         else if (args = '..') then
-          begin
-
-           p := strrscan(dir,'/');
-
-           if (p = nil ) then
-            begin
-            dir := '/';
-            exit;
-            end
-            else p -= 1 ;
-
-           while (p^ <> '/') do p -= 1 ;
-
-           p += 1;
-
-           p^ := #0;
-
-           end
-            else if (args^ = '.') then
-             begin
-
-             end
-            else
-           begin
-            strcat (dir ,args);
-            strcat (dir , root);
-          end;
-
-        end;
-
-    exit;
+    if cmd = 'cd' then
+    begin
+      chdir(@dir[0]);
     end else
-     begin
-
-
-      if path^ = '/' then ret := exec (path,args)
-      else
-       begin
-       strcopy(rela_path,binpath);
-       strcat(rela_path,path);
-
-       ret := exec (rela_path , args) ;
-       end;
-
-     end;
-
+    begin
+      err := Exec(cmd, nil);
+      ttygotoxy(1, 25);
+      if err = 0 then 
+        writeln('command not found: ', cmd)
+      else 
+        waitpid(err);
     end;
-
-   ret := ioresult ;
-
-   if (ret <> 0) then writeln('comando incorrecto')
-    else waitpid(err);
-
-end;
-
-
-
-
-
-begin
-
-cmd := stralloc (255) ;
-path := stralloc (255);
-args := stralloc (255);
-dir := stralloc(255);
-rela_path := stralloc (255);
-
-dir := '/' ;
-
-writeln('Toro shell ',version,'.',subversion,' by Matias Vara');
-writeln('matiasevara@gmail.com');
-
-write('$', dir);
-
-while (true) do
- begin
-  readln (cmd);
-  shell;
-  gotoxy (1,25);
-  write('$',dir);
- end;
-
+    
+    ttygotoxy(1, 25);
+    write('root:', dir);
+  end;
 end.
