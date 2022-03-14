@@ -1,22 +1,28 @@
+//
+// printk.pas
+//
+// This unit contains functions to access the terminal from the kernel.
+// 
+// Copyright (c) 2003-2022 Matias Vara <matiasevara@gmail.com>
+// All Rights Reserved
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
 Unit printk;
 
-{ * Printk :                                                            *
-  *                                                                     *
-  * Unidad encarga de la llamada printk() , que es utilizada por el     *
-  * kernel para desplegar caracteres en pantalla  .                     *
-  *                                                                     *
-  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>          *
-  * All Rights Reserved                                                 *
-  *                                                                     *
-  * Versiones :                                                         *
-  *                                                                     *
-  * 09 / 02 / 2005 : Primera Version                                    *
-  *                                                                     *
-  ***********************************************************************
-
-}
-
 interface
+
 type
 struc_consola=record
 car:char;
@@ -43,14 +49,6 @@ var x,y:byte;
 
 implementation
 
-{ * Set_Cursor :                                                        *
-  *                                                                     *
-  * pos : Posicion                                                      *
-  *                                                                     *
-  * Procedimiento que coloca el cursor en pos                           *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure set_cursor(pos:word);assembler;[PUBLIC , ALIAS :'SET_CURSOR'];
 asm
 mov bx , pos
@@ -69,14 +67,6 @@ out dx , al
 end;
 
 
-{ * Putc :                                                              *
-  *                                                                     *
-  * Car : Caracter                                                      *
-  *                                                                     *
-  * Procedimiento que coloca un caracter                                *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure putc(Car:char);
 begin
 y := 24;
@@ -90,14 +80,6 @@ x += 1;
 Set_Cursor(y * 80 + x);
 end;
 
-
-
-{ * Flush :                                                             *
-  *                                                                     *
-  * Procedimiento que mueve la pantalla hacia arriba                    *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure Flush;
 var ult_linea : dword ;
 begin
@@ -127,18 +109,6 @@ end;
 //end;
 
 
-
-{ * Printk :                                                            *
-  *                                                                     *
-  * Cadena : Puntero a cadena terminada en #0                           *
-  * Args : Argumentos                                                   *
-  * Argsk : Argumentos para el kernel                                   *
-  *                                                                     *
-  * Procedimiento utilizado por el kernel para desplegar caracteres en  *
-  * la pantalla . Soporta argumentos para kernel                        *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure printkf(Cadena:pchar ; const Args: array of dword);
 var arg,argk,cont,val,i : dword;
 label volver;
@@ -147,18 +117,14 @@ begin
 arg :=0;
 argk := 0;
 
-{Se analiza la cadena nula}
 while (cadena^ <> #0) do
  begin
 
- {Se ha pedido un argumento}
  If (cadena^ = '%') and (High(Args) <> -1) and (High(Args) >= arg) then
   begin
   cadena += 1;
 
  If cadena^ = #0 then exit ;
-
- {Tipos de argumentos}
 
  Case cadena^ of
  'h': begin
@@ -204,7 +170,6 @@ while (cadena^ <> #0) do
 end;
 
 
- {Caractes de control de la terminal}
   If cadena^ = '\' then
    begin
    cadena += 1;
@@ -240,9 +205,6 @@ end;
   continue;
 end;
 
-
-
-{Caracteres de color}
  If cadena^ = '/' then
   begin
 
@@ -271,7 +233,7 @@ end;
 end;
 
 
-{Caracteres de Argumentos al kernel
+{
 If (cadena^ = '$') and (High(kArgs) <> -1) and (High(kArgs) >= argk) then
   begin
   cadena += 1;
@@ -420,18 +382,10 @@ while (c^ <> #0) do
 end;
 end;
 
-
-{******************************************************************************
- * print_dword
- *
- * Print a dword in hexa
- *****************************************************************************}
 procedure print_dword (nb : dword); [public, alias : 'PRINT_DWORD'];
-
 var
    car : char;
    i, decalage, tmp : byte;
-
 begin
 
    putc('0');putc('x');
@@ -460,15 +414,6 @@ end;
 
 
 { * DumpTask :                                                           *
-  *                                                                      *
-  * Pid : Numero de  Pid de la tarea                                     *
-  *                                                                      *
-  * Procedimiento que vuelca en la pantalla los registros mas importan   *
-  * tes de una tarea                                                     *
-  *                                                                      *
-  ************************************************************************
-
-
 procedure DumpTask(Pid:dword);
 var tmp : p_tarea_struc;
     page_fault : dword ;

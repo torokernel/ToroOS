@@ -1,32 +1,24 @@
-
-{ * Toro Kernel :                                                     *
-  *                                                                   *
-  * Este el kernel de TORO , aqui son cargados todos los modulos y la *
-  * tarea inicial INIT , luego se entra en un bucle al que nunca se   *
-  * devera llegar                                                     *
-  *                                                                   *
-  * Copyright (c) 2003-2006 Matias Vara <matiasevara@gmail.com>        *
-  * All Rights Reserved                                               *
-  *                                                                   *
-  * Versiones :                                                       *
-  * 17 / 02 / 2006 : Version 1.1.2 del kernel Toro .Autor Matias Vara *
-  * 16 / 10 / 2005 : Es eliminado el thread nulo!!!                   *
-  *                                                                   *
-  * 31 / 07 / 2005 : Version 1.1 del kernel Toro . Autor Matias Vara  *
-  *                                                                   *
-  * 29 / 04 / 2005 : Version 1.0.4 .Autor Matias Vara                 *
-  *                                                                   *
-  * 10 / 02 / 2005 : Se aplica un VFS para dispositivos hard          *
-  * Toro version 1.0.3                                                *
-  *                                                                   *
-  * 02 / 08 / 2004 : Es creada la tarea inicial desde aqui , se aplica*
-  * el modelo paginado de memoria                                     *
-  *                                                                   *
-  * 20 / 05 / 2004 : Version Inicial . Autor Matias Vara              *
-  *                                                                   *
-  *********************************************************************
-}
-
+//
+// kernel.pas
+//
+// This program contains the initialization of the kernel.
+// 
+// Copyright (c) 2003-2022 Matias Vara <matiasevara@gmail.com>
+// All Rights Reserved
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
 
 {$M 2048,4096}
 

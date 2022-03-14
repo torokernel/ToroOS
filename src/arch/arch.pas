@@ -1,48 +1,54 @@
-{**
- * Arch.pas:
- * 
- * This unit contains the functions to run the kernel in i386.
- *
- * Copyright (c) 2003-2020 Matias Vara <matiasevara@gmail.com>
- * All Rights Reserved
-}
+//
+// Arch.pas
+//
+// This units contains the the code that is platform-dependent.
+// 
+// Copyright (c) 2003-2022 Matias Vara <matiasevara@gmail.com>
+// All Rights Reserved
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+
 Unit arch;
 
   
 interface
  const
 
-  {Descriptores del sistema}
   Kernel_Data_Sel = $10;
   Kernel_Code_Sel = $8;
-  {Descriptores de Usuario}
   User_Data_Sel = $1B;
   User_Code_Sel =$23;
 
-  {Posiciones en memoria}
   Gdt_Nueva = $2000;
   Idt_Pos   = 0;
 
-  {Numero de descriptores validos}
   Max_Sel=50;
   Max_Int=55;
 
-  {Descriptores del Sistema}
   Sistema_Datos=$92;
   Sistema_Codigo=$9A;
 
-  {Descriptores de Usuario}
   Usuario_Datos=$F2;
   Usuario_Codigo=$FA;
 
-  {Estructura del registro Gdtr}
   Type
   struc_GDTR = packed record
   limite :word;
   base_lin:pointer;
   end;
 
-  {Estructura de un descriptor}
   Type
   struc_descriptor= packed record
   limite_0_15:word;
@@ -53,7 +59,6 @@ interface
   base_24_31:byte;
   end;
 
- {Puntero a la Gdt}
  Type
  p_struc_GDT=^struc_GDT;
  struc_GDT = array[0..Max_Sel-1] of struc_descriptor;
@@ -67,19 +72,19 @@ interface
  end;
 
  const
- TAM_TSS=103;                  {Tamano de un TSS }
+ TAM_TSS=103;                  
 
- TSS_SIST_LIBRE=$89;               {TSS de sistema libre}
- TSS_SIST_OCUP=$8B;                {TSS de sistema ocupado}
+ TSS_SIST_LIBRE=$89;               
+ TSS_SIST_OCUP=$8B;                
 
- TSS_USER_LIBRE=$E9;               {TSS de Anillo 3 libre}
- TSS_USER_OCUP =$EB;               {TSS de Anillo 3 ocupado }
+ TSS_USER_LIBRE=$E9;              
+ TSS_USER_OCUP =$EB;               
 
- TSK_GATE_SIST=$85;                {TASK GATE de Anillo 0}
- TSK_GATE_USER=$E5;                {TASK GATE de Anillo 3}
+ TSK_GATE_SIST=$85;                
+ TSK_GATE_USER=$E5;               
 
- INT_GATE_SIST=$8E;                {INT GATE de Anillo 0 }
- INT_GATE_USER=$EE;                {INT GATE de Anillo 3 }
+ INT_GATE_SIST=$8E;                
+ INT_GATE_USER=$EE;
 
   Status_Port : array[0..1] of byte = ($20,$A0);
   Mask_Port : array[0..1] of byte = ($21,$A1);
@@ -89,7 +94,7 @@ interface
  type
   struc_intr_gate=packed record
   entrada_0_15:word;
-  selector:word;                    {Aqui deve ir Selector a TSS}                          {si es una TASK GATE        }
+  selector:word;                 
   nu:byte;
   tipo:byte;
   entrada_16_31:word;
@@ -187,14 +192,14 @@ puerto:=$A1;
 if IRQ<7 then puerto :=$21;
 
 irqs:=leer_byte(puerto);
-buf:=irqs or PIC_MASK[IRQ];  {modifico los bit con OR}
+buf:=irqs or PIC_MASK[IRQ];
 enviar_byte(buf,puerto);
 end;
 
 procedure fdi;[public , alias :'FDI'];
 begin
-enviar_byte($20,status_port[0]); {Si es el 2ø controlador se deve enviar al primero}
-enviar_byte($20,status_port[1]); {tambien}
+enviar_byte($20,status_port[0]);
+enviar_byte($20,status_port[1]);
 end;
 
 procedure habilitar_todasirq;
@@ -221,7 +226,6 @@ until (cont = 8) ;
 exit(-1);
 end;
 
-{ * las irq son desviadas para q no generen problemas * }
 procedure desviar_irqs ; assembler;
 asm
     mov   al , 00010001b
@@ -269,16 +273,6 @@ asm
     out  0A1h, al
 end;
 
-{ * Set_Int_Gate :                                                       *
-  *                                                                      *
-  * Int : Numero de interrupcion                                         *
-  * Handler : Puntero al codigo de tratamiento                           *
-  *                                                                      *
-  * Procedimiento que coloca un descriptor en la IDT de Anillo 0 , uti   *
-  * lizado por los drivers                                               *
-  *                                                                      *
-  ************************************************************************
-}
 procedure set_int_gate(int:byte;handler:pointer);
 var k:p_intr_gate;
     bajo:word;
@@ -298,16 +292,6 @@ k^.tipo := Int_Gate_Sist;
 k^.entrada_16_31 := alto shr 16;
 end;
 
-{ * Set_Int_Gate_User :                                                  *
-  *                                                                      *
-  * Int : Numero de interrupcion                                         *
-  * Handler : Puntero al tratamiento de la int.                          *
-  *                                                                      *
-  * Procedimiento que es igual a set_int_gate la diferencia radica en    *
-  * que son accesibles para el usuario . Es utuilizado para las syscall  *
-  *                                                                      *
-  ************************************************************************
-}
 procedure set_int_gate_user(int:byte;handler:pointer);
 var alto,bajo:word;
     k:p_intr_gate ;
@@ -326,13 +310,6 @@ k^.entrada_16_31 := alto;
 
 end;
 
-{ * Int_Ignore :                                                *
-  *                                                             *
-  * Procedimiento llamado para int. no validas                  *
-  *                                                             *
-  ***************************************************************
-}
-
 Procedure int_ignore;interrupt;
 begin
 LoadKernelData;
@@ -343,20 +320,10 @@ end;
 //printk('/Virq/n : Irq igonarada\n',[]);
 end;
 
-
-{ * Idt_Init :                                                          *
-  *                                                                     *
-  * Proceso que inicializa todos los manejadores de interrupciones ,    *
-  * las irq y las execpciones . Se limita a 55 interrupciones la Idt    *
-  *                                                                     *
-  ***********************************************************************
-}
-
 procedure idt_init;
 var m:word;
 begin
 
-{Es inicializa la nueva Idt}
 idtr.base_lin := pointer(Idt_Pos);
 idtr.limite := MAX_INT * 8 ;
 
@@ -364,11 +331,8 @@ asm
 lidt [idtr]
 end;
 
-
-{Excepto a del controlador secundario}
 Habilitar_irq(2);
 
-{Todas las irq son ignoradas por ahora}
 for m:= 17 to 54 Do
 begin
 Set_Int_Gate(m,@int_ignore);
@@ -377,19 +341,6 @@ end;
 desviar_irqs;
 end;
 
-{
- * Gdt_Dame :                                                               *
- *                                                                          *
- * Retorno : Numero de Descriptor en la GDT                                 *
- *                                                                          *
- * Devuelve un valor word que contiene un selector libre si devuelve        *
- * 0  significa que no hay un hueco libre en la GDT . El valor devuelto     *
- * devera ser restado a 1 y multiplicado por 8  + GDT_NUEVA para saber su   *
- * ubicacion dentro de la GDT.                                              *
- *                                                                          *
- ****************************************************************************
-
-}
 function gdt_dame:word;
 var n:word;
 begin
@@ -404,29 +355,12 @@ If n = Max_Sel then exit(0)
   end;
 end;
 
-{ * Gdt_Quitar :                                                        *
-  *                                                                     *
-  * Selector : Numero de descriptor                                     *
-  *                                                                     *
-  * Este proc. libera un descriptor desmarcando su bit en el bitmap     *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure gdt_quitar(Selector:word);
 begin
 bit_Set(@gdt_bitmap,Selector-1);
 Gdt_huecos_Libres +=1;
 end;
 
-{ * Init_Tss:                                                           *
-  *                                                                     *
-  * Tss : Puntero a una estructura TSS                                  *
-  *                                                                     *
-  * Esta funcion limpia el registro tss para que no se provoquen        *
-  * errores cuando se carga a la GDT                                    *
-  *								        *	 *
-  ***********************************************************************
-}
 procedure init_tss(tss:p_tss_struc);
 var tmp:dword;
 begin
@@ -439,29 +373,16 @@ rep stosb
 end;
 end;
 
-{ * Gdt_Set_Tss :                                                           *
-  *                                                                         *
-  * Tss : Puntero a una estructura TASK STATE SEGMENT                       *
-  * Devuelve: Numero dentro de la Gdt                                       *
-  *                                                                         *
-  * Esta funcion busca un lugar libre en la GDT y crea un Descriptor de TSS *
-  * , devuelve la posicion dentro de la GDT o 0  si no hay espacio          *
-  *                                                                         *d
- ***************************************************************************
-}
 function gdt_set_tss(tss:pointer):word;
 var s,bajo:word;
          j:dword;
 var altoA,altoB:byte;
 begin
 
-{ Se pide el descriptor }
 s := Gdt_Dame;
 
-{ No hay espacio }
 If s = 0 then exit(0);
 
-{ Devuelvo el numero de descriptor }
 Gdt_Set_Tss := s;
 Init_Tss(Tss);
 
@@ -473,29 +394,20 @@ mov ALTOB , al
 mov ALTOA , ah
 end;
 
-{ Son establecidos los valores del tss }
 GDT_AR^[s-1].limite_0_15:=104;
 GDT_AR^[s-1].base_0_15:=bajo;
 GDT_AR^[s-1].base_16_23:=ALTOB;
 GDT_AR^[s-1].base_24_31:=ALTOA;
 GDT_AR^[s-1].tipo:=TSS_SIST_LIBRE;
 GDT_AR^[s-1].limite_16_23:=$40;
-
 end;
 
-{ * Gdt_Init :                                                          *
-  *                                                                     *
-  * Aqui es inicializada la Gdt cuando se inicia el kernel              *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure gdt_init;
 var tmp:pointer;
     ret:dword;
 begin
 
 tmp:=@gdt_bitmap;
-{todos los bitmaps estan libres}
 asm
 mov  ecx , 256
 mov  eax , $FFFFFFFF
@@ -503,10 +415,9 @@ mov  edi , tmp
 rep  stosd
 end;
 
-gdtreg.limite:= 8192 * 8 - 1;         {Cargo el reg GDTR con el tama¤o}
-gdtreg.base_lin:= pointer(GDT_NUEVA);              {Cargo el reg GDTR con la nueva base}
+gdtreg.limite:= 8192 * 8 - 1;        
+gdtreg.base_lin:= pointer(GDT_NUEVA);             
 
-{descriptores del sistema}
 Bit_Reset(@gdt_bitmap,0);
 Bit_Reset(@gdt_bitmap,1);
 Bit_Reset(@gdt_bitmap,2);
@@ -522,7 +433,6 @@ gdt_ar^[0].tipo :=0 ;
 gdt_ar^[0].limite_16_23 := 0 ;
 gdt_ar^[0].base_24_31 := 0 ;
 
-{codigo y datos del kernel}
 gdt_ar^[1].limite_0_15 := $ffff;
 gdt_ar^[1].base_0_15 := 0 ;
 gdt_ar^[1].base_16_23 := 0 ;
@@ -537,7 +447,6 @@ gdt_ar^[2].tipo := sistema_datos ;
 gdt_ar^[2].limite_16_23 := $cf ;
 gdt_ar^[2].base_24_31 := 0 ;
 
-{datos y codigo del usuario}
 gdt_ar^[3].limite_0_15 := $ffff;
 gdt_ar^[3].base_0_15 := 0 ;
 gdt_ar^[3].base_16_23 := 0 ;
@@ -559,20 +468,12 @@ end;
 Gdt_Huecos_Libres:=MAX_SEL - 5;
 end;
 
-
-{ * Enviar_Byte :                                                       *
-  *                                                                     *
-  * Simple procedimiento que envia unbyte a un puerto dado              *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure enviar_byte(Data:byte;Puerto:word);assembler;inline;
 asm
 mov dx,Puerto
 mov al,data
 out dx,al
 end;
-
 
 function leer_byte(puerto:word):byte;
 var tmp : byte ;
@@ -585,7 +486,6 @@ end;
 exit(tmp);
 end;
 
-
 procedure Enviar_Wd(Data:word;Puerto:dword);inline;
 var tmp : pointer ;
 begin
@@ -596,7 +496,6 @@ mov esi , tmp
 outsw
 end;
 end;
-
 
 function Leer_Wd(Puerto:word) : word ;inline;
 var r:dword;
@@ -730,19 +629,6 @@ begin
 debug(-1);
 end;
 
-
-
-{ * Mapa_Get :                                                          *
-  *                                                                     *
-  * Mapa : Puntero a un mapa de bits                                    *
-  * Limite : Tama¤o del mapa                                            *
-  * Retorno : Numero de bit libre                                       *
-  *                                                                     *
-  * Funcion que busca destro de un mapa de bits , uno en estado 0 y     *
-  * devuelve su posicion                                                *
-  *                                                                     *
-  ***********************************************************************
-}
 function Mapa_Get(Mapa:pointer;Limite:dword):word;
 var ret:word;
 begin
@@ -762,17 +648,6 @@ end;
 exit (ret);
 end;
 
-
-
-{ * Limpiar_Array :                                                     *
-  *                                                                     *
-  * P_array : Puntero a un array                                        *
-  * fin : tama¤o del array                                              *
-  *                                                                     *
-  * Procedimiento utilizado para llenar de caracteres nulos un array    *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure Limpiar_Array(p_array:pointer;fin:word);
 var tmp:word;
     cl:^char;
@@ -785,13 +660,6 @@ for tmp:= 0 to Fin do
 end;
 end;
 
-
-{ * Reset_Computer :                                                    *
-  *                                                                     *
-  * Simple proc. que resetea la maquina                                 *
-  *                                                                     *
-  ***********************************************************************
-}
 procedure Reboot;assembler;
 asm
    cli
@@ -817,12 +685,6 @@ begin
 val := (val and 15) + ((val shr 4) * 10 );
 end;
 
-
-{ * get_datetime :   devuelve la hora actual del sistema utlizando el form *
-  *                  ato horario de unix                                   *
-  *                                                                        *
-  **************************************************************************
-}
 function get_datetime  : dword ;
 var sec , min , hour  , day , mon , year  : dword ;
 begin
