@@ -1,6 +1,6 @@
 // sh.pas
 //
-// This is a simple shell with built-in and external commands.
+// This is a simple shell with built-in and external commands based on exec().
 //
 // Copyright (c) 2003-2022 Matias Vara <matiasevara@gmail.com>
 // All Rights Reserved
@@ -24,14 +24,16 @@
 
 uses Strings, crt;
 
-var cmd: array[0..254] of char;
-    args: array[0..254] of char;
-    currpath: array[0..254] of char;
-
-const root : pchar = '/' ;
+const root : PChar = '/'#0 ;
       version = '1' ;
       subversion = '3';
-      binpath = '/BIN/';
+      binpath : PChar = '/BIN/'#0;
+
+var cmd: array[0..254] of char;
+    args: array[0..254] of char;
+    currpathbuff: array[0..254] of char;
+    currpath: PChar = @currpathbuff[0];
+    i: LongInt;
 
 // TODO: backspace is not working
 procedure GetCmdAndArgs(cmd: PChar; args: PChar);
@@ -50,6 +52,7 @@ begin
   end;
   if pbuff^ = #32 then
   begin
+    // TODO: replace with strcpy()
     for i:= 0 to count-1 do
     begin
       cmd[i] := buff[i];
@@ -57,6 +60,7 @@ begin
     cmd[count] := #0;
     Inc(pbuff);
     i := 0;
+    // TODO: replace with strcpy()
     while (pbuff^ <> #0) and (count < 255) do
     begin
       args[i] := pbuff^;
@@ -80,27 +84,81 @@ function ExecCmd(cmd: PChar; args: PChar): Boolean;
 var
   err: DWord;
 begin
-  Result := False;
+  Result := True;
   err := Exec(cmd, args);
   if err = 0 Then
   begin
-    Result := false;
+    Result := False;
     Exit;
   end;
   WaitPid(err);
 end;
 
+// TODO: check chdir errno before change curr dir
 function DoCdCmd(args: PChar): Boolean;
+var
+  p, c: PChar;
+  i: LongInt;
 begin
+  Result := true;
   if args^ = #0 then
     Exit;
-  // si el argumento con una barra al principio  es absoluto
-  // entonces cambiamos el dir actual y eliminamos el historia
-  // si no comienza con la barra es relativo
-  // primero creas un buffer con la copia de actual mas el nuevo
-  // cambias el directorio
-  // si es succesfull entonces guardas el buffer como nuevo curr path
-  chdir(args);
+  if args^ = '/' then
+  begin
+    chdir(args);
+  end else if args = '.' then
+  begin
+    writeln(currpath)
+  end else if args = '..' then
+  begin
+    // TODO: to replace with strfind()
+    i := strlen(currpath) - 2;
+    while (i > 0) and (currpath[i] <> '/') do
+      Dec(i);
+    currpath[i+1] := #0;
+    chdir(currpath);
+  end else
+  begin
+    // TODO: to use strconcat
+    p := currpath;
+    c := args;
+    while p^ <> #0 do
+      Inc(p);
+    while c^ <> #0 do
+    begin
+      p^ := c^;
+      Inc(p);
+      Inc(c);
+    end;
+    p^ := '/';
+    Inc(p);
+    p^ := #0;
+    chdir(currpath);
+  end;
+end;
+
+function DoBinCmd(cmd, args: PChar): Boolean;
+var
+  buff: array[0..255] of Char;
+  p: PChar;
+  i: LongInt;
+begin
+  // concatenate with binpath
+  for i:= 0 to strlen(binpath)-1 do
+  begin
+    buff[i] := binpath[i];
+  end;
+  p := cmd;
+  i := strlen(binpath);
+  while p^ <> #0 do
+  begin
+    buff[i] := p^;
+    Inc(p);
+    Inc(i);
+  end;
+  buff[i] := #0;
+  writeln('curr: ', Pchar(@buff[0]));
+  Result := ExecCmd(@buff[0], args);
 end;
 
 function DoCmd(cmd: PChar; args: PChar): Boolean;
@@ -109,13 +167,15 @@ begin
   if cmd = 'cd' then
     Result := DoCdCmd(args)
   else if cmd = 'ver' then
-    Writeln('version command')
+    Writeln('Shell ', version, '.', subversion)
   else
-    Result := ExecCmd(cmd, args);
+    Result := DoBinCmd(cmd, args);
 end;
 
 begin
-  currpath[0]:= '/';
+  // TODO: strcpy
+  for i := 0 to strlen(root) do
+    currpath [i] := root[i];
   writeln('Shell ', version, '.', subversion);
   write('$', currpath);
   while true do
@@ -123,7 +183,7 @@ begin
     GetCmdAndArgs(@cmd, @args);
     ttygotoxy(1, 25);
     if not DoCmd(@cmd, @args) then
-      Writeln('Command unknow');
+      Writeln('Command unknown');
     write('$', currpath);
   end;
 end.
