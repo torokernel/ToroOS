@@ -1,6 +1,6 @@
 // sh.pas
 //
-// This application shows how a shell is implemented in ToroOS.
+// This is a simple shell with built-in and external commands.
 //
 // Copyright (c) 2003-2022 Matias Vara <matiasevara@gmail.com>
 // All Rights Reserved
@@ -24,66 +24,106 @@
 
 uses Strings, crt;
 
-var err : dword;
-    cmd: array[0..254] of char;
-    fullcmd: array[0..254] of char;
-    dir: array[0..254] of char;
-    p, s, a: Pchar;
+var cmd: array[0..254] of char;
+    args: array[0..254] of char;
+    currpath: array[0..254] of char;
 
 const root : pchar = '/' ;
       version = '1' ;
       subversion = '3';
       binpath = '/BIN/';
 
+// TODO: backspace is not working
+procedure GetCmdAndArgs(cmd: PChar; args: PChar);
+var
+  buff: array[0..255] of char;
+  pbuff: PChar;
+  count, i: LongInt;
 begin
-  fillbyte(dir, 0, 255); //this is not working
-  fillbyte(fullcmd, 0, 254); //this is not working
-  fillbyte(cmd, 0, 254); //this is not working
-  dir[0]:= '/';
+  readln(buff);
+  count := 0;
+  pbuff := @buff[0];
+  while (count < 255) and (pbuff^ <> #0) and (pbuff^ <> #32) do
+  begin
+    Inc(count);
+    Inc(pbuff);
+  end;
+  if pbuff^ = #32 then
+  begin
+    for i:= 0 to count-1 do
+    begin
+      cmd[i] := buff[i];
+    end;
+    cmd[count] := #0;
+    Inc(pbuff);
+    i := 0;
+    while (pbuff^ <> #0) and (count < 255) do
+    begin
+      args[i] := pbuff^;
+      Inc(pbuff);
+      Inc(i);
+      Inc(count);
+    end;
+    args[i] := #0;
+  end else if pbuff^ = #0 then
+  begin
+    for i:= 0 to count-1 do
+    begin
+      cmd[i] := buff[i];
+    end;
+    cmd[count] := #0;
+    args[0] := #0;
+  end;
+end;
+
+function ExecCmd(cmd: PChar; args: PChar): Boolean;
+var
+  err: DWord;
+begin
+  Result := False;
+  err := Exec(cmd, args);
+  if err = 0 Then
+  begin
+    Result := false;
+    Exit;
+  end;
+  WaitPid(err);
+end;
+
+function DoCdCmd(args: PChar): Boolean;
+begin
+  if args^ = #0 then
+    Exit;
+  // si el argumento con una barra al principio  es absoluto
+  // entonces cambiamos el dir actual y eliminamos el historia
+  // si no comienza con la barra es relativo
+  // primero creas un buffer con la copia de actual mas el nuevo
+  // cambias el directorio
+  // si es succesfull entonces guardas el buffer como nuevo curr path
+  chdir(args);
+end;
+
+function DoCmd(cmd: PChar; args: PChar): Boolean;
+begin
+  Result := true;
+  if cmd = 'cd' then
+    Result := DoCdCmd(args)
+  else if cmd = 'ver' then
+    Writeln('version command')
+  else
+    Result := ExecCmd(cmd, args);
+end;
+
+begin
+  currpath[0]:= '/';
   writeln('Shell ', version, '.', subversion);
-  write('root:', dir);
+  write('$', currpath);
   while true do
   begin
-    readln(fullcmd); 
-    p := @fullcmd[0];
-    s := @cmd[0];
-    a := @dir[0];
-
-    while (p^ <> #32) and (p^ <> #0) do
-    begin
-      s^ := p^;
-      Inc(s);    
-      Inc(p);
-    end;
-
-    s^ := #0;
-
-    if p^ = #32 then
-    begin
-      Inc(p);
-      while p^ <> #0 do
-      begin
-        a^ := p^;
-        Inc(a);
-        Inc(p);
-      end;
-      a^ := #0;
-    end;
-
-    if cmd = 'cd' then
-    begin
-      chdir(@dir[0]);
-    end else
-    begin
-      err := Exec(cmd, nil);
-      ttygotoxy(1, 25);
-      if err = 0 then 
-        writeln('command not found: ', cmd)
-      else 
-        waitpid(err);
-    end;
-    
+    GetCmdAndArgs(@cmd, @args);
     ttygotoxy(1, 25);
-    write('root:', dir);
+    if not DoCmd(@cmd, @args) then
+      Writeln('Command unknow');
+    write('$', currpath);
   end;
 end.
