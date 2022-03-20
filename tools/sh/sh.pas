@@ -29,11 +29,11 @@ const root : PChar = '/'#0 ;
       subversion = '3';
       binpath : PChar = '/BIN/'#0;
 
-var cmd: array[0..254] of char;
-    args: array[0..254] of char;
-    currpathbuff: array[0..254] of char;
-    currpath: PChar = @currpathbuff[0];
-    i: LongInt;
+var
+  cmd: array[0..254] of char;
+  args: array[0..254] of char;
+  currpathbuff: array[0..254] of char;
+  currpath: PChar = @currpathbuff[0];
 
 // TODO: backspace is not working
 procedure GetCmdAndArgs(cmd: PChar; args: PChar);
@@ -94,11 +94,10 @@ begin
   WaitPid(err);
 end;
 
-// TODO: check chdir errno before change curr dir
 function DoCdCmd(args: PChar): Boolean;
 var
-  p, c: PChar;
   i: LongInt;
+  p: PChar;
 begin
   Result := true;
   if args^ = #0 then
@@ -111,28 +110,21 @@ begin
     writeln(currpath)
   end else if args = '..' then
   begin
-    // TODO: to replace with strfind()
-    i := strlen(currpath) - 2;
-    while (i > 0) and (currpath[i] <> '/') do
-      Dec(i);
-    currpath[i+1] := #0;
-    chdir(currpath);
+    if currpath <> '/' then
+    begin
+      i := strlen(currpath) - 1;
+      currpath[i] := #0;
+      p := strrscan(currpath, '/');
+      Inc(p);
+      p^ := #0;
+      chdir(currpath);
+      // TODO: check ioresult
+      i := IOResult;
+    end;
   end else
   begin
-    // TODO: to use strconcat
-    p := currpath;
-    c := args;
-    while p^ <> #0 do
-      Inc(p);
-    while c^ <> #0 do
-    begin
-      p^ := c^;
-      Inc(p);
-      Inc(c);
-    end;
-    p^ := '/';
-    Inc(p);
-    p^ := #0;
+    strcat(currpath, args);
+    strcat(currpath,'/');
     chdir(currpath);
   end;
 end;
@@ -140,24 +132,10 @@ end;
 function DoBinCmd(cmd, args: PChar): Boolean;
 var
   buff: array[0..255] of Char;
-  p: PChar;
-  i: LongInt;
 begin
-  // concatenate with binpath
-  for i:= 0 to strlen(binpath)-1 do
-  begin
-    buff[i] := binpath[i];
-  end;
-  p := cmd;
-  i := strlen(binpath);
-  while p^ <> #0 do
-  begin
-    buff[i] := p^;
-    Inc(p);
-    Inc(i);
-  end;
-  buff[i] := #0;
-  writeln('curr: ', Pchar(@buff[0]));
+  buff[0] := #0;
+  strcat(Pchar(@buff[0]), binpath);
+  strcat(Pchar(@buff[0]), cmd);
   Result := ExecCmd(@buff[0], args);
 end;
 
@@ -173,9 +151,7 @@ begin
 end;
 
 begin
-  // TODO: strcpy
-  for i := 0 to strlen(root) do
-    currpath [i] := root[i];
+  strcopy(currpath, root);
   writeln('Shell ', version, '.', subversion);
   write('$', currpath);
   while true do
