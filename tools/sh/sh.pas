@@ -96,8 +96,9 @@ end;
 
 function DoCdCmd(args: PChar): Boolean;
 var
-  i: LongInt;
+  i, err: LongInt;
   p: PChar;
+  tmp: Char;
 begin
   Result := true;
   if args^ = #0 then
@@ -105,6 +106,9 @@ begin
   if args^ = '/' then
   begin
     chdir(args);
+    err := IOResult;
+    if err = 0 then
+      strcopy(currpath, args);
   end else if args = '.' then
   begin
     writeln(currpath)
@@ -116,16 +120,22 @@ begin
       currpath[i] := #0;
       p := strrscan(currpath, '/');
       Inc(p);
+      tmp := p^;
       p^ := #0;
       chdir(currpath);
-      // TODO: check ioresult
-      i := IOResult;
     end;
   end else
   begin
+    i := strlen(currpath);
     strcat(currpath, args);
     strcat(currpath,'/');
     chdir(currpath);
+    err := IOResult;
+    if err <> 0 then
+    begin
+       WriteLn('Wrong path!');
+       currpath[i] := #0;
+    end;
   end;
 end;
 
