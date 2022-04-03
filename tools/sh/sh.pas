@@ -46,7 +46,6 @@ begin
   readln(buff);
   count := 0;
   pbuff := @buff[0];
-  // TODO: replace with strscan()
   while (count < BUFF_PATH_SIZE) and (pbuff^ <> #0) and (pbuff^ <> #32) do
   begin
     Inc(count);
@@ -54,31 +53,14 @@ begin
   end;
   if pbuff^ = #32 then
   begin
-    // TODO: replace with strcpy()
-    for i:= 0 to count-1 do
-    begin
-      cmd[i] := buff[i];
-    end;
-    cmd[count] := #0;
+    strlcopy(cmd, buff, count);
     Inc(pbuff);
     i := 0;
-    // TODO: replace with strcpy()
-    while (pbuff^ <> #0) and (count < BUFF_PATH_SIZE) do
-    begin
-      args[i] := pbuff^;
-      Inc(pbuff);
-      Inc(i);
-      Inc(count);
-    end;
-    args[i] := #0;
+    strlcopy(args, pbuff, BUFF_PATH_SIZE);
   end else if pbuff^ = #0 then
   begin
-    for i:= 0 to count-1 do
-    begin
-      cmd[i] := buff[i];
-    end;
-    cmd[count] := #0;
-    args[0] := #0;
+    strlcopy(cmd, buff, count);
+    args^ := #0;
   end;
 end;
 
@@ -104,13 +86,17 @@ var
 begin
   Result := true;
   if args^ = #0 then
-    Exit;
-  if args^ = '/' then
+  begin
+    chdir(root);
+    strcopy(currpath, root);
+  end else if args^ = '/' then
   begin
     chdir(args);
     err := IOResult;
     if err = 0 then
-      strcopy(currpath, args);
+      strcopy(currpath, args)
+    else
+      Result := false;
   end else if args = '.' then
   begin
     writeln(currpath)
@@ -135,7 +121,7 @@ begin
     err := IOResult;
     if err <> 0 then
     begin
-       WriteLn('Wrong path!');
+       Result := false;
        currpath[i] := #0;
     end;
   end;
