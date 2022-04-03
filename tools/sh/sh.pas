@@ -1,6 +1,6 @@
 // sh.pas
 //
-// This application shows how a shell is implemented in ToroOS.
+// This is a simple shell with built-in and external commands based on exec().
 //
 // Copyright (c) 2003-2022 Matias Vara <matiasevara@gmail.com>
 // All Rights Reserved
@@ -24,66 +24,140 @@
 
 uses Strings, crt;
 
-var err : dword;
-    cmd: array[0..254] of char;
-    fullcmd: array[0..254] of char;
-    dir: array[0..254] of char;
-    p, s, a: Pchar;
-
-const root : pchar = '/' ;
+const root : PChar = '/'#0 ;
       version = '1' ;
       subversion = '3';
-      binpath = '/BIN/';
+      binpath : PChar = '/BIN/'#0;
+      BUFF_PATH_SIZE = 255;
+
+var
+  cmd: array[0..BUFF_PATH_SIZE-1] of char;
+  args: array[0..BUFF_PATH_SIZE-1] of char;
+  currpathbuff: array[0..BUFF_PATH_SIZE-1] of char;
+  currpath: PChar = @currpathbuff[0];
+
+// TODO: backspace is not working
+procedure GetCmdAndArgs(cmd: PChar; args: PChar);
+var
+  buff: array[0..BUFF_PATH_SIZE-1] of char;
+  pbuff: PChar;
+  count, i: LongInt;
+begin
+  readln(buff);
+  count := 0;
+  pbuff := @buff[0];
+  while (count < BUFF_PATH_SIZE) and (pbuff^ <> #0) and (pbuff^ <> #32) do
+  begin
+    Inc(count);
+    Inc(pbuff);
+  end;
+  if pbuff^ = #32 then
+  begin
+    strlcopy(cmd, buff, count);
+    Inc(pbuff);
+    i := 0;
+    strlcopy(args, pbuff, BUFF_PATH_SIZE);
+  end else if pbuff^ = #0 then
+  begin
+    strlcopy(cmd, buff, count);
+    args^ := #0;
+  end;
+end;
+
+function ExecCmd(cmd: PChar; args: PChar): Boolean;
+var
+  err: DWord;
+begin
+  Result := True;
+  err := Exec(cmd, args);
+  if err = 0 Then
+  begin
+    Result := False;
+    Exit;
+  end;
+  WaitPid(err);
+end;
+
+function DoCdCmd(args: PChar): Boolean;
+var
+  i, err: LongInt;
+  p: PChar;
+  tmp: Char;
+begin
+  Result := true;
+  if args^ = #0 then
+  begin
+    chdir(root);
+    strcopy(currpath, root);
+  end else if args^ = '/' then
+  begin
+    chdir(args);
+    err := IOResult;
+    if err = 0 then
+      strcopy(currpath, args)
+    else
+      Result := false;
+  end else if args = '.' then
+  begin
+    writeln(currpath)
+  end else if args = '..' then
+  begin
+    if currpath <> '/' then
+    begin
+      i := strlen(currpath) - 1;
+      currpath[i] := #0;
+      p := strrscan(currpath, '/');
+      Inc(p);
+      tmp := p^;
+      p^ := #0;
+      chdir(currpath);
+    end;
+  end else
+  begin
+    i := strlen(currpath);
+    strcat(currpath, args);
+    strcat(currpath,'/');
+    chdir(currpath);
+    err := IOResult;
+    if err <> 0 then
+    begin
+       Result := false;
+       currpath[i] := #0;
+    end;
+  end;
+end;
+
+function DoBinCmd(cmd, args: PChar): Boolean;
+var
+  buff: array[0..BUFF_PATH_SIZE-1] of Char;
+begin
+  buff[0] := #0;
+  strcat(Pchar(@buff[0]), binpath);
+  strcat(Pchar(@buff[0]), cmd);
+  Result := ExecCmd(@buff[0], args);
+end;
+
+function DoCmd(cmd: PChar; args: PChar): Boolean;
+begin
+  Result := true;
+  if cmd = 'cd' then
+    Result := DoCdCmd(args)
+  else if cmd = 'ver' then
+    Writeln('Shell ', version, '.', subversion)
+  else
+    Result := DoBinCmd(cmd, args);
+end;
 
 begin
-  fillbyte(dir, 0, 255); //this is not working
-  fillbyte(fullcmd, 0, 254); //this is not working
-  fillbyte(cmd, 0, 254); //this is not working
-  dir[0]:= '/';
+  strcopy(currpath, root);
   writeln('Shell ', version, '.', subversion);
-  write('root:', dir);
+  write('$', currpath);
   while true do
   begin
-    readln(fullcmd); 
-    p := @fullcmd[0];
-    s := @cmd[0];
-    a := @dir[0];
-
-    while (p^ <> #32) and (p^ <> #0) do
-    begin
-      s^ := p^;
-      Inc(s);    
-      Inc(p);
-    end;
-
-    s^ := #0;
-
-    if p^ = #32 then
-    begin
-      Inc(p);
-      while p^ <> #0 do
-      begin
-        a^ := p^;
-        Inc(a);
-        Inc(p);
-      end;
-      a^ := #0;
-    end;
-
-    if cmd = 'cd' then
-    begin
-      chdir(@dir[0]);
-    end else
-    begin
-      err := Exec(cmd, nil);
-      ttygotoxy(1, 25);
-      if err = 0 then 
-        writeln('command not found: ', cmd)
-      else 
-        waitpid(err);
-    end;
-    
+    GetCmdAndArgs(@cmd, @args);
     ttygotoxy(1, 25);
-    write('root:', dir);
+    if not DoCmd(@cmd, @args) then
+      Writeln('Command unknown');
+    write('$', currpath);
   end;
 end.

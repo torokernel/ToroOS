@@ -96,7 +96,7 @@ color : byte ;
 end;
 
 Const
-  KEYBUFFLEN = 128;
+  KEYBUFFLEN = 1024;
 
 procedure Setc(pos : word);
 procedure Flush;
