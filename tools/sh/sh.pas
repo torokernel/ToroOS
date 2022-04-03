@@ -63,7 +63,7 @@ begin
     Inc(pbuff);
     i := 0;
     // TODO: replace with strcpy()
-    while (pbuff^ <> #0) and (count < 255) do
+    while (pbuff^ <> #0) and (count < BUFF_PATH_SIZE) do
     begin
       args[i] := pbuff^;
       Inc(pbuff);
