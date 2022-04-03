@@ -28,24 +28,26 @@ const root : PChar = '/'#0 ;
       version = '1' ;
       subversion = '3';
       binpath : PChar = '/BIN/'#0;
+      BUFF_PATH_SIZE = 255;
 
 var
-  cmd: array[0..254] of char;
-  args: array[0..254] of char;
-  currpathbuff: array[0..254] of char;
+  cmd: array[0..BUFF_PATH_SIZE-1] of char;
+  args: array[0..BUFF_PATH_SIZE-1] of char;
+  currpathbuff: array[0..BUFF_PATH_SIZE-1] of char;
   currpath: PChar = @currpathbuff[0];
 
 // TODO: backspace is not working
 procedure GetCmdAndArgs(cmd: PChar; args: PChar);
 var
-  buff: array[0..255] of char;
+  buff: array[0..BUFF_PATH_SIZE-1] of char;
   pbuff: PChar;
   count, i: LongInt;
 begin
   readln(buff);
   count := 0;
   pbuff := @buff[0];
-  while (count < 255) and (pbuff^ <> #0) and (pbuff^ <> #32) do
+  // TODO: replace with strscan()
+  while (count < BUFF_PATH_SIZE) and (pbuff^ <> #0) and (pbuff^ <> #32) do
   begin
     Inc(count);
     Inc(pbuff);
@@ -141,7 +143,7 @@ end;
 
 function DoBinCmd(cmd, args: PChar): Boolean;
 var
-  buff: array[0..255] of Char;
+  buff: array[0..BUFF_PATH_SIZE-1] of Char;
 begin
   buff[0] := #0;
   strcat(Pchar(@buff[0]), binpath);
