@@ -16,7 +16,7 @@ RUN sed -i '/AS=/c\AS="'"$PWD"'/fpc-3.2.0-i386-embedded.cross.x86_64-linux/bin/i
 RUN sed -i '/FPC_RTL=/c\FPC_RTL="'"$PWD"'/fpc-for-toroos/rtl"' ./ToroOS/src/make.rules
 RUN sed -i '/FPC_EMB=/c\FPC_EMB="'"$PWD"'/fpc-3.2.0-i386-embedded.cross.x86_64-linux/units/i386-embedded/rtl"' ./ToroOS/src/make.rules
 RUN sed -i '/QEMU_PATH=/c\QEMU_PATH="'"$PWD"'/qemufortoroos/build/x86_64-softmmu/qemu-system-x86_64"' ./ToroOS/src/run.sh
-run wget https://sourceforge.net/projects/toro/files/images/toro-1.1.3/toro-1.1.3.img/download && mv download /root/ToroOS/src/floppy-disk.img
+RUN wget https://sourceforge.net/projects/toro/files/images/toro-1.1.3/toro-1.1.3.img/download && mv download /root/ToroOS/src/floppy-disk.img
 WORKDIR /root/ToroOS/tools
 RUN make
 WORKDIR /root/ToroOS/src
