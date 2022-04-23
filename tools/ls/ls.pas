@@ -21,9 +21,10 @@
 //
 
 uses crt, strings;
+const
+  root : PChar = '/'#0 ;
 
 type
-
 preaddir_entry = ^readdir_entry ;
 
 readdir_entry = record
@@ -32,25 +33,24 @@ ino : dword ;
 end;
 
 p_inode_tmp = ^inode_tmp;
-
 inode_tmp = packed record
-ino      : dword;
-mayor    : byte;
-menor    : byte;
-rmayor   : byte;
-rmenor   : byte;
-count    : byte;
-state    : byte;
-mode     : dword;
-atime    : dword;
-ctime    : dword;
-mtime    : dword;
-dtime    : dword;
-nlink    : word;
-flags     : dword;
-size     : dword;
-blksize  : dword;
-blocks   : dword;
+  ino      : dword;
+  mayor    : byte;
+  menor    : byte;
+  rmayor   : byte;
+  rmenor   : byte;
+  count    : byte;
+  state    : byte;
+  mode     : dword;
+  atime    : dword;
+  ctime    : dword;
+  mtime    : dword;
+  dtime    : dword;
+  nlink    : word;
+  flags     : dword;
+  size     : dword;
+  blksize  : dword;
+  blocks   : dword;
 end;
 
 var
@@ -58,13 +58,17 @@ var
   fd, count: LongInt;
   buf: readdir_entry;
   name: array[0..255] of Char;
-
+  path: array[0..255] of Char;
 begin
-  if Stat('.', Pointer(@st)) < 0 then 
+  If ParamCount = 1 then
+    strpcopy(@path[0], ParamStr(1))
+  else
+    strcopy(@path[0], root);
+  if Stat(@path[0], Pointer(@st)) < 0 then
     Exit;
   if st.mode and 4 <> 4 then
     Exit;
-  fd := open('.', O_RDONLY, 0);
+  fd := open(@path[0], O_RDONLY, 0);
   while true do
   begin
     count := do_read(fd, Pointer(@buf), sizeof(buf));
@@ -76,7 +80,7 @@ begin
       continue;
     StrPCopy(@name[0], buf.name);
     ttygotoxy(1, 25);
-    writeln(PChar(@name[0]));
+    WriteLn(PChar(@name[0]));
   end;
   //do_close(fd);
 end.
