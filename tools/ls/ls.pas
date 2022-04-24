@@ -22,7 +22,7 @@
 
 uses crt, strings;
 const
-  root : PChar = '/'#0 ;
+  cdir : PChar = '.'#0 ;
 
 type
 preaddir_entry = ^readdir_entry ;
@@ -60,10 +60,10 @@ var
   name: array[0..255] of Char;
   path: array[0..255] of Char;
 begin
-  If ParamCount = 1 then
-    strpcopy(@path[0], ParamStr(1))
+  If ParamCount < 1 then
+    strcopy(@path[0], cdir)
   else
-    strcopy(@path[0], root);
+    strpcopy(@path[0], ParamStr(0));
   if Stat(@path[0], Pointer(@st)) < 0 then
     Exit;
   if st.mode and 4 <> 4 then
