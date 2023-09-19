@@ -1,6 +1,6 @@
 # Toro Operating System
 ## Introduction
-ToroOS is an operating system for educational purposes for x86 that supports one core. For the moment, Toro boots only from floppy disk by using multiboot. Toro is being ported to fpc 3.2.0.
+ToroOS is an operating system for educational purposes for x86 that supports one core. For the moment, Toro boots only from floppy disk by using multiboot.
 
 ## Features
 * Support for POSIX
