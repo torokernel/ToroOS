@@ -2141,25 +2141,30 @@ end;
 exit(cont + 1);
 end;
 
-function get_argc ( args : pchar) : dword ;
-var tmp : dword ;
+function GetArgc (args : pchar): dword ;
+var
+  tmp : dword ;
 begin
-
-if args = nil then exit(0);
-
-tmp := 0 ;
-
-while (args^ <> #0) do
- begin
-  if args^ = #32 then tmp += 1;
-  args += 1;
- end;
-
-tmp += 1 ;
-
-if (args-1)^ = #32 then tmp -= 1 ;
-
-exit(tmp);
+  Result := 0;
+  tmp := 0 ;
+  if (args = nil) or (args^ = #0) then
+    Exit;
+  while True do
+  begin
+    If args^ = #32 then
+    begin
+      Inc(Result);
+      while (args^ = #32) and (args^ <> #0) do
+        Inc(args);
+      if args^ = #0 then
+        Exit;
+    end else if args^ = #0 then
+    begin
+      Inc(Result);
+      Exit;
+    end;
+    Inc(args);
+  end;
 end;
 
 function sys_ioctl (Fichero , req : dword ; argp : pointer) : dword ;cdecl;
@@ -2386,9 +2391,8 @@ begin
   end;
 
   argc := get_args_size (args);
-  argccount := get_argc(args);
+  argccount := getArgc(args);
   page_Args := get_free_kpage ;
-
   If argc > 1 then
   begin
     If argc > Page_Size then
