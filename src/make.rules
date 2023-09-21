@@ -4,3 +4,4 @@ AS="/root/fpc-3.2.0-i386-embedded.cross.x86_64-linux/bin/i386-unknown-elf-as"
 FPC_EMB="/root/fpc-3.2.0-i386-embedded.cross.x86_64-linux/units/i386-embedded/rtl"
 FPC_FLAGS=-TEmbedded -Fu$(FPC_EMB) -Fu../kernel/ -Fu../arch/ -Fu../memory/ -Fu../process/ -Fu../filesystem/ -Fu../drivers/ -Fu../drivers/block/ -s -a -Rintel -Sm -Si -MObjfpc
 FPC_RTL="/root/fpc-for-toroos/rtl"
+FPC_RTL_PACK="/root/fpc-for-toroos/packages/"

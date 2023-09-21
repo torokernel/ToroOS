@@ -1,9 +1,9 @@
 //
 // ls.pas
 //
-// This application shows how ls is implemented in ToroOS.
+// This is an application to list directories.
 // 
-// Copyright (c) 2003-2022 Matias Vara <matiasevara@gmail.com>
+// Copyright (c) 2003-2023 Matias Vara <matiasevara@torokernel.io>
 // All Rights Reserved
 //
 // This program is free software: you can redistribute it and/or modify
@@ -79,7 +79,7 @@ begin
     if byte(buf.name[0]) = 0 then
       continue;
     StrPCopy(@name[0], buf.name);
-    ttygotoxy(1, 25);
+    GotoXY(1, 25);
     WriteLn(PChar(@name[0]));
   end;
   //do_close(fd);
