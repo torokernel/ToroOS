@@ -1,9 +1,12 @@
 //
 // tty.pas
 //
-// This unit contains functions to access the terminal.
-// 
-// Copyright (c) 2003-2022 Matias Vara <matiasevara@gmail.com>
+// This unit implements a driver for the keyboard and the screen.
+// The support for the keyboard is minimal. It implements a ringbuffer
+// that copies keys from hardware and then copies from the ringbuffer to
+// the user.
+//
+// Copyright (c) 2003-2023 Matias Vara <matiasevara@torokernel.io>
 // All Rights Reserved
 //
 // This program is free software: you can redistribute it and/or modify
@@ -30,538 +33,343 @@ uses filesystem, process, arch, printk;
 {$DEFINE keyb_lock := lock (@keyb_queue_wait); }
 {$DEFINE keyb_unlock := unlock (@keyb_queue_wait) ; }
 
-Const
-NR_TTY=1;
+const
 
-TTY_OFFSET = $B8000 ;
-Scree_Size = 4000 ;
-Tty_Mayor = 31 ;
+  TTY_OFFSET = $B8000;
+  Scree_Size = 4000;
+  TTY_NR_MAJOR = 31;
 
-IO_SET_TTY_TORO = 1;
-IO_GET_TTY_TORO = 2;
+  IO_SET_TTY_TORO = 1;
+  IO_GET_TTY_TORO = 2;
 
+  CHAR_PER_LINE = 80;
+  KEYB_PORT = $60;
+  KEYB_NR_MAJOR = 32;
 
-KEYB_PORT=$60;
-KEYB_MAYOR = 32 ;
+  Kbesc = 1;
+  Kbenter = 28;
+  Kbleft = 75;
+  Kbrigth = 77;
+  kbSpace = 57;
+  KbBkSpc = 14;
+  kbUp = 72 ;
+  kbdown = 80 ;
+  KbCrtl = 29;
+  KbAlt = 56;
+  KbCapsLock = 58;
+  KbShift = 42;
+  kbF1 = $3B;
+  kbF2 = $3C;
+  kbF3 = $3D;
+  kbF4 = $3E;
+  kbF5 = $3F;
+  kbF6 = $40;
+  kbF7 = $41;
+  kbF8 = $42;
+  kbF9 = $43;
+  kbF10 = $44;
+  kbF11 = $85;
+  kbF12 = $86;
 
+  SHIFT_CODE : array [1..55] of char =
+     ('0','!','"','#','$','%','&','/','(',')','=','=',' ','0',' ','Q','W',
+      'E','R','T','Y','U','I','O','P','\','+','0','0','A','S','D','F','G','H',
+      'J','K','L','0','[',']','0','0','Z','X','C','V','B','N','M',';',':','_',
+      '0','?');
 
-EXT_CODE=$e0;
+type
+  p_tty = ^tty_struct;
 
+  tty_struct=record
+    flush: boolean;
+    color: byte;
+    x, y: byte;
+  end;
 
-Kbesc=1;
+const
+  KEYBUFLEN = 1024;
 
-Kbenter=28;
-Kbleft=75;
-Kbrigth=77;
-kbSpace=57;
-KbBkSpc=14;
-kbUp = 72 ;
-kbdown = 80 ;
-KbCrtl=29;
-KbAlt=56;
-KbCapsLock=58;
-KbShift=42;
-kbF1    =$3B;
-kbF2    =$3C;
-kbF3    =$3D;
-kbF4    =$3E;
-kbF5    =$3F;
-kbF6    =$40;
-kbF7    =$41;
-kbF8    =$42;
-kbF9    =$43;
-kbF10   =$44;
-kbF11   =$85;
-kbF12   =$86;
+procedure SetCursor(Offset : word);
+procedure TtyInit;
 
-CHAR_CODE : array [1..57] of char=
-   ('0','1','2','3','4','5','6','7','8','9','0','?','=','0',' ','q','w',
-   'e','r','t','y','u','i','o','p','[',']','0','0','a','s','d','f','g','h',
-   'j','k','l','0','{','}','0','0','z','x','c','v','b','n','m',',','.','-',
-   '0','*','0',' ');
+var
+  tty_ops: file_operations;
+  tty_wait: wait_queue;
+  tty_dev: tty_struct;
 
-SHIFT_CODE : array [1..55] of char=
-   ('0','!','"','#','$','%','&','/','(',')','=','=',' ','0',' ','Q','W',
-   'E','R','T','Y','U','I','O','P','\','+','0','0','A','S','D','F','G','H',
-   'J','K','L','0','[',']','0','0','Z','X','C','V','B','N','M',';',':','_',
-   '0','?');
+  KeybRingBuffer: array[0..KEYBUFLEN-1] of char;
+  IdxRead, IdxWriter: DWORD;
 
-Type
-p_tty = ^tty_struct;
-
-tty_struct=record
-echo : boolean;
-flush : boolean;
-color : byte ;
-end;
-
-Const
-  KEYBUFFLEN = 1024;
-
-procedure Setc(pos : word);
-procedure Flush;
-
-var tty_ops : file_operations ;
-    tty_wait : wait_queue ;
-    tty_dev : tty_struct ;
-
-    Shift,CapsLock,Crt,Alt : boolean;
-
-    buffer_keyb  : array[0..KEYBUFFLEN-1] of char;
-    buffer_count , last_c: dword;
-
-    keyb_ops : file_operations ;
-    keyb_wait : p_tarea_struc ;
-    keyb_queue_wait : wait_queue ;
-    leds : byte ;
-
-procedure tty_init;
+  keyb_ops: file_operations;
+  keyb_wait: p_tarea_struc;
+  keyb_queue_wait: wait_queue;
 
 implementation
 
 {$I ../arch/macros.inc}
 
-procedure putcar(c:char);
-var consola : ^struc_consola ;
+// Keys are handled by a ring-buffer
+function EnqueueKey(Key: Char): Boolean;
 begin
-
-
-if x > 79 then
- begin
- y += 1 ;
- x := 0 ;
-end;
-
-if y = 25 then if tty_dev.flush then flush;
-
-consola := pointer(pointer(VIDEO_OFF)  + 160 * y + (x * 2) );
-
-consola^.form:= tty_dev.color;
-consola^.car := c;
-
-x += 1;
-
-Setc(y * 80 + x);
-end;
-
-procedure SetC(pos:word);assembler;
-asm
-mov bx , pos
-mov dx , $3D4
-mov al , $0E
-out dx , al
-inc dx
-mov al , bh
-out dx , al
-dec dx
-mov al , $0f
-out dx , al
-inc dx
-mov al , bl
-out dx , al
-end;
-
-procedure Flush;
-var ult_linea : dword ;
-begin
-x := 0 ;
-y := 24 ;
-
-asm
-mov esi , TTY_OFFSET + 160
-mov edi , TTY_OFFSET
-mov ecx , 24*80
-rep movsw
-end;
-ult_linea := TTY_OFFSET + 160 * 24;
-    asm
-      mov eax , ult_linea
-      mov edi , eax
-      mov ax , 0720h
-      mov cx , 80
-      rep stosw
-    end;
-end;
-
-
-procedure upflush;
-var linea : dword ;
-    p1 , p2 : pointer ;
-begin
-y := 0 ;
-p1 := pointer(TTY_OFFSET + 160 * 24) ;
-p2 := pointer(TTY_OFFSET + 160 * 23) ;
-
-
-repeat
-memcopy(p2 , p1 , 160);
-p2 -= 160 ;
-p1 -= 160 ;
-until (p2 < pointer(TTY_OFFSET));
-
-
-linea := TTY_OFFSET;
-    asm
-      mov eax , linea
-      mov edi , eax
-      mov ax , 0720h
-      mov cx , 80
-      rep stosw
-    end;
-end;
-
-procedure putc(Chr : char);
-var cont : dword;
-begin
-
-if  (chr > #13) and (chr < #250) then
- begin
-  putcar (chr);
-  exit;
- end;
-
-Case Chr of
-
-#9   : for cont := 1 to 9 do putcar(#32);
-#10  : exit;
-#252 : begin
-       y += 1;
-
-       if (y = 25) and (tty_dev.flush) then flush
-        else if (y = 25 ) then y := 24 ;
-
-       setc ( y * 80 + x);
-       exit;
-
-       end;
-#251 : begin
-       if (y = 0 ) then
-        begin
-         if (tty_dev.flush) then upflush;
-        end
-       else y -= 1;
-
-       setc (y * 80 + x);
-       exit;
-       end;
-#253 : begin
-       x += 1;
-       if x > 79 then x := 0 ;
-       Setc (y * 80 + x);
-      exit;
-      end;
-#250 : begin
-      x -= 1;
-      if x= -1 then x := 0;
-      setC (y * 80 + x);
-      exit;
-      end;
-#8 : begin
-      If (x <> 0) then
-       begin
-       x -= 1 ;
-       putcar(#0);
-       x -= 1;
-       setc ( y * 80 + x);
-       exit;
-       end;
-      end;
-#13 : begin
-      y += 1;
-
-      If (y = 25) and (tty_dev.flush) then flush;
-
-      setc (y * 80 + x);
-      exit;
-      end;
-end;
-
-end;
-
-
-procedure Echo(c:char);inline;
-begin
-If (tty_dev.echo ) then putc(c) else exit;
-end;
-
-
-function tty_open ( Inodo : p_Inode_t ; Fichero : p_file_t ) : dword ;
-var flags : dword ;
-begin
-cerrar ;
-
-Fichero^.f_pos := 24 * 160 + 2 ;
-
-abrir;
-exit(0);
-end;
-
-function tty_seek(Fichero : p_file_t ; whence  , offset : dword ): dword ;
-var off :dword ;
-begin
-off := offset ;
-off *= 2;
-Case whence of
-SEEK_SET: If (offset > Scree_Size) then exit(-1)
-          else Fichero^.f_pos := off ;
-SEEK_CUR: If (Fichero^.f_pos + offset > Scree_Size) then exit(-1)
-          else Fichero^.f_pos += off ;
-SEEK_EOF: exit(-1);
-end;
-exit(Fichero^.f_pos);
-end;
-
-function tty_write (Fichero : p_file_t ; count : dword ; buff : pointer ) : dword ;
-var cont , flags :dword;
-    c : ^char ;
-begin
-
-tty_lock ;
-
-x := (fichero^.f_pos div 2)   mod 80 ;
-y := (Fichero^.f_pos div 2)   div 80 ;
-
-cont:=0;
-
-c := buff ;
-
-repeat
-putc(c^);
-cont +=1;
-c += 1;
-
-
-until (count = cont);
-
-Fichero^.f_pos := y * 160 + x * 2;
-
-Setc(y * 80 + x);
-
-tty_unlock;
-
-exit(count)
-end;
-
-function tty_ioctl (Fichero : p_file_t ; req : dword ; argp : pointer ) : dword ;
-var r:p_tty;
-begin
-
-If argp = nil then exit(-1);
-
-case req of
-IO_SET_TTY_TORO : begin
-                  r := argp ;
-                  tty_dev.flush := r^.flush;
-                  tty_dev.echo := r^.echo ;
-                  tty_dev.color :=r^.color;
-                  exit(0);
-                  end;
-IO_GET_TTY_TORO:  begin
-                  memcopy(@tty_dev,argp,sizeof(tty_dev));
-                  exit(0);
-                  end;
-
-end;
-exit(-1);
-end;
-
-procedure wait_keyboard;
-var tmp : byte ;
-begin
-
-tmp := leer_byte($64);
-
-while ((tmp and 2) = 1 ) do tmp := leer_byte ($64);
-
-end;
-
-
-
-procedure set_leds;
-begin
-
-wait_keyboard ;
-enviar_byte ($ED , $60);
-
-wait_keyboard ;
-enviar_byte (leds , $60);
-
-wait_keyboard ;
-end;
-
-
-function Keyb_Open(Inodo : p_inode_t ; Fichero : p_file_t ) : dword ;
-begin
-exit(0);
-end;
-
-
-
-procedure Keyb_Irq;interrupt;
-var code ,key : byte;
-    p : pchar ;
-
-label reanudar;
-begin
-
-abrir ;
-enviar_byte ($20,$20);
-
- while (leer_byte($64) and 1) = 1 do
-  begin
-
-  code := leer_byte($60);
-
-  key := 127 and code;
-
-    If (code and 128) <> 0 then
-     begin
-      case key of
-       KbShift:shift := false;
-       KbCrtl: Crt := false;
-      end;
-     end
-   else
-     begin
-
-        case key of
-         KbCrtl: Crt := true;
-         KbShift: Shift := true;
-         KbCapsLock : begin
-                      CapsLock := not (CapsLock) ;
-                      leds := leds or 4;
-                      set_leds;
-                     end;
-         else
-          begin
-              p := @buffer_keyb[buffer_count];
-              Inc(buffer_count);
-              buffer_count := buffer_count mod KEYBUFFLEN;
-
-
-           case key of
-            KbBkSpc : begin
-                       echo(#8);
-                       p^ := #8 ;
-                       goto reanudar;
-                      end;
-            KbEnter : begin
-                        echo(#13);
-                        p^ := #13;
-                        goto reanudar;
-                      end;
-            KbLeft : begin
-                       echo(#250);
-                       p^ := #250 ;
-                     end;
-              Kbup : begin
-                       echo(#251);
-                       p^ := #251 ;
-                     end;
-            Kbdown : begin
-                       echo (#252);
-                       p^:= #252 ;
-                       goto reanudar ;
-                     end;
-          KbRigth : begin
-                      echo(#253);
-                      p^ := #253 ;
-                      goto reanudar;
-                    end;
-         else
-          begin
-
-           If (Shift or CapsLock) then p^ := Shift_Code[key]
-            else p^ := Char_Code[key];
-
-           echo(p^);
-
-           reanudar:
-           Proceso_Reanudar (keyb_wait , keyb_wait);
-          end;
-      end;
-   end;
-end;
-end;
-
-end;
-end;
-
-
-function keyb_read (Fichero : p_file_t ; count : dword ; buff : pointer ): dword ;
-begin
-  Result := 0;
-  if not Verify_User_Buffer(pointer(buff+count)) then
+  Result := False;
+  if (IdxWriter + 1) mod KEYBUFLEN = IdxRead mod KEYBUFLEN then
     Exit;
-  keyb_lock;
-  while true do
-  begin
-    If buffer_count = last_c then
-      Proceso_Interrumpir (Tarea_Actual , keyb_wait) ;
-    while (last_c < buffer_count) and (Result < count) do
-    begin
-      Inc(Result);
-      if buffer_keyb[last_c] = #13 then
-        buffer_keyb[last_c] := #10;
-      memcopy (@buffer_keyb[last_c] , buff , 1);
-      Inc(last_c);
-      last_c := last_c mod KEYBUFFLEN;
-      Inc(buff);
-      if buffer_keyb[last_c-1] = #10 then
-        Break;
-    end;
-    if (count = Result) or (buffer_keyb[last_c-1] = #10) then
-    begin
-      keyb_unlock;
-      Exit;
-    end;
+  KeybRingBuffer[IdxWriter mod KEYBUFLEN] := Key;
+  Inc(IdxWriter);
+  Result := True;
+end;
+
+function DequeueKey(out c: Char): Boolean;
+begin
+  Result := False;
+  if IdxRead = IdxWriter then
+    Exit;
+  c := KeybRingBuffer[IdxRead];
+  Inc(IdxRead);
+  Result := True;
+end;
+
+// Move screen up one line
+procedure ScrollDown;
+var
+  ult_linea : dword ;
+begin
+  x := 0;
+  y := 24;
+  asm
+     mov esi , TTY_OFFSET + CHAR_PER_LINE * 2
+     mov edi , TTY_OFFSET
+     mov ecx , 24 * CHAR_PER_LINE
+     rep movsw
+  end;
+  ult_linea := TTY_OFFSET + CHAR_PER_LINE * 2 * 24;
+  asm
+    mov eax , ult_linea
+    mov edi , eax
+    mov ax , 0720h
+    mov cx , CHAR_PER_LINE
+    rep stosw
   end;
 end;
 
-
-function keyb_ioctl ( Fichero : p_file_t ; req : dword ; argp : pointer ) : dword ;
+// Move screen down one line
+procedure ScrollUp;
+var
+  line: DWORD;
+  p1, p2: Pointer;
 begin
-exit(-1);
+  y := 0;
+  p1 := pointer(TTY_OFFSET + CHAR_PER_LINE * 2 * 24);
+  p2 := pointer(TTY_OFFSET + CHAR_PER_LINE * 2 * 23);
+  repeat
+    memcopy(p2, p1, CHAR_PER_LINE * 2);
+    p2 -= CHAR_PER_LINE * 2;
+    p1 -= CHAR_PER_LINE * 2;
+  until p2 < pointer(TTY_OFFSET);
+  line := TTY_OFFSET;
+  asm
+    mov eax , line
+    mov edi , eax
+    mov ax , 0720h
+    mov cx , CHAR_PER_LINE
+    rep stosw
+  end;
 end;
 
-procedure tty_init;
+procedure WriteChar(c: Char);
+var
+  Console: ^struc_consola;
 begin
-printkf('/nInitializing tty0 ... /VOk\n',[]);
+  if x > 79 then
+  begin
+    Inc(y);
+    x := 0;
+  end;
+  if y > 24 then
+    if tty_dev.flush then
+      ScrollDown;
+  Console := Pointer(Pointer(VIDEO_OFF)  + CHAR_PER_LINE * y * 2 + x * 2);
+  Console^.form := tty_dev.color;
+  Console^.car := c;
+  Inc(x);
+  SetCursor(y * CHAR_PER_LINE + x);
+end;
 
-tty_ops.write := @tty_write ;
-tty_ops.read :=  nil ;
-tty_ops.seek :=  @tty_seek;
-tty_ops.ioctl := @tty_ioctl;
-tty_ops.open :=  @tty_open ;
+procedure SetCursor(Offset: Word);
+begin
+  enviar_byte($0e, $3d4);
+  enviar_byte((Offset and $ff00) shr 8, $3d5);
+  enviar_byte($0f, $3d4);
+  enviar_byte(byte(Offset and $ff), $3d5);
+end;
 
-Register_ChrDev(TTY_MAYOR , 'tty', @tty_ops);
-tty_Wait.lock := false ;
-tty_wait.lock_wait := nil;
+procedure WriteCharF(c: Char);
+begin
+  case c of
+    #8  : begin
+            If x > 0 then
+            begin
+              Dec(x);
+              WriteChar(#0);
+              Dec(x);
+            end;
+          end;
+    #13 : begin
+            Inc(y);
+            If (y > 24) and (tty_dev.flush) then
+              ScrollDown;
+          end;
+  end;
+end;
 
-tty_dev.echo := true ;
-tty_dev.flush := true ;
-tty_dev.color := $7;
+procedure WriteChars(c: PChar; Count: DWORD);
+var
+  j: LongInt;
+begin
+  for j := 0 to Count-1 do
+  begin
+    if  (c[j] > #13) and (c[j] < #250) then
+      WriteChar(c[j])
+    else
+      WriteCharF(c[j]);
+  end;
+  SetCursor (y * CHAR_PER_LINE + x);
+end;
 
 
-printkf('/nInitializing keyb0 ... /VOk\n',[]);
+function TtyOpen(Inodo: p_Inode_t; fd: p_file_t): DWORD;
+begin
+  cerrar;
+  fd^.f_pos := 24 * CHAR_PER_LINE * 2 + 2;
+  abrir;
+  Result := 0;
+end;
 
-keyb_ops.seek := nil ;
-keyb_ops.open := @keyb_open;
-keyb_ops.write := nil ;
-keyb_ops.read := @keyb_read ;
-keyb_ops.ioctl := @keyb_ioctl;
+function TtySeek(fd: p_file_t; whence, offset: dword ): dword ;
+var
+  off :dword ;
+begin
+  off := offset ;
+  off *= 2;
+  Case whence of
+  SEEK_SET: If (offset > Scree_Size) then exit(-1)
+          else fd^.f_pos := off;
+  SEEK_CUR: If (fd^.f_pos + offset > Scree_Size) then exit(-1)
+          else fd^.f_pos += off;
+  SEEK_EOF: exit(-1);
+  end;
+  Result := fd^.f_pos;
+end;
 
-Register_Chrdev(Keyb_Mayor,'keyb',@keyb_ops);
+function TtyWrite(fd: p_file_t; count: DWORD; buf: pointer): DWORD;
+begin
+  tty_lock ;
+  x := (fd^.f_pos div 2) mod CHAR_PER_LINE;
+  y := (fd^.f_pos div 2) div CHAR_PER_LINE;
+  WriteChars(PChar(buf), count);
+  fd^.f_pos := y * CHAR_PER_LINE * 2 + x * 2;
+  tty_unlock;
+  Result := count;
+end;
 
-keyb_wait := nil ;
+function TtyIoctl(fd: p_file_t; req: dword; argp: pointer): DWORD;
+var
+  r: p_tty;
+begin
+  Result := -1;
+  If argp = nil then
+    Exit;
+  case req of
+  IO_SET_TTY_TORO : begin
+                      r := argp ;
+                      tty_dev.flush := r^.flush;
+                      tty_dev.color :=r^.color;
+                      Result := 0;
+                    end;
+  IO_GET_TTY_TORO:  begin
+                      tty_dev.x := x;
+                      tty_dev.y := y;
+                      memcopy(@tty_dev,argp,sizeof(tty_dev));
+                      Result := 0;
+                    end;
+  end;
+end;
 
-leds := 0 ;
-set_leds;
+function KeybOpen(Inodo: p_inode_t; Fichero: p_file_t): DWORD;
+begin
+  Result := 0;
+end;
 
-buffer_count := 0 ;
-last_c := 0 ;
+procedure KeybIrqHandler; Interrupt;
+begin
+  while (leer_byte($64) and 1) = 1 do
+  begin
+    if not EnqueueKey(Char(leer_byte($60))) then
+      printkf('keyb: ring buffer is full!\n', []);
+    Proceso_Reanudar (keyb_wait , keyb_wait);
+  end;
+  // send EOI
+  enviar_byte ($20, $20);
+end;
 
-Wait_Short_Irq(1,@Keyb_Irq);
+function KeybRead(fd: p_file_t; count: DWORD; buf: Pointer): DWORD;
+var
+  c: Char;
+begin
+  Result := 0;
+  if not Verify_User_Buffer(Pointer(buf + count)) then
+    Exit;
+  keyb_lock;
+  while count > 0 do
+  begin
+    while not DequeueKey(c) do
+      Proceso_Interrumpir (Tarea_Actual, keyb_wait);
+    memcopy(@c, buf, sizeof(Char));
+    Dec(count);
+    Inc(Result);
+  end;
+  keyb_unlock;
+end;
+
+function KeybIOctl(Fichero: p_file_t; req: DWORD; argp: pointer): DWORD;
+begin
+  Result := 0;
+end;
+
+procedure TtyInit;
+begin
+  printkf('/nInitializing tty0 ... /VOk\n',[]);
+
+  tty_ops.write := @TtyWrite;
+  tty_ops.read := nil;
+  tty_ops.seek := @TtySeek;
+  tty_ops.ioctl := @TtyIoctl;
+  tty_ops.open := @TtyOpen;
+
+  Register_ChrDev(TTY_NR_MAJOR, 'tty', @tty_ops);
+
+  tty_Wait.lock := false;
+  tty_wait.lock_wait := nil;
+
+  tty_dev.flush := true;
+  tty_dev.color := $7;
+
+  printkf('/nInitializing keyb0 ... /VOk\n',[]);
+
+  keyb_ops.seek := nil;
+  keyb_ops.open := @KeybOpen;
+  keyb_ops.write := nil;
+  keyb_ops.read := @KeybRead;
+  keyb_ops.ioctl := @KeybIOctl;
+
+  Register_Chrdev(KEYB_NR_MAJOR,'keyb',@keyb_ops);
+
+  keyb_wait := nil;
+
+  IdxRead := 0;
+  IdxWriter := 0;
+
+  Wait_Short_Irq(1, @KeybIrqHandler);
 end;
 
 end.

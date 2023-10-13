@@ -1,8 +1,9 @@
+//
 // sh.pas
 //
-// This is a simple shell with built-in and external commands based on exec().
+// This is a shell with built-in and external commands based on exec().
 //
-// Copyright (c) 2003-2022 Matias Vara <matiasevara@gmail.com>
+// Copyright (c) 2003-2023 Matias Vara <matiasevara@torokernel.io>
 // All Rights Reserved
 //
 // This program is free software: you can redistribute it and/or modify
@@ -36,7 +37,6 @@ var
   currpathbuff: array[0..BUFF_PATH_SIZE-1] of char;
   currpath: PChar = @currpathbuff[0];
 
-// TODO: backspace is not working
 procedure GetCmdAndArgs(cmd: PChar; args: PChar);
 var
   buff: array[0..BUFF_PATH_SIZE-1] of char;
@@ -155,7 +155,6 @@ begin
   while true do
   begin
     GetCmdAndArgs(@cmd, @args);
-    ttygotoxy(1, 25);
     if not DoCmd(@cmd, @args) then
       Writeln('Command unknown');
     write('$', currpath);
